@@ -1,4 +1,4 @@
-package com.tangzc.autotable.test.core;
+package com.tangzc.autotable.test.core.dynamicdatasource;
 
 import com.tangzc.autotable.annotation.ColumnComment;
 import com.tangzc.autotable.annotation.ColumnDefault;
@@ -11,8 +11,9 @@ import com.tangzc.autotable.annotation.mysql.MysqlTypeConstant;
 import lombok.Data;
 
 @Data
-@TableName("sys_user")
-public class User {
+@Ds("test")
+@TableName("sys_user2")
+public class User2 {
 
     @PrimaryKey(true)
     @ColumnComment("用户id")

@@ -1,4 +1,4 @@
-package com.tangzc.autotable.test.core;
+package com.tangzc.autotable.test.core.dynamicdatasource;
 
 import com.tangzc.autotable.annotation.ColumnComment;
 import com.tangzc.autotable.annotation.ColumnDefault;

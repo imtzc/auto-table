@@ -3,6 +3,8 @@ package com.tangzc.autotable.core.strategy;
 import com.tangzc.autotable.core.AutoTableGlobalConfig;
 import com.tangzc.autotable.core.constants.DatabaseDialect;
 import com.tangzc.autotable.core.constants.RunMode;
+import com.tangzc.autotable.core.dynamicds.SqlSessionFactoryManager;
+import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.slf4j.Logger;
@@ -30,19 +32,44 @@ public interface IStrategy<TABLE_META extends TableMetadata, COMPARE_TABLE_INFO 
     DatabaseDialect dbDialect();
 
     default void execute(Consumer<MAPPER> execute) {
-        SqlSessionFactory sqlSessionFactory = AutoTableGlobalConfig.getSqlSessionFactory();
-        try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
-            ParameterizedType genericSuperclass = (ParameterizedType) getClass().getGenericInterfaces()[0];
-            execute.accept(sqlSession.getMapper((Class<MAPPER>) genericSuperclass.getActualTypeArguments()[2]));
+
+        // 从接口泛型上读取MapperClass
+        Class<MAPPER> mapperClass = getMapperClass();
+
+        // 执行
+        try (SqlSession sqlSession = SqlSessionFactoryManager.getSqlSessionFactory().openSession()) {
+            execute.accept(sqlSession.getMapper(mapperClass));
         }
     }
 
     default <R> R executeRet(Function<MAPPER, R> execute) {
-        SqlSessionFactory sqlSessionFactory = AutoTableGlobalConfig.getSqlSessionFactory();
-        try (SqlSession sqlSession = sqlSessionFactory.openSession()) {
-            ParameterizedType genericSuperclass = (ParameterizedType) getClass().getGenericInterfaces()[0];
-            return execute.apply(sqlSession.getMapper((Class<MAPPER>) genericSuperclass.getActualTypeArguments()[2]));
+
+        // 从接口泛型上读取MapperClass
+        Class<MAPPER> mapperClass = getMapperClass();
+
+        // 执行
+        try (SqlSession sqlSession = SqlSessionFactoryManager.getSqlSessionFactory().openSession()) {
+            return execute.apply(sqlSession.getMapper(mapperClass));
         }
+    }
+
+    /**
+     * 从接口泛型上读取MapperClass
+     */
+    default Class<MAPPER> getMapperClass() {
+
+        // 从接口泛型上读取MapperClass
+        ParameterizedType genericSuperclass = (ParameterizedType) getClass().getGenericInterfaces()[0];
+        Class<MAPPER> mapperClass = (Class<MAPPER>) genericSuperclass.getActualTypeArguments()[2];
+
+        // 如果没有注册Mapper，则注册
+        SqlSessionFactory sqlSessionFactory = SqlSessionFactoryManager.getSqlSessionFactory();
+        Configuration configuration = sqlSessionFactory.getConfiguration();
+        if (!configuration.hasMapper(mapperClass)) {
+            configuration.addMapper(mapperClass);
+        }
+
+        return mapperClass;
     }
 
     /**
@@ -54,14 +81,22 @@ public interface IStrategy<TABLE_META extends TableMetadata, COMPARE_TABLE_INFO 
 
         AutoTableGlobalConfig.PropertyConfig autoTableProperties = AutoTableGlobalConfig.getAutoTableProperties();
 
-        if (autoTableProperties.getMode() == RunMode.validate) {
-            validateMode(beanClasses);
-        } else {
-            createOrUpdateMode(beanClasses, autoTableProperties.getMode());
+        RunMode runMode = autoTableProperties.getMode();
+        switch (runMode) {
+            case none:
+                break;
+            case validate:
+                validateMode(beanClasses);
+                break;
+            case add:
+            case create:
+            case update:
+                addOrCreateOrUpdateMode(beanClasses, runMode == RunMode.create, runMode == RunMode.update);
+                break;
         }
     }
 
-    default void createOrUpdateMode(Set<Class<?>> beanClasses, RunMode runMode) {
+    default void addOrCreateOrUpdateMode(Set<Class<?>> beanClasses, boolean isCreateMode, boolean isUpdateMode) {
         for (Class<?> beanClass : beanClasses) {
 
             TABLE_META tableMetadata = this.analyseClass(beanClass);
@@ -73,26 +108,32 @@ public interface IStrategy<TABLE_META extends TableMetadata, COMPARE_TABLE_INFO 
 
             String tableName = tableMetadata.getTableName();
 
-            if (runMode == RunMode.create) {
-                // create模式特殊对待，如果配置文件配置的是create，表示将所有的表删掉重新创建
+            // 表是否存在的标记
+            boolean tableIsExist;
+            if (isCreateMode) {
                 log.info("create模式，删除表：{}", tableName);
                 // 直接删除表重新生成
                 this.dropTable(tableName);
+                // 上一步表被删了，肯定不存在
+                tableIsExist = false;
+            } else {
+                tableIsExist = this.checkTableExist(tableName);
             }
 
-            // 判断表是否存在
-            boolean tableIsExist = this.checkTableExist(tableName);
-            if (tableIsExist) {
+            // 当表不存在的时候，直接生成表
+            if (!tableIsExist) {
+                log.info("创建表：{}", tableName);
+                this.createTable(tableMetadata);
+            }
+
+            // update模型，且表存在，更新表信息
+            if (isUpdateMode && tableIsExist) {
                 // 当表存在，比对表与Bean描述的差异
                 COMPARE_TABLE_INFO compareTableInfo = this.compareTable(tableMetadata);
                 if (compareTableInfo.needModify()) {
                     // 修改表信息
                     this.modifyTable(compareTableInfo);
                 }
-            } else {
-                // 当表不存在的时候，直接生成表
-                log.info("创建表：{}", tableName);
-                this.createTable(tableMetadata);
             }
         }
     }

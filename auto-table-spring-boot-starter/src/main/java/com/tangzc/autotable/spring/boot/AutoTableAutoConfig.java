@@ -2,6 +2,7 @@ package com.tangzc.autotable.spring.boot;
 
 import com.tangzc.autotable.core.AutoTableBootstrap;
 import com.tangzc.autotable.core.AutoTableGlobalConfig;
+import com.tangzc.autotable.core.dynamicds.SqlSessionFactoryManager;
 import com.tangzc.autotable.core.strategy.mysql.mapper.MysqlTablesMapper;
 import com.tangzc.autotable.core.strategy.pgsql.mapper.PgsqlTablesMapper;
 import com.tangzc.autotable.core.strategy.sqlite.mapper.SqliteTablesMapper;
@@ -35,21 +36,8 @@ public class AutoTableAutoConfig {
         // 设置全局的配置
         AutoTableGlobalConfig.setAutoTableProperties(autoTableProperties.toConfig());
         // 设置全局的SqlSessionFactory
-        AutoTableGlobalConfig.setSqlSessionFactory(getSqlSessionFactory());
+        SqlSessionFactoryManager.setSqlSessionFactory(sqlSessionTemplate.getSqlSessionFactory());
         // 启动AutoTable
         AutoTableBootstrap.start();
-    }
-
-    /**
-     * 构建SqlSessionFactory
-     */
-    private SqlSessionFactory getSqlSessionFactory() {
-        SqlSessionFactory sqlSessionFactory = sqlSessionTemplate.getSqlSessionFactory();
-        org.apache.ibatis.session.Configuration configuration = sqlSessionFactory.getConfiguration();
-        // 把内置的Mapper注入Mybatis
-        configuration.addMapper(MysqlTablesMapper.class);
-        configuration.addMapper(PgsqlTablesMapper.class);
-        configuration.addMapper(SqliteTablesMapper.class);
-        return sqlSessionFactory;
     }
 }

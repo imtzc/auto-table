@@ -23,7 +23,7 @@
         <spring-boot.version>2.7.11</spring-boot.version>
         <mybatis.version>3.5.14</mybatis.version>
         <mybatis-spring.version>2.3.2</mybatis-spring.version>
-        <lombok.version>1.18.28</lombok.version>
+        <lombok.version>1.18.30</lombok.version>
         <slf4j.version>2.0.7</slf4j.version>
     </properties>
 

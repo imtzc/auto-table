@@ -8,9 +8,7 @@ import com.tangzc.autotable.core.strategy.pgsql.JavaToPgsqlConverter;
 import com.tangzc.autotable.core.strategy.sqlite.JavaToSqliteConverter;
 import lombok.Data;
 import lombok.Getter;
-import lombok.NonNull;
 import lombok.Setter;
-import org.apache.ibatis.session.SqlSessionFactory;
 
 public class AutoTableGlobalConfig {
 
@@ -41,11 +39,6 @@ public class AutoTableGlobalConfig {
     @Setter
     @Getter
     private static JavaToSqliteConverter javaToSqliteConverter = new JavaToSqliteConverter() {};
-
-    @Setter
-    @Getter
-    @NonNull
-    private static SqlSessionFactory sqlSessionFactory;
 
     @Data
     public static class PropertyConfig {
