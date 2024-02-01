@@ -79,7 +79,7 @@ public class AutoTableBootstrap {
         }
 
         // 获取对应的数据源，根据不同数据库方言，执行不同的处理
-        IDatasourceHandler datasourceHandler = AutoTableGlobalConfig.getDatasourceHandler();
+        IDatasourceHandler<?> datasourceHandler = AutoTableGlobalConfig.getDatasourceHandler();
         datasourceHandler.handleAnalysis(classes, (databaseDialect, tables) -> {
             log.info("数据库方言（" + databaseDialect + "）");
             IStrategy<?, ?, ?> databaseStrategy = Stream.of(new MysqlStrategy(), new PgsqlStrategy(), new SqliteStrategy())

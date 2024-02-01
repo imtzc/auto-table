@@ -19,8 +19,4 @@ import java.lang.annotation.Target;
 @EnableConfigurationProperties(AutoTableProperties.class)
 @Import({AutoTableAutoConfig.class})
 public @interface EnableAutoTable {
-
-    String[] activeProfile() default {};
-
-    String profileProperty() default "spring.profiles.active";
 }

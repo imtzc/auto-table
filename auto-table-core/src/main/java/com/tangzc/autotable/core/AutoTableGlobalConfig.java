@@ -18,7 +18,7 @@ public class AutoTableGlobalConfig {
 
     @Setter
     @Getter
-    private static IDatasourceHandler datasourceHandler = new DefaultDatasourceHandler();
+    private static IDatasourceHandler<?> datasourceHandler = new DefaultDatasourceHandler();
 
     @Setter
     @Getter

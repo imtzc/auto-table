@@ -1,4 +1,5 @@
 auto-table:
+  enable: true
   auto-drop-column: true
 server:
   port: 9999
