@@ -16,6 +16,7 @@
         <module>auto-table-core-test</module>
         <module>auto-table-spring-boot-test</module>
         <module>auto-table-dynamicdatasource-test</module>
+        <module>auto-table-spring-boot-dynamicdatasource-test</module>
     </modules>
 
     <properties>

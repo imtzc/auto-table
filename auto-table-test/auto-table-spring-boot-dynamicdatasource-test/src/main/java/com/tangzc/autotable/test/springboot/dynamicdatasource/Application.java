@@ -1,4 +1,4 @@
-package com.tangzc.autotable.test.springboot;
+package com.tangzc.autotable.test.springboot.dynamicdatasource;
 
 import com.tangzc.autotable.springboot.EnableAutoTable;
 import org.springframework.boot.SpringApplication;

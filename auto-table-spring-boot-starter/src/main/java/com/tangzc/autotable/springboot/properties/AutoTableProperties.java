@@ -1,4 +1,4 @@
-package com.tangzc.autotable.spring.boot.properties;
+package com.tangzc.autotable.springboot.properties;
 
 import com.tangzc.autotable.core.AutoTableGlobalConfig;
 import com.tangzc.autotable.core.constants.RunMode;

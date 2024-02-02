@@ -1,6 +1,7 @@
 package com.tangzc.autotable.test.core.dynamicdatasource;
 
-import com.tangzc.autotable.core.dynamicds.IDatasourceHandler;
+import com.tangzc.autotable.core.dynamicds.IDataSourceHandler;
+import com.tangzc.autotable.core.dynamicds.SqlSessionFactoryManager;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 
@@ -8,17 +9,17 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MyDatasourceHandler implements IDatasourceHandler<String> {
+public class DynamicDataSourceHandler implements IDataSourceHandler<String> {
 
     private static final Map<String, SqlSessionFactory> STRING_SQL_SESSION_FACTORY_MAP = new HashMap<>();
 
     @Override
-    public SqlSessionFactory useDataSource(String dataSource) {
+    public void useDataSource(String dataSourceName) {
 
-        return STRING_SQL_SESSION_FACTORY_MAP.computeIfAbsent(dataSource, $ -> {
+        SqlSessionFactory sqlSessionFactory = STRING_SQL_SESSION_FACTORY_MAP.computeIfAbsent(dataSourceName, $ -> {
 
             String resource = "mybatis-config.xml";
-            if (dataSource.equals("test")) {
+            if (dataSourceName.equals("test")) {
                 resource = "mybatis-config2.xml";
             }
 
@@ -26,18 +27,20 @@ public class MyDatasourceHandler implements IDatasourceHandler<String> {
                 // 使用SqlSessionFactoryBuilder加载配置文件
                 return new SqlSessionFactoryBuilder().build(inputStream);
             } catch (Exception e) {
-                return null;
+                throw new RuntimeException(e);
             }
         });
+
+        // 设置新的SqlSessionFactory
+        SqlSessionFactoryManager.setSqlSessionFactory(sqlSessionFactory);
     }
 
     @Override
-    public void clearDataSource(String dataSource) {
-
+    public void clearDataSource(String dataSourceName) {
     }
 
     @Override
-    public String getDataSource(Class<?> clazz) {
+    public String getDataSourceName(Class<?> clazz) {
         Ds annotation = clazz.getAnnotation(Ds.class);
         if (annotation != null) {
             return annotation.value();

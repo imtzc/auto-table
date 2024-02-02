@@ -1,6 +1,6 @@
-package com.tangzc.autotable.spring.boot;
+package com.tangzc.autotable.springboot;
 
-import com.tangzc.autotable.spring.boot.properties.AutoTableProperties;
+import com.tangzc.autotable.springboot.properties.AutoTableProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Import;
 

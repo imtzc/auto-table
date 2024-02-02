@@ -8,7 +8,7 @@ import com.tangzc.autotable.annotation.TableName;
 import com.tangzc.autotable.annotation.mysql.MysqlCharset;
 import com.tangzc.autotable.annotation.mysql.MysqlEngine;
 import com.tangzc.autotable.core.constants.RunMode;
-import com.tangzc.autotable.core.dynamicds.IDatasourceHandler;
+import com.tangzc.autotable.core.dynamicds.IDataSourceHandler;
 import com.tangzc.autotable.core.strategy.IStrategy;
 import com.tangzc.autotable.core.strategy.mysql.MysqlStrategy;
 import com.tangzc.autotable.core.strategy.pgsql.PgsqlStrategy;
@@ -79,7 +79,7 @@ public class AutoTableBootstrap {
         }
 
         // 获取对应的数据源，根据不同数据库方言，执行不同的处理
-        IDatasourceHandler<?> datasourceHandler = AutoTableGlobalConfig.getDatasourceHandler();
+        IDataSourceHandler<?> datasourceHandler = AutoTableGlobalConfig.getDatasourceHandler();
         datasourceHandler.handleAnalysis(classes, (databaseDialect, tables) -> {
             log.info("数据库方言（" + databaseDialect + "）");
             IStrategy<?, ?, ?> databaseStrategy = Stream.of(new MysqlStrategy(), new PgsqlStrategy(), new SqliteStrategy())

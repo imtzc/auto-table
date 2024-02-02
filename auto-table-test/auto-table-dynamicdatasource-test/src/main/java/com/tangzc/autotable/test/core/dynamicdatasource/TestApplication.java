@@ -17,7 +17,7 @@ public class TestApplication {
         AutoTableGlobalConfig.setAutoTableProperties(autoTableProperties);
 
         // 设置数据源处理器
-        AutoTableGlobalConfig.setDatasourceHandler(new MyDatasourceHandler());
+        AutoTableGlobalConfig.setDatasourceHandler(new DynamicDataSourceHandler());
 
         AutoTableBootstrap.start();
     }

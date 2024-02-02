@@ -1,8 +1,8 @@
 package com.tangzc.autotable.core;
 
 import com.tangzc.autotable.core.constants.RunMode;
-import com.tangzc.autotable.core.dynamicds.IDatasourceHandler;
-import com.tangzc.autotable.core.dynamicds.impl.DefaultDatasourceHandler;
+import com.tangzc.autotable.core.dynamicds.IDataSourceHandler;
+import com.tangzc.autotable.core.dynamicds.impl.DefaultDataSourceHandler;
 import com.tangzc.autotable.core.strategy.mysql.JavaToMysqlConverter;
 import com.tangzc.autotable.core.strategy.pgsql.JavaToPgsqlConverter;
 import com.tangzc.autotable.core.strategy.sqlite.JavaToSqliteConverter;
@@ -18,7 +18,7 @@ public class AutoTableGlobalConfig {
 
     @Setter
     @Getter
-    private static IDatasourceHandler<?> datasourceHandler = new DefaultDatasourceHandler();
+    private static IDataSourceHandler<?> datasourceHandler = new DefaultDataSourceHandler();
 
     @Setter
     @Getter

@@ -1,8 +1,11 @@
 package com.tangzc.autotable.core.dynamicds;
 
+import com.sun.istack.internal.Nullable;
 import com.tangzc.autotable.core.constants.DatabaseDialect;
+import lombok.NonNull;
 import org.apache.ibatis.session.Configuration;
-import org.apache.ibatis.session.SqlSessionFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.sql.Connection;
@@ -16,7 +19,9 @@ import java.util.stream.Collectors;
 /**
  * @author don
  */
-public interface IDatasourceHandler<T extends Serializable> {
+public interface IDataSourceHandler<T extends Serializable> {
+
+    Logger log = LoggerFactory.getLogger(IDataSourceHandler.class);
 
     /**
      * 开始分析处理模型
@@ -28,17 +33,17 @@ public interface IDatasourceHandler<T extends Serializable> {
 
         // <数据源，Set<表>>
         Map<T, Set<Class<?>>> needHandleTableMap = classList.stream()
-                .collect(Collectors.groupingBy(this::getDataSource, Collectors.toSet()));
+                .collect(Collectors.groupingBy(this::getDataSourceName, Collectors.toSet()));
 
         needHandleTableMap.forEach((dataSource, tables) -> {
-            // 切换数据源
-            SqlSessionFactory sqlSessionFactory = this.useDataSource(dataSource);
-            // 设置SqlSessionFactory
-            SqlSessionFactoryManager.setSqlSessionFactory(sqlSessionFactory);
+            // 使用数据源
+            this.useDataSource(dataSource);
             try {
                 DatabaseDialect databaseDialect = this.getDatabaseDialect();
                 if (databaseDialect != null) {
                     consumer.accept(databaseDialect, tables);
+                } else {
+                    log.warn("忽略处理以下实体：{}", tables.stream().map(Class::getName).collect(Collectors.joining(", ")));
                 }
             } finally {
                 this.clearDataSource(dataSource);
@@ -52,7 +57,7 @@ public interface IDatasourceHandler<T extends Serializable> {
      *
      * @return 返回数据方言
      */
-    default DatabaseDialect getDatabaseDialect() {
+    default @Nullable DatabaseDialect getDatabaseDialect() {
 
         // 获取Configuration对象
         Configuration configuration = SqlSessionFactoryManager.getSqlSessionFactory().getConfiguration();
@@ -70,22 +75,22 @@ public interface IDatasourceHandler<T extends Serializable> {
     }
 
     /**
-     * 开始使用指定的数据源
-     * @param dataSource 数据源名称
+     * 切换指定的数据源
+     * @param dataSourceName 数据源名称
      */
-    SqlSessionFactory useDataSource(T dataSource);
+    void useDataSource(T dataSourceName);
 
     /**
-     * 清除指定的数据源
-     * @param dataSource 数据源名称
+     * 清除当前数据源
+     * @param dataSourceName 数据源名称
      */
-    void clearDataSource(T dataSource);
+    void clearDataSource(T dataSourceName);
 
     /**
      * 获取指定类的数据库数据源
      *
      * @param clazz 指定类
-     * @return 数据源名称
+     * @return 数据源名称，表分组的依据，届时，根据该值分组所有的表，同一数据源下的统一处理
      */
-    T getDataSource(Class<?> clazz);
+    @NonNull T getDataSourceName(Class<?> clazz);
 }

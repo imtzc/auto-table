@@ -9,7 +9,7 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>auto-table-spring-boot-test</artifactId>
+    <artifactId>auto-table-spring-boot-dynamicdatasource-test</artifactId>
 
     <dependencyManagement>
         <dependencies>
