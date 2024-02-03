@@ -14,10 +14,17 @@ public class DynamicDataSourceContextHolder {
     }
 
     public static void removeContextKey() {
-        DATASOURCE_CONTEXT_KEY_HOLDER.get().pop();
+        Stack<String> stack = DATASOURCE_CONTEXT_KEY_HOLDER.get();
+        if (!stack.empty()) {
+            stack.pop();
+        }
     }
 
     public static String getContextKey() {
-        return DATASOURCE_CONTEXT_KEY_HOLDER.get().peek();
+        Stack<String> stack = DATASOURCE_CONTEXT_KEY_HOLDER.get();
+        if (!stack.empty()) {
+            return stack.peek();
+        }
+        return DataSourceConstants.DS_KEY_MASTER;
     }
 }
