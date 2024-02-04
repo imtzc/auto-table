@@ -316,9 +316,17 @@ public class MysqlStrategy implements IStrategy<MysqlTableMetadata, MysqlCompare
         if (fieldType.isNoLengthNumber()) {
             return !fieldType.typeName().equalsIgnoreCase(informationSchemaColumn.getDataType());
         }
-        // 非整数类型，类型全文匹配：varchar(255) double(6,2)
+
+        // 非整数类型，类型全文匹配：varchar(255) double(6,2) enum('A','B')
         String fullType = fieldType.getFullType();
-        return !fullType.equals(informationSchemaColumn.getColumnType().toLowerCase());
+
+        // 枚举类的，不忽略大小写比较
+        if (fieldType.isEnum()) {
+            return !fullType.equals(informationSchemaColumn.getColumnType());
+        }
+
+        // 剩下的忽略大小写进行比较
+        return !fullType.equalsIgnoreCase(informationSchemaColumn.getColumnType());
     }
 
     private static boolean isCommentChanged(InformationSchemaColumn informationSchemaColumn, MysqlColumnMetadata mysqlColumnMetadata) {
