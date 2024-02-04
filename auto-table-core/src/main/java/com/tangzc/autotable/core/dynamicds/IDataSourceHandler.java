@@ -1,7 +1,6 @@
 package com.tangzc.autotable.core.dynamicds;
 
 import com.sun.istack.internal.Nullable;
-import com.tangzc.autotable.core.constants.DatabaseDialect;
 import lombok.NonNull;
 import org.apache.ibatis.session.Configuration;
 import org.slf4j.Logger;
@@ -29,7 +28,7 @@ public interface IDataSourceHandler<T extends Serializable> {
      *
      * @param classList 待处理的类
      */
-    default void handleAnalysis(Set<Class<?>> classList, BiConsumer<DatabaseDialect, Set<Class<?>>> consumer) {
+    default void handleAnalysis(Set<Class<?>> classList, BiConsumer<String, Set<Class<?>>> consumer) {
 
         // <数据源，Set<表>>
         Map<T, Set<Class<?>>> needHandleTableMap = classList.stream()
@@ -39,7 +38,7 @@ public interface IDataSourceHandler<T extends Serializable> {
             // 使用数据源
             this.useDataSource(dataSource);
             try {
-                DatabaseDialect databaseDialect = this.getDatabaseDialect();
+                String databaseDialect = this.getDatabaseDialect();
                 if (databaseDialect != null) {
                     consumer.accept(databaseDialect, tables);
                 } else {
@@ -57,7 +56,7 @@ public interface IDataSourceHandler<T extends Serializable> {
      *
      * @return 返回数据方言
      */
-    default @Nullable DatabaseDialect getDatabaseDialect() {
+    default @Nullable String getDatabaseDialect() {
 
         // 获取Configuration对象
         Configuration configuration = SqlSessionFactoryManager.getSqlSessionFactory().getConfiguration();
@@ -66,9 +65,7 @@ public interface IDataSourceHandler<T extends Serializable> {
             // 通过连接获取DatabaseMetaData对象
             DatabaseMetaData metaData = connection.getMetaData();
             // 获取数据库方言
-            String databaseDialect = metaData.getDatabaseProductName().toLowerCase();
-            // 获取当前数据源所属的方言
-            return DatabaseDialect.parseFromDialectName(databaseDialect);
+            return metaData.getDatabaseProductName().toLowerCase();
         } catch (SQLException e) {
             throw new RuntimeException("获取数据方言失败", e);
         }

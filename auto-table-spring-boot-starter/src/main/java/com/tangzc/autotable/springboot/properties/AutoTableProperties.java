@@ -1,7 +1,7 @@
 package com.tangzc.autotable.springboot.properties;
 
 import com.tangzc.autotable.core.AutoTableGlobalConfig;
-import com.tangzc.autotable.core.constants.RunMode;
+import com.tangzc.autotable.core.RunMode;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 

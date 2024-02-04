@@ -1,4 +1,4 @@
-package com.tangzc.autotable.core.constants;
+package com.tangzc.autotable.core;
 
 import lombok.Getter;
 

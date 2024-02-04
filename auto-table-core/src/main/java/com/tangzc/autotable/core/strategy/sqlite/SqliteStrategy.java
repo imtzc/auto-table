@@ -1,6 +1,5 @@
 package com.tangzc.autotable.core.strategy.sqlite;
 
-import com.tangzc.autotable.core.constants.DatabaseDialect;
 import com.tangzc.autotable.core.strategy.IStrategy;
 import com.tangzc.autotable.core.strategy.sqlite.builder.CreateTableSqlBuilder;
 import com.tangzc.autotable.core.strategy.sqlite.builder.TableMetadataBuilder;
@@ -26,8 +25,8 @@ public class SqliteStrategy implements IStrategy<SqliteTableMetadata, SqliteComp
     private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd");
 
     @Override
-    public DatabaseDialect dbDialect() {
-        return DatabaseDialect.SQLite;
+    public String dbDialect() {
+        return "SQLite";
     }
 
     @Override

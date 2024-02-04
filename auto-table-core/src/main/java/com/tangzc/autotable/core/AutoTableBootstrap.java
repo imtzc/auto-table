@@ -7,7 +7,6 @@ import com.tangzc.autotable.annotation.TableIndexes;
 import com.tangzc.autotable.annotation.TableName;
 import com.tangzc.autotable.annotation.mysql.MysqlCharset;
 import com.tangzc.autotable.annotation.mysql.MysqlEngine;
-import com.tangzc.autotable.core.constants.RunMode;
 import com.tangzc.autotable.core.dynamicds.IDataSourceHandler;
 import com.tangzc.autotable.core.strategy.IStrategy;
 import com.tangzc.autotable.core.strategy.mysql.MysqlStrategy;
@@ -26,7 +25,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * 启动时进行处理的实现类
@@ -55,6 +53,14 @@ public class AutoTableBootstrap {
                             " Git: https://gitee.com/tangzc/auto-table\n");
         }
 
+        // 注册内置的不同数据源策略, 如果用户自定义了策略，那么内置的策略不会添加
+        MysqlStrategy mysqlStrategy = new MysqlStrategy();
+        AutoTableGlobalConfig.getStrategyMap().computeIfAbsent(mysqlStrategy.dbDialect(), $ -> mysqlStrategy);
+        PgsqlStrategy pgsqlStrategy = new PgsqlStrategy();
+        AutoTableGlobalConfig.getStrategyMap().computeIfAbsent(pgsqlStrategy.dbDialect(), $ -> pgsqlStrategy);
+        SqliteStrategy sqliteStrategy = new SqliteStrategy();
+        AutoTableGlobalConfig.getStrategyMap().computeIfAbsent(sqliteStrategy.dbDialect(), $ -> sqliteStrategy);
+
         // 获取扫描包路径
         String[] packs = getModelPackage(autoTableProperties);
 
@@ -82,9 +88,8 @@ public class AutoTableBootstrap {
         IDataSourceHandler<?> datasourceHandler = AutoTableGlobalConfig.getDatasourceHandler();
         datasourceHandler.handleAnalysis(classes, (databaseDialect, tables) -> {
             log.info("数据库方言（" + databaseDialect + "）");
-            IStrategy<?, ?, ?> databaseStrategy = Stream.of(new MysqlStrategy(), new PgsqlStrategy(), new SqliteStrategy())
-                    .filter(strategy -> strategy.dbDialect() == databaseDialect).findFirst()
-                    .orElse(null);
+            // 查找对应的数据源策略
+            IStrategy<?, ?, ?> databaseStrategy = AutoTableGlobalConfig.getStrategyMap().get(databaseDialect);
             if (databaseStrategy != null) {
                 databaseStrategy.analyseClasses(tables);
             } else {

@@ -1,8 +1,7 @@
 package com.tangzc.autotable.core.strategy;
 
 import com.tangzc.autotable.core.AutoTableGlobalConfig;
-import com.tangzc.autotable.core.constants.DatabaseDialect;
-import com.tangzc.autotable.core.constants.RunMode;
+import com.tangzc.autotable.core.RunMode;
 import com.tangzc.autotable.core.dynamicds.SqlSessionFactoryManager;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.SqlSession;
@@ -26,10 +25,10 @@ public interface IStrategy<TABLE_META extends TableMetadata, COMPARE_TABLE_INFO 
 
     /**
      * 策略对应的数据库方言
-     *
+     * 保持名字与数据库驱动中的数据库厂商名字一致
      * @return 方言
      */
-    DatabaseDialect dbDialect();
+    String dbDialect();
 
     default void execute(Consumer<MAPPER> execute) {
 
