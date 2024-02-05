@@ -24,8 +24,7 @@ public interface IStrategy<TABLE_META extends TableMetadata, COMPARE_TABLE_INFO 
     Logger log = LoggerFactory.getLogger(IStrategy.class);
 
     /**
-     * 策略对应的数据库方言
-     * 保持名字与数据库驱动中的数据库厂商名字一致
+     * 策略对应的数据库方言，与数据库驱动中的接口{@link java.sql.DatabaseMetaData#getDatabaseProductName()}实现返回值一致
      * @return 方言
      */
     String dbDialect();

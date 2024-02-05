@@ -65,7 +65,7 @@ public interface IDataSourceHandler<T extends Serializable> {
             // 通过连接获取DatabaseMetaData对象
             DatabaseMetaData metaData = connection.getMetaData();
             // 获取数据库方言
-            return metaData.getDatabaseProductName().toLowerCase();
+            return metaData.getDatabaseProductName();
         } catch (SQLException e) {
             throw new RuntimeException("获取数据方言失败", e);
         }
