@@ -1,6 +1,5 @@
 package com.tangzc.autotable.core.dynamicds;
 
-import com.sun.istack.internal.Nullable;
 import lombok.NonNull;
 import org.apache.ibatis.session.Configuration;
 import org.slf4j.Logger;
@@ -39,11 +38,7 @@ public interface IDataSourceHandler<T extends Serializable> {
             this.useDataSource(dataSource);
             try {
                 String databaseDialect = this.getDatabaseDialect();
-                if (databaseDialect != null) {
-                    consumer.accept(databaseDialect, tables);
-                } else {
-                    log.warn("忽略处理以下实体：{}", tables.stream().map(Class::getName).collect(Collectors.joining(", ")));
-                }
+                consumer.accept(databaseDialect, tables);
             } finally {
                 this.clearDataSource(dataSource);
             }
@@ -56,7 +51,7 @@ public interface IDataSourceHandler<T extends Serializable> {
      *
      * @return 返回数据方言
      */
-    default @Nullable String getDatabaseDialect() {
+    default String getDatabaseDialect() {
 
         // 获取Configuration对象
         Configuration configuration = SqlSessionFactoryManager.getSqlSessionFactory().getConfiguration();

@@ -5,7 +5,7 @@ import com.tangzc.autotable.annotation.ColumnType;
 import com.tangzc.autotable.annotation.enums.DefaultValueEnum;
 import com.tangzc.autotable.core.AutoTableGlobalConfig;
 import com.tangzc.autotable.core.strategy.sqlite.JavaToSqliteConverter;
-import com.tangzc.autotable.core.utils.StringHelper;
+import com.tangzc.autotable.core.utils.StringConnectHelper;
 import com.tangzc.autotable.core.utils.StringUtils;
 import com.tangzc.autotable.core.utils.TableBeanUtils;
 import lombok.Data;
@@ -114,7 +114,7 @@ public class SqliteColumnMetadata {
      * "card_number" text(30) NOT NULL -- 身份证号码
      */
     public String toColumnSql(boolean isSinglePrimaryKey, boolean addComma) {
-        return StringHelper.newInstance("\"{columnName}\" {typeAndLength} {null} {default} {primaryKey}{comma}{columnComment}")
+        return StringConnectHelper.newInstance("\"{columnName}\" {typeAndLength} {null} {default} {primaryKey}{comma}{columnComment}")
                 .replace("{columnName}", this.getName())
                 .replace("{typeAndLength}", this.type.getFullType())
                 .replace("{null}", this.isNotNull() ? "NOT NULL" : "NULL")

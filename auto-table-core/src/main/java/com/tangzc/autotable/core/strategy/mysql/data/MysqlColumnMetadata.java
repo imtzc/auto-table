@@ -8,7 +8,7 @@ import com.tangzc.autotable.core.AutoTableOrmFrameAdapter;
 import com.tangzc.autotable.core.AutoTableGlobalConfig;
 import com.tangzc.autotable.core.strategy.mysql.ParamValidChecker;
 import com.tangzc.autotable.core.strategy.mysql.JavaToMysqlConverter;
-import com.tangzc.autotable.core.utils.StringHelper;
+import com.tangzc.autotable.core.utils.StringConnectHelper;
 import com.tangzc.autotable.core.utils.StringUtils;
 import com.tangzc.autotable.core.utils.TableBeanUtils;
 import lombok.Data;
@@ -161,7 +161,7 @@ public class MysqlColumnMetadata {
     public String toColumnSql() {
         // 例子：`name` varchar(100) NULL DEFAULT '张三' COMMENT '名称'
         // 例子：`id` int(32) NOT NULL AUTO_INCREMENT COMMENT '主键'
-        return StringHelper.newInstance("`{columnName}` {typeAndLength} {character} {collate} {null} {default} {autoIncrement} {columnComment} {position}")
+        return StringConnectHelper.newInstance("`{columnName}` {typeAndLength} {character} {collate} {null} {default} {autoIncrement} {columnComment} {position}")
                 .replace("{columnName}", this.getName())
                 .replace("{typeAndLength}", this.getType().getFullType())
                 .replace("{character}", $ -> {

@@ -5,6 +5,7 @@ import com.tangzc.autotable.annotation.ColumnType;
 import com.tangzc.autotable.annotation.PrimaryKey;
 import com.tangzc.autotable.annotation.TableName;
 import com.tangzc.autotable.annotation.mysql.MysqlTypeConstant;
+import com.tangzc.autotable.springboot.annotation.UniIndex;
 import lombok.Data;
 
 @Data
@@ -15,6 +16,7 @@ public class User {
     @ColumnComment("用户id")
     private Long id;
 
+    @UniIndex
     @ColumnComment("电话")
     private String phone;
 

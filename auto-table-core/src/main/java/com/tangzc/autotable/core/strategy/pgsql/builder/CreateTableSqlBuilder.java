@@ -4,7 +4,7 @@ import com.tangzc.autotable.annotation.enums.IndexTypeEnum;
 import com.tangzc.autotable.core.strategy.pgsql.data.PgsqlColumnMetadata;
 import com.tangzc.autotable.core.strategy.pgsql.data.PgsqlIndexMetadata;
 import com.tangzc.autotable.core.strategy.pgsql.data.PgsqlTableMetadata;
-import com.tangzc.autotable.core.utils.StringHelper;
+import com.tangzc.autotable.core.utils.StringConnectHelper;
 import lombok.extern.slf4j.Slf4j;
 import com.tangzc.autotable.core.utils.StringUtils;
 
@@ -51,7 +51,7 @@ public class CreateTableSqlBuilder {
     public static String getCreateIndexSql(String tableName, List<PgsqlIndexMetadata> indexMetadataList) {
 
         return indexMetadataList.stream()
-                .map(pgsqlIndexMetadata -> StringHelper.newInstance("CREATE {indexType} INDEX \"{indexName}\" ON \"{tableName}\" ({columns});")
+                .map(pgsqlIndexMetadata -> StringConnectHelper.newInstance("CREATE {indexType} INDEX \"{indexName}\" ON \"{tableName}\" ({columns});")
                         .replace("{indexType}", pgsqlIndexMetadata.getType() == IndexTypeEnum.UNIQUE ? "UNIQUE" : "")
                         .replace("{indexName}", pgsqlIndexMetadata.getName())
                         .replace("{tableName}", tableName)

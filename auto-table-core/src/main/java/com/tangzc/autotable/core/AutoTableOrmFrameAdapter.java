@@ -2,7 +2,6 @@ package com.tangzc.autotable.core;
 
 import com.tangzc.autotable.annotation.ColumnName;
 import com.tangzc.autotable.annotation.TableName;
-import com.tangzc.autotable.core.utils.StringHelper;
 import com.tangzc.autotable.core.utils.StringUtils;
 
 import java.lang.annotation.Annotation;
@@ -64,7 +63,7 @@ public interface AutoTableOrmFrameAdapter {
                 return tableName;
             }
         }
-        return StringHelper.camelToUnderline(clazz.getSimpleName());
+        return StringUtils.camelToUnderline(clazz.getSimpleName());
     }
 
     default String getRealColumnName(Class<?> clazz, Field field) {
@@ -75,7 +74,7 @@ public interface AutoTableOrmFrameAdapter {
                 return columnName;
             }
         }
-        return StringHelper.camelToUnderline(field.getName());
+        return StringUtils.camelToUnderline(field.getName());
     }
 
 

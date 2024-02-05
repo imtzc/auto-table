@@ -4,7 +4,7 @@ import com.tangzc.autotable.annotation.enums.IndexTypeEnum;
 import com.tangzc.autotable.core.strategy.mysql.data.MysqlColumnMetadata;
 import com.tangzc.autotable.core.strategy.mysql.data.MysqlIndexMetadata;
 import com.tangzc.autotable.core.strategy.mysql.data.MysqlTableMetadata;
-import com.tangzc.autotable.core.utils.StringHelper;
+import com.tangzc.autotable.core.utils.StringConnectHelper;
 import lombok.extern.slf4j.Slf4j;
 import com.tangzc.autotable.core.utils.StringUtils;
 
@@ -111,7 +111,7 @@ public class CreateTableSqlBuilder {
 
     public static String getIndexSql(MysqlIndexMetadata mysqlIndexMetadata) {
         // 例子： UNIQUE INDEX `unique_name_age`(`name` ASC, `age` DESC) COMMENT '姓名、年龄索引',
-        return StringHelper.newInstance("{indexType} INDEX `{indexName}`({columns}) {indexComment}")
+        return StringConnectHelper.newInstance("{indexType} INDEX `{indexName}`({columns}) {indexComment}")
                 .replace("{indexType}", mysqlIndexMetadata.getType() == IndexTypeEnum.UNIQUE ? "UNIQUE" : "")
                 .replace("{indexName}", mysqlIndexMetadata.getName())
                 .replace("{columns}", (key) -> {

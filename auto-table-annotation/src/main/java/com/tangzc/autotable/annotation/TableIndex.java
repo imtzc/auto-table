@@ -14,7 +14,7 @@ import java.lang.annotation.Target;
  * 设置表索引
  * @author tangzc
  */
-@Target(ElementType.TYPE)
+@Target({ElementType.TYPE, ElementType.ANNOTATION_TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Repeatable(TableIndexes.class)

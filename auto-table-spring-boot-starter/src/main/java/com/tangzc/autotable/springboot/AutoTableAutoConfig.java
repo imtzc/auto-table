@@ -32,14 +32,19 @@ public class AutoTableAutoConfig {
     @PostConstruct
     public void init() {
 
-        // 设置全局的配置
-        AutoTableGlobalConfig.setAutoTableProperties(autoTableProperties.toConfig());
         // 默认设置全局的SqlSessionFactory
         SqlSessionFactoryManager.setSqlSessionFactory(sqlSessionTemplate.getSqlSessionFactory());
+
+        // 设置全局的配置
+        AutoTableGlobalConfig.setAutoTableProperties(autoTableProperties.toConfig());
         // 有自定义多数据源处理逻辑，就使用多数据源模式
         if (dynamicDataSourceHandler != null) {
             AutoTableGlobalConfig.setDatasourceHandler(dynamicDataSourceHandler);
         }
+
+        // 设置自定义的注解扫描器
+        AutoTableGlobalConfig.setAutoTableAnnotationFinder(new CustomAnnotationFinder());
+
         // 启动AutoTable
         AutoTableBootstrap.start();
     }

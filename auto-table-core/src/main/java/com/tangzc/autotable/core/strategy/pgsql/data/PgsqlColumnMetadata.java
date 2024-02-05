@@ -5,7 +5,7 @@ import com.tangzc.autotable.annotation.ColumnType;
 import com.tangzc.autotable.annotation.enums.DefaultValueEnum;
 import com.tangzc.autotable.core.AutoTableGlobalConfig;
 import com.tangzc.autotable.core.strategy.pgsql.JavaToPgsqlConverter;
-import com.tangzc.autotable.core.utils.StringHelper;
+import com.tangzc.autotable.core.utils.StringConnectHelper;
 import com.tangzc.autotable.core.utils.StringUtils;
 import com.tangzc.autotable.core.utils.TableBeanUtils;
 import lombok.Data;
@@ -119,7 +119,7 @@ public class PgsqlColumnMetadata {
     public String toColumnSql() {
         // 例子："name" varchar(100) NULL DEFAULT '张三' COMMENT '名称'
         // 例子："id" int4(32) NOT NULL AUTO_INCREMENT COMMENT '主键'
-        return StringHelper.newInstance("\"{columnName}\" {typeAndLength} {null} {default}")
+        return StringConnectHelper.newInstance("\"{columnName}\" {typeAndLength} {null} {default}")
                 .replace("{columnName}", this.getName())
                 .replace("{typeAndLength}", (key) -> {
                     PgsqlTypeAndLength typeAndLength = this.getType();

@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
  * 指定MySQL字符编码和排序规则
  * @author don
  */
-@Target({ElementType.TYPE})
+@Target({ElementType.TYPE, ElementType.ANNOTATION_TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface MysqlCharset {

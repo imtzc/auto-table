@@ -3,7 +3,7 @@ package com.tangzc.autotable.core.strategy.sqlite.builder;
 import com.tangzc.autotable.annotation.enums.IndexTypeEnum;
 import com.tangzc.autotable.core.strategy.sqlite.data.SqliteColumnMetadata;
 import com.tangzc.autotable.core.strategy.sqlite.data.SqliteIndexMetadata;
-import com.tangzc.autotable.core.utils.StringHelper;
+import com.tangzc.autotable.core.utils.StringConnectHelper;
 import lombok.extern.slf4j.Slf4j;
 import com.tangzc.autotable.core.utils.StringUtils;
 
@@ -105,7 +105,7 @@ public class CreateTableSqlBuilder {
      * @return
      */
     public static String getIndexSql(String tableName, SqliteIndexMetadata sqliteIndexMetadata) {
-        return StringHelper.newInstance("CREATE{indexType} INDEX \"{indexName}\" ON {tableName} ({columns}) {indexComment};")
+        return StringConnectHelper.newInstance("CREATE{indexType} INDEX \"{indexName}\" ON {tableName} ({columns}) {indexComment};")
                 .replace("{indexType}", sqliteIndexMetadata.getType() == IndexTypeEnum.NORMAL ? "" : " " + sqliteIndexMetadata.getType().name())
                 .replace("{indexName}", sqliteIndexMetadata.getName())
                 .replace("{tableName}", tableName)

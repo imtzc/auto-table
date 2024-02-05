@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
  * 指定MySQL引擎
  * @author don
  */
-@Target({ElementType.TYPE})
+@Target({ElementType.TYPE, ElementType.ANNOTATION_TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface MysqlEngine {
