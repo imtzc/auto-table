@@ -79,15 +79,15 @@ public class MysqlColumnMetadata {
     private String collate;
 
     /**
-     * 当前列的位置
+     * 当前字段的顺序位置，按照实体字段自上而下排列的，父类的字段整体排在子类之后
      */
     private int position;
 
     /**
-     * 位置变动：前一列的列名。
-     * if 非空，AFTER 列名；
-     * else if 空字符，表示FIRST；
-     * else 表示没有变动；
+     * <p>表示前一列的列名:
+     * <p>if 非空，生成“AFTER [列名]”，表示位于某列之后；
+     * <p>else if 空字符，生成“FIRST”，表示第一列；
+     * <p>else 表示没有变动；
      */
     private String newPreColumn;
 
