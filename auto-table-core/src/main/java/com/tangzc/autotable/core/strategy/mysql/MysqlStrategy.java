@@ -49,7 +49,7 @@ public class MysqlStrategy implements IStrategy<MysqlTableMetadata, MysqlCompare
 
     @Override
     public boolean checkTableExist(String tableName) {
-        return executeRet(mysqlTablesMapper -> mysqlTablesMapper.findTableByTableName(tableName) != null);
+        return executeReturn(mysqlTablesMapper -> mysqlTablesMapper.findTableByTableName(tableName) != null);
     }
 
     @Override
@@ -76,7 +76,7 @@ public class MysqlStrategy implements IStrategy<MysqlTableMetadata, MysqlCompare
         String tableName = tableMetadata.getTableName();
         MysqlCompareTableInfo mysqlCompareTableInfo = new MysqlCompareTableInfo(tableName);
 
-        InformationSchemaTable informationSchemaTable = executeRet(mysqlTablesMapper -> mysqlTablesMapper.findTableByTableName(tableName));
+        InformationSchemaTable informationSchemaTable = executeReturn(mysqlTablesMapper -> mysqlTablesMapper.findTableByTableName(tableName));
 
         // 对比表配置有无变化
         compareTableProperties(tableMetadata, informationSchemaTable, mysqlCompareTableInfo);
@@ -85,7 +85,7 @@ public class MysqlStrategy implements IStrategy<MysqlTableMetadata, MysqlCompare
         compareColumns(tableMetadata, tableName, mysqlCompareTableInfo);
 
         // 开始比对 主键 和 索引 的变化
-        List<InformationSchemaStatistics> informationSchemaStatistics = executeRet(mysqlTablesMapper -> mysqlTablesMapper.queryTablePrimaryAndIndex(tableName));
+        List<InformationSchemaStatistics> informationSchemaStatistics = executeReturn(mysqlTablesMapper -> mysqlTablesMapper.queryTablePrimaryAndIndex(tableName));
         // 按照主键（固定值：PRIMARY）、索引名字，对所有列进行分组
         Map<String, List<InformationSchemaStatistics>> keyColumnGroupByName = informationSchemaStatistics.stream()
                 .collect(Collectors.groupingBy(InformationSchemaStatistics::getIndexName));
@@ -222,7 +222,7 @@ public class MysqlStrategy implements IStrategy<MysqlTableMetadata, MysqlCompare
         // 变形：《列名，实体字段描述》
         Map<String, MysqlColumnMetadata> columnParamMap = mysqlColumnMetadataList.stream().collect(Collectors.toMap(MysqlColumnMetadata::getName, Function.identity()));
         // 查询数据库所有列数据
-        List<InformationSchemaColumn> tableColumnList = executeRet(mysqlTablesMapper -> mysqlTablesMapper.findTableEnsembleByTableName(tableName));
+        List<InformationSchemaColumn> tableColumnList = executeReturn(mysqlTablesMapper -> mysqlTablesMapper.findTableEnsembleByTableName(tableName));
 
         // 获取顺序变更的sql
         ColumnPositionHelper.generateChangePosition(tableColumnList, mysqlColumnMetadataList);

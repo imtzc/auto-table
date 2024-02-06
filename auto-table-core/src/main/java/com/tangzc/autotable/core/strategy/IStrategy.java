@@ -40,7 +40,7 @@ public interface IStrategy<TABLE_META extends TableMetadata, COMPARE_TABLE_INFO 
         }
     }
 
-    default <R> R executeRet(Function<MAPPER, R> execute) {
+    default <R> R executeReturn(Function<MAPPER, R> execute) {
 
         // 从接口泛型上读取MapperClass
         Class<MAPPER> mapperClass = getMapperClass();

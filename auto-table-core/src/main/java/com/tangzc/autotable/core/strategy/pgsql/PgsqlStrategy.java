@@ -42,7 +42,7 @@ public class PgsqlStrategy implements IStrategy<PgsqlTableMetadata, PgsqlCompare
 
     @Override
     public boolean checkTableExist(String tableName) {
-        return executeRet(pgsqlTablesMapper -> pgsqlTablesMapper.checkTableExist(tableName) > 0);
+        return executeReturn(pgsqlTablesMapper -> pgsqlTablesMapper.checkTableExist(tableName) > 0);
     }
 
     @Override
@@ -84,7 +84,7 @@ public class PgsqlStrategy implements IStrategy<PgsqlTableMetadata, PgsqlCompare
     }
 
     private void compareIndexInfo(PgsqlTableMetadata tableMetadata, String tableName, PgsqlCompareTableInfo pgsqlCompareTableInfo) {
-        List<PgsqlDbIndex> pgsqlDbIndices = executeRet(pgsqlTablesMapper -> pgsqlTablesMapper.selectTableIndexesDetail(tableName));
+        List<PgsqlDbIndex> pgsqlDbIndices = executeReturn(pgsqlTablesMapper -> pgsqlTablesMapper.selectTableIndexesDetail(tableName));
         Map<String, PgsqlDbIndex> pgsqlDbIndexMap = pgsqlDbIndices.stream()
                 // 仅仅处理自定义的索引
                 .filter(idx -> idx.getIndexName().startsWith(AutoTableGlobalConfig.getAutoTableProperties().getIndexPrefix()))
@@ -130,7 +130,7 @@ public class PgsqlStrategy implements IStrategy<PgsqlTableMetadata, PgsqlCompare
 
     private void compareColumnInfo(PgsqlTableMetadata tableMetadata, String tableName, PgsqlCompareTableInfo pgsqlCompareTableInfo) {
         // 数据库字段元信息
-        List<PgsqlDbColumn> pgsqlDbColumns = executeRet(pgsqlTablesMapper -> pgsqlTablesMapper.selectTableFieldDetail(tableName));
+        List<PgsqlDbColumn> pgsqlDbColumns = executeReturn(pgsqlTablesMapper -> pgsqlTablesMapper.selectTableFieldDetail(tableName));
         Map<String, PgsqlDbColumn> pgsqlFieldDetailMap = pgsqlDbColumns.stream().collect(Collectors.toMap(PgsqlDbColumn::getColumnName, Function.identity()));
         // 当前字段信息
         List<PgsqlColumnMetadata> columnMetadataList = tableMetadata.getColumnMetadataList();
@@ -176,7 +176,7 @@ public class PgsqlStrategy implements IStrategy<PgsqlTableMetadata, PgsqlCompare
         // 获取所有主键
         List<PgsqlColumnMetadata> primaryColumnList = columnMetadataList.stream().filter(PgsqlColumnMetadata::isPrimary).collect(Collectors.toList());
         // 查询数据库主键信息
-        PgsqlDbPrimary pgsqlDbPrimary = executeRet(pgsqlTablesMapper -> pgsqlTablesMapper.selectPrimaryKeyName(tableName));
+        PgsqlDbPrimary pgsqlDbPrimary = executeReturn(pgsqlTablesMapper -> pgsqlTablesMapper.selectPrimaryKeyName(tableName));
 
         boolean removePrimary = primaryColumnList.isEmpty() && pgsqlDbPrimary != null;
         String newPrimaryColumns = primaryColumnList.stream().map(PgsqlColumnMetadata::getName).collect(Collectors.joining(","));
@@ -238,7 +238,7 @@ public class PgsqlStrategy implements IStrategy<PgsqlTableMetadata, PgsqlCompare
     }
 
     private void compareTableInfo(PgsqlTableMetadata tableMetadata, String tableName, PgsqlCompareTableInfo pgsqlCompareTableInfo) {
-        String tableDescription = executeRet(pgsqlTablesMapper -> pgsqlTablesMapper.selectTableDescription(tableName));
+        String tableDescription = executeReturn(pgsqlTablesMapper -> pgsqlTablesMapper.selectTableDescription(tableName));
         if (!Objects.equals(tableDescription, tableMetadata.getComment())) {
             pgsqlCompareTableInfo.setComment(tableMetadata.getComment());
         }

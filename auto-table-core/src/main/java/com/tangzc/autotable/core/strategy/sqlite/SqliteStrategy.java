@@ -36,7 +36,7 @@ public class SqliteStrategy implements IStrategy<SqliteTableMetadata, SqliteComp
 
     @Override
     public boolean checkTableExist(String tableName) {
-        int i = executeRet(sqliteTablesMapper -> sqliteTablesMapper.checkTableExist(tableName));
+        int i = executeReturn(sqliteTablesMapper -> sqliteTablesMapper.checkTableExist(tableName));
         return i > 0;
     }
 
@@ -67,14 +67,14 @@ public class SqliteStrategy implements IStrategy<SqliteTableMetadata, SqliteComp
         SqliteCompareTableInfo sqliteCompareTableInfo = new SqliteCompareTableInfo(tableName);
 
         // 判断表是否需要重建
-        String orgBuildTableSql = executeRet(sqliteTablesMapper -> sqliteTablesMapper.queryBuildTableSql(tableName));
+        String orgBuildTableSql = executeReturn(sqliteTablesMapper -> sqliteTablesMapper.queryBuildTableSql(tableName));
         String newBuildTableSql = CreateTableSqlBuilder.buildTableSql(tableMetadata.getTableName(), tableMetadata.getComment(), tableMetadata.getColumnMetadataList());
         boolean needRebuildTable = !Objects.equals(orgBuildTableSql + ";", newBuildTableSql);
         if (needRebuildTable) {
             // 该情况下无需单独分析索引了，因为sqlite的表修改方式为重建整个表，索引需要全部删除，重新创建
             sqliteCompareTableInfo.setRebuildTableSql(newBuildTableSql);
             // 删除当前所有索引
-            List<SqliteMaster> orgBuildIndexSqlList = executeRet(sqliteTablesMapper -> sqliteTablesMapper.queryBuildIndexSql(tableName));
+            List<SqliteMaster> orgBuildIndexSqlList = executeReturn(sqliteTablesMapper -> sqliteTablesMapper.queryBuildIndexSql(tableName));
             for (SqliteMaster sqliteMaster : orgBuildIndexSqlList) {
                 sqliteCompareTableInfo.getDeleteIndexList().add(sqliteMaster.getName());
             }
@@ -92,7 +92,7 @@ public class SqliteStrategy implements IStrategy<SqliteTableMetadata, SqliteComp
                             indexMetadata -> CreateTableSqlBuilder.getIndexSql(tableName, indexMetadata)
                     ));
             // 遍历所有数据库存在的索引，判断有没有变化
-            List<SqliteMaster> orgBuildIndexSqlList = executeRet(sqliteTablesMapper -> sqliteTablesMapper.queryBuildIndexSql(tableName));
+            List<SqliteMaster> orgBuildIndexSqlList = executeReturn(sqliteTablesMapper -> sqliteTablesMapper.queryBuildIndexSql(tableName));
             for (SqliteMaster sqliteMaster : orgBuildIndexSqlList) {
                 String indexName = sqliteMaster.getName();
                 String newBuildIndexSql = rebuildIndexMap.remove(indexName);
@@ -160,7 +160,7 @@ public class SqliteStrategy implements IStrategy<SqliteTableMetadata, SqliteComp
                 backupName += "_" + offset;
             }
             String finalBackupName = backupName;
-            int count = executeRet(sqliteTablesMapper -> sqliteTablesMapper.checkTableExist(finalBackupName));
+            int count = executeReturn(sqliteTablesMapper -> sqliteTablesMapper.checkTableExist(finalBackupName));
             if (count == 0) {
                 return backupName;
             } else {
