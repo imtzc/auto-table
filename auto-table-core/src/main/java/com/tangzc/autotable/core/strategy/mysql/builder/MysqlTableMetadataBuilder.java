@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
  * @author don
  */
 @Slf4j
-public class TableMetadataBuilder {
+public class MysqlTableMetadataBuilder {
 
     public static MysqlTableMetadata build(Class<?> clazz) {
 
@@ -68,7 +68,7 @@ public class TableMetadataBuilder {
         AtomicInteger index = new AtomicInteger(1);
         return fields.stream()
                 .filter(field -> TableBeanUtils.isIncludeField(field, clazz))
-                .map(field -> MysqlColumnMetadata.create(clazz, field, index.getAndIncrement()))
+                .map(field -> MysqlColumnMetadataBuilder.build(clazz, field, index.getAndIncrement()))
                 .collect(Collectors.toList());
     }
 
@@ -79,7 +79,7 @@ public class TableMetadataBuilder {
         // 类上的索引注解
         List<TableIndex> tableIndexes = TableBeanUtils.getTableIndexes(clazz);
         List<MysqlIndexMetadata> indexMetadataList = tableIndexes.stream()
-                .map(tableIndex -> MysqlIndexMetadata.create(clazz, tableIndex, AutoTableGlobalConfig.getAutoTableProperties().getIndexPrefix()))
+                .map(tableIndex -> MysqlIndexMetadataBuilder.build(clazz, tableIndex, AutoTableGlobalConfig.getAutoTableProperties().getIndexPrefix()))
                 .filter(Objects::nonNull)
                 .filter(indexMetadata -> indexRepeatChecker.filter(indexMetadata.getName()))
                 .collect(Collectors.toList());
@@ -87,7 +87,7 @@ public class TableMetadataBuilder {
         // 字段上的索引注解
         List<MysqlIndexMetadata> onFieldIndexMetadata = fields.stream()
                 .filter(field -> TableBeanUtils.isIncludeField(field, clazz))
-                .map(field -> MysqlIndexMetadata.create(clazz, field, AutoTableGlobalConfig.getAutoTableProperties().getIndexPrefix()))
+                .map(field -> MysqlIndexMetadataBuilder.build(clazz, field, AutoTableGlobalConfig.getAutoTableProperties().getIndexPrefix()))
                 .filter(Objects::nonNull)
                 .filter(indexMetadata -> indexRepeatChecker.filter(indexMetadata.getName()))
                 .collect(Collectors.toList());

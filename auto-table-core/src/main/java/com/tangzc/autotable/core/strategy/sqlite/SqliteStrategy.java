@@ -2,7 +2,7 @@ package com.tangzc.autotable.core.strategy.sqlite;
 
 import com.tangzc.autotable.core.strategy.IStrategy;
 import com.tangzc.autotable.core.strategy.sqlite.builder.CreateTableSqlBuilder;
-import com.tangzc.autotable.core.strategy.sqlite.builder.TableMetadataBuilder;
+import com.tangzc.autotable.core.strategy.sqlite.builder.SqliteTableMetadataBuilder;
 import com.tangzc.autotable.core.strategy.sqlite.data.SqliteCompareTableInfo;
 import com.tangzc.autotable.core.strategy.sqlite.data.SqliteIndexMetadata;
 import com.tangzc.autotable.core.strategy.sqlite.data.SqliteTableMetadata;
@@ -42,7 +42,7 @@ public class SqliteStrategy implements IStrategy<SqliteTableMetadata, SqliteComp
 
     @Override
     public SqliteTableMetadata analyseClass(Class<?> beanClass) {
-        SqliteTableMetadata sqliteTableMetadata = TableMetadataBuilder.build(beanClass);
+        SqliteTableMetadata sqliteTableMetadata = SqliteTableMetadataBuilder.build(beanClass);
         if (sqliteTableMetadata.getColumnMetadataList().isEmpty()) {
             log.warn("扫描发现{}没有建表字段请检查！", beanClass.getName());
             return null;

@@ -7,7 +7,7 @@ import com.tangzc.autotable.core.AutoTableGlobalConfig;
 import com.tangzc.autotable.core.strategy.IStrategy;
 import com.tangzc.autotable.core.strategy.pgsql.builder.CreateTableSqlBuilder;
 import com.tangzc.autotable.core.strategy.pgsql.builder.ModifyTableSqlBuilder;
-import com.tangzc.autotable.core.strategy.pgsql.builder.TableMetadataBuilder;
+import com.tangzc.autotable.core.strategy.pgsql.builder.PgsqlTableMetadataBuilder;
 import com.tangzc.autotable.core.strategy.pgsql.data.PgsqlColumnMetadata;
 import com.tangzc.autotable.core.strategy.pgsql.data.PgsqlCompareTableInfo;
 import com.tangzc.autotable.core.strategy.pgsql.data.PgsqlIndexMetadata;
@@ -47,7 +47,7 @@ public class PgsqlStrategy implements IStrategy<PgsqlTableMetadata, PgsqlCompare
 
     @Override
     public PgsqlTableMetadata analyseClass(Class<?> beanClass) {
-        PgsqlTableMetadata pgsqlTableMetadata = TableMetadataBuilder.build(beanClass);
+        PgsqlTableMetadata pgsqlTableMetadata = PgsqlTableMetadataBuilder.build(beanClass);
         if (pgsqlTableMetadata.getColumnMetadataList().isEmpty()) {
             log.warn("扫描发现{}没有建表字段请检查！", beanClass.getName());
             return null;

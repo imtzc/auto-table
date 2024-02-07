@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
  * @author don
  */
 @Slf4j
-public class TableMetadataBuilder {
+public class SqliteTableMetadataBuilder {
 
     public static SqliteTableMetadata build(Class<?> clazz) {
 
@@ -44,7 +44,7 @@ public class TableMetadataBuilder {
     public static List<SqliteColumnMetadata> getColumnList(Class<?> clazz, List<Field> fields) {
         return fields.stream()
                 .filter(field -> TableBeanUtils.isIncludeField(field, clazz))
-                .map(field -> SqliteColumnMetadata.create(clazz, field))
+                .map(field -> SqliteColumnMetadataBuilder.build(clazz, field))
                 .collect(Collectors.toList());
     }
 
@@ -55,7 +55,7 @@ public class TableMetadataBuilder {
         // 类上的索引注解
         List<TableIndex> tableIndexes = TableBeanUtils.getTableIndexes(clazz);
         List<SqliteIndexMetadata> indexMetadataList = tableIndexes.stream()
-                .map(tableIndex -> SqliteIndexMetadata.create(clazz, tableIndex, AutoTableGlobalConfig.getAutoTableProperties().getIndexPrefix()))
+                .map(tableIndex -> SqliteIndexMetadataBuilder.build(clazz, tableIndex, AutoTableGlobalConfig.getAutoTableProperties().getIndexPrefix()))
                 .filter(Objects::nonNull)
                 .filter(indexMetadata -> indexRepeatChecker.filter(indexMetadata.getName()))
                 .collect(Collectors.toList());
@@ -63,7 +63,7 @@ public class TableMetadataBuilder {
         // 字段上的索引注解
         List<SqliteIndexMetadata> onFieldIndexMetadata = fields.stream()
                 .filter(field -> TableBeanUtils.isIncludeField(field, clazz))
-                .map(field -> SqliteIndexMetadata.create(clazz, field, AutoTableGlobalConfig.getAutoTableProperties().getIndexPrefix()))
+                .map(field -> SqliteIndexMetadataBuilder.build(clazz, field, AutoTableGlobalConfig.getAutoTableProperties().getIndexPrefix()))
                 .filter(Objects::nonNull)
                 .filter(indexMetadata -> indexRepeatChecker.filter(indexMetadata.getName()))
                 .collect(Collectors.toList());

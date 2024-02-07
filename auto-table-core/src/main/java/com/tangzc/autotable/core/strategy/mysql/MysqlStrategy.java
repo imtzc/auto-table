@@ -6,7 +6,7 @@ import com.tangzc.autotable.core.AutoTableGlobalConfig;
 import com.tangzc.autotable.core.strategy.IStrategy;
 import com.tangzc.autotable.core.strategy.mysql.builder.CreateTableSqlBuilder;
 import com.tangzc.autotable.core.strategy.mysql.builder.ModifyTableSqlBuilder;
-import com.tangzc.autotable.core.strategy.mysql.builder.TableMetadataBuilder;
+import com.tangzc.autotable.core.strategy.mysql.builder.MysqlTableMetadataBuilder;
 import com.tangzc.autotable.core.strategy.mysql.data.MysqlColumnMetadata;
 import com.tangzc.autotable.core.strategy.mysql.data.MysqlCompareTableInfo;
 import com.tangzc.autotable.core.strategy.mysql.data.MysqlIndexMetadata;
@@ -54,7 +54,7 @@ public class MysqlStrategy implements IStrategy<MysqlTableMetadata, MysqlCompare
 
     @Override
     public MysqlTableMetadata analyseClass(Class<?> beanClass) {
-        MysqlTableMetadata mysqlTableMetadata = TableMetadataBuilder.build(beanClass);
+        MysqlTableMetadata mysqlTableMetadata = MysqlTableMetadataBuilder.build(beanClass);
         if (mysqlTableMetadata.getColumnMetadataList().isEmpty()) {
             log.warn("扫描发现{}没有建表字段请检查！", beanClass.getName());
             return null;

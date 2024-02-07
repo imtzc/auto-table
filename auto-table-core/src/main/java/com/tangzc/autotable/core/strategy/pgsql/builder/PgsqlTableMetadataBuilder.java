@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
  * @author don
  */
 @Slf4j
-public class TableMetadataBuilder {
+public class PgsqlTableMetadataBuilder {
 
     public static PgsqlTableMetadata build(Class<?> clazz) {
 
@@ -44,7 +44,7 @@ public class TableMetadataBuilder {
     public static List<PgsqlColumnMetadata> getColumnList(Class<?> clazz, List<Field> fields) {
         return fields.stream()
                 .filter(field -> TableBeanUtils.isIncludeField(field, clazz))
-                .map(field -> PgsqlColumnMetadata.create(clazz, field))
+                .map(field -> PgsqlColumnMetadataBuilder.build(clazz, field))
                 .collect(Collectors.toList());
     }
 
@@ -55,7 +55,7 @@ public class TableMetadataBuilder {
         // 类上的索引注解
         List<TableIndex> tableIndexes = TableBeanUtils.getTableIndexes(clazz);
         List<PgsqlIndexMetadata> indexMetadataList = tableIndexes.stream()
-                .map(tableIndex -> PgsqlIndexMetadata.create(clazz, tableIndex, AutoTableGlobalConfig.getAutoTableProperties().getIndexPrefix()))
+                .map(tableIndex -> PgsqlIndexMetadataBuilder.build(clazz, tableIndex, AutoTableGlobalConfig.getAutoTableProperties().getIndexPrefix()))
                 .filter(Objects::nonNull)
                 .filter(indexMetadata -> indexRepeatChecker.filter(indexMetadata.getName()))
                 .collect(Collectors.toList());
@@ -63,7 +63,7 @@ public class TableMetadataBuilder {
         // 字段上的索引注解
         List<PgsqlIndexMetadata> onFieldIndexMetadata = fields.stream()
                 .filter(field -> TableBeanUtils.isIncludeField(field, clazz))
-                .map(field -> PgsqlIndexMetadata.create(clazz, field, AutoTableGlobalConfig.getAutoTableProperties().getIndexPrefix()))
+                .map(field -> PgsqlIndexMetadataBuilder.build(clazz, field, AutoTableGlobalConfig.getAutoTableProperties().getIndexPrefix()))
                 .filter(Objects::nonNull)
                 .filter(indexMetadata -> indexRepeatChecker.filter(indexMetadata.getName()))
                 .collect(Collectors.toList());
