@@ -25,7 +25,6 @@ import java.util.stream.Collectors;
  * @author don
  */
 @Data
-@Accessors(chain = true)
 public class PgsqlIndexMetadataBuilder {
 
     public static PgsqlIndexMetadata build(Class<?> clazz, Field field, String indexPrefix) {

@@ -25,7 +25,6 @@ import java.util.stream.Collectors;
  * @author don
  */
 @Data
-@Accessors(chain = true)
 public class SqliteIndexMetadataBuilder {
 
     public static SqliteIndexMetadata build(Class<?> clazz, Field field, String indexPrefix) {
