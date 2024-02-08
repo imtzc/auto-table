@@ -26,8 +26,7 @@ public class SqliteTableMetadataBuilder {
 
         String tableName = TableBeanUtils.getTableName(clazz);
 
-        SqliteTableMetadata mysqlTableMetadata = new SqliteTableMetadata();
-        mysqlTableMetadata.setTableName(tableName);
+        SqliteTableMetadata mysqlTableMetadata = new SqliteTableMetadata(tableName);
 
         TableComment tableComment = TableBeanUtils.getTableComment(clazz);
         assert tableComment != null;

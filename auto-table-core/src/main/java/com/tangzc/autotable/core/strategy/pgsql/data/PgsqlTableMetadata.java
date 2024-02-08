@@ -2,19 +2,19 @@ package com.tangzc.autotable.core.strategy.pgsql.data;
 
 import com.tangzc.autotable.core.strategy.TableMetadata;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 
 import java.util.List;
 
 /**
  * @author don
  */
-@Data
-public class PgsqlTableMetadata implements TableMetadata {
-
-    /**
-     * 表名
-     */
-    private String tableName;
+@Getter
+@Setter
+@Accessors(chain = true)
+public class PgsqlTableMetadata extends TableMetadata {
 
     /**
      * 注释
@@ -30,4 +30,8 @@ public class PgsqlTableMetadata implements TableMetadata {
      * 所有索引信息
      */
     private List<PgsqlIndexMetadata> indexMetadataList;
+
+    public PgsqlTableMetadata(String tableName) {
+        super(tableName);
+    }
 }

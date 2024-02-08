@@ -27,7 +27,7 @@ public interface IStrategy<TABLE_META extends TableMetadata, COMPARE_TABLE_INFO 
      * 策略对应的数据库方言，与数据库驱动中的接口{@link java.sql.DatabaseMetaData#getDatabaseProductName()}实现返回值一致
      * @return 方言
      */
-    String dbDialect();
+    String databaseDialect();
 
     default void execute(Consumer<MAPPER> execute) {
 
@@ -98,6 +98,8 @@ public interface IStrategy<TABLE_META extends TableMetadata, COMPARE_TABLE_INFO 
         for (Class<?> beanClass : beanClasses) {
 
             TABLE_META tableMetadata = this.analyseClass(beanClass);
+            // 拦截表信息，供用户自定义修改
+            AutoTableGlobalConfig.getBuildTableMetadataIntercepter().intercept(this.databaseDialect(), tableMetadata);
 
             // 构建数据模型失败跳过
             if (tableMetadata == null) {
@@ -121,6 +123,7 @@ public interface IStrategy<TABLE_META extends TableMetadata, COMPARE_TABLE_INFO 
             // 当表不存在的时候，直接生成表
             if (!tableIsExist) {
                 log.info("创建表：{}", tableName);
+                // 建表
                 this.createTable(tableMetadata);
             }
 
@@ -129,6 +132,7 @@ public interface IStrategy<TABLE_META extends TableMetadata, COMPARE_TABLE_INFO 
                 // 当表存在，比对表与Bean描述的差异
                 COMPARE_TABLE_INFO compareTableInfo = this.compareTable(tableMetadata);
                 if (compareTableInfo.needModify()) {
+                    log.info("修改表：{}", tableName);
                     // 修改表信息
                     this.modifyTable(compareTableInfo);
                 }
@@ -160,7 +164,7 @@ public interface IStrategy<TABLE_META extends TableMetadata, COMPARE_TABLE_INFO 
             }
         }
         if (!validateResult.isEmpty()) {
-            throw new RuntimeException("启动失败，" + this.dbDialect() + "数据库与实体模型不对应：\n" + String.join("\n", validateResult));
+            throw new RuntimeException("启动失败，" + this.databaseDialect() + "数据库与实体模型不对应：\n" + String.join("\n", validateResult));
         }
     }
 

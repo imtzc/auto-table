@@ -3,6 +3,7 @@ package com.tangzc.autotable.core.strategy.mysql;
 import com.tangzc.autotable.annotation.enums.DefaultValueEnum;
 import com.tangzc.autotable.annotation.enums.IndexSortTypeEnum;
 import com.tangzc.autotable.core.AutoTableGlobalConfig;
+import com.tangzc.autotable.core.constants.DatabaseDialect;
 import com.tangzc.autotable.core.strategy.IStrategy;
 import com.tangzc.autotable.core.strategy.mysql.builder.CreateTableSqlBuilder;
 import com.tangzc.autotable.core.strategy.mysql.builder.ModifyTableSqlBuilder;
@@ -38,8 +39,8 @@ import java.util.stream.Collectors;
 public class MysqlStrategy implements IStrategy<MysqlTableMetadata, MysqlCompareTableInfo, MysqlTablesMapper> {
 
     @Override
-    public String dbDialect() {
-        return "MySQL";
+    public String databaseDialect() {
+        return DatabaseDialect.MYSQL;
     }
 
     @Override
@@ -207,8 +208,7 @@ public class MysqlStrategy implements IStrategy<MysqlTableMetadata, MysqlCompare
             }
 
             if (needResetPrimary) {
-                mysqlCompareTableInfo.setNewPrimaries(primaries);
-                mysqlCompareTableInfo.setDropPrimary(true);
+                mysqlCompareTableInfo.resetPrimary(primaries);
             }
         }
     }

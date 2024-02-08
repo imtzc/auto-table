@@ -2,9 +2,11 @@ package com.tangzc.autotable.core.strategy.pgsql.data;
 
 import com.tangzc.autotable.core.strategy.CompareTableInfo;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import com.tangzc.autotable.core.utils.StringUtils;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,15 +17,9 @@ import java.util.Set;
 /**
  * @author don
  */
-@Data
-@RequiredArgsConstructor
-public class PgsqlCompareTableInfo implements CompareTableInfo {
-
-    /**
-     * 表名: 不可变，变了意味着新表
-     */
-    @NonNull
-    private final String name;
+@Getter
+@Setter
+public class PgsqlCompareTableInfo extends CompareTableInfo {
 
     /**
      * 注释: 有值说明需要改
@@ -73,6 +69,10 @@ public class PgsqlCompareTableInfo implements CompareTableInfo {
      * 新添加的索引
      */
     private List<PgsqlIndexMetadata> indexMetadataList = new ArrayList<>();
+
+    public PgsqlCompareTableInfo(@NonNull String name) {
+        super(name);
+    }
 
     @Override
     public boolean needModify() {

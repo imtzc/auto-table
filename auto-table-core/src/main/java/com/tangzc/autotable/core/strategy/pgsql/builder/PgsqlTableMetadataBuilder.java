@@ -26,8 +26,7 @@ public class PgsqlTableMetadataBuilder {
 
         String tableName = TableBeanUtils.getTableName(clazz);
 
-        PgsqlTableMetadata pgsqlTableMetadata = new PgsqlTableMetadata();
-        pgsqlTableMetadata.setTableName(tableName);
+        PgsqlTableMetadata pgsqlTableMetadata = new PgsqlTableMetadata(tableName);
 
         TableComment tableComment = TableBeanUtils.getTableComment(clazz);
         assert tableComment != null;

@@ -2,6 +2,9 @@ package com.tangzc.autotable.core.strategy.mysql.data;
 
 import com.tangzc.autotable.core.strategy.TableMetadata;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,13 +12,11 @@ import java.util.List;
 /**
  * @author don
  */
-@Data
-public class MysqlTableMetadata implements TableMetadata {
+@Getter
+@Setter
+@Accessors(chain = true)
+public class MysqlTableMetadata extends TableMetadata {
 
-    /**
-     * 表名
-     */
-    private String tableName;
     /**
      * 引擎
      */
@@ -40,4 +41,8 @@ public class MysqlTableMetadata implements TableMetadata {
      * 索引
      */
     private List<MysqlIndexMetadata> indexMetadataList = new ArrayList<>();
+
+    public MysqlTableMetadata(String tableName) {
+        super(tableName);
+    }
 }

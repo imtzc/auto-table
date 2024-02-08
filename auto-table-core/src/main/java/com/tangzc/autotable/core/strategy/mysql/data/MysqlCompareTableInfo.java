@@ -3,8 +3,9 @@ package com.tangzc.autotable.core.strategy.mysql.data;
 import com.tangzc.autotable.core.strategy.CompareTableInfo;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,15 +13,10 @@ import java.util.List;
 /**
  * @author don
  */
-@Data
-@RequiredArgsConstructor
-public class MysqlCompareTableInfo implements CompareTableInfo {
+@Getter
+@Setter
+public class MysqlCompareTableInfo extends CompareTableInfo {
 
-    /**
-     * 表名: 不可变，变了意味着新表
-     */
-    @NonNull
-    private final String name;
     /**
      * 引擎: 有值，则说明需要修改
      */
@@ -62,6 +58,10 @@ public class MysqlCompareTableInfo implements CompareTableInfo {
      */
     private final List<MysqlIndexMetadata> mysqlIndexMetadataList = new ArrayList<>();
 
+    public MysqlCompareTableInfo(@NonNull String name) {
+        super(name);
+    }
+
     /**
      * 判断该修改参数，是不是可用，如果除了name，其他值均没有设置过，则无效，反之有效
      */
@@ -85,6 +85,14 @@ public class MysqlCompareTableInfo implements CompareTableInfo {
 
     public void addEditColumnMetadata(MysqlColumnMetadata mysqlColumnMetadata) {
         this.modifyMysqlColumnMetadataList.add(new MysqlModifyColumnMetadata(ModifyType.MODIFY, mysqlColumnMetadata));
+    }
+
+    /**
+     * 重设主键
+     */
+    public void resetPrimary(List<MysqlColumnMetadata> primaries) {
+        this.newPrimaries = primaries;
+        this.dropPrimary = true;
     }
 
     @Data

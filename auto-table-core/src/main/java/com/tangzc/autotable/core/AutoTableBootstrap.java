@@ -53,21 +53,18 @@ public class AutoTableBootstrap {
                             " Git: https://gitee.com/tangzc/auto-table\n");
         }
 
-        // 注册内置的不同数据源策略, 如果用户自定义了策略，那么内置的策略不会添加
-        MysqlStrategy mysqlStrategy = new MysqlStrategy();
-        AutoTableGlobalConfig.getStrategyMap().computeIfAbsent(mysqlStrategy.dbDialect(), $ -> mysqlStrategy);
-        PgsqlStrategy pgsqlStrategy = new PgsqlStrategy();
-        AutoTableGlobalConfig.getStrategyMap().computeIfAbsent(pgsqlStrategy.dbDialect(), $ -> pgsqlStrategy);
-        SqliteStrategy sqliteStrategy = new SqliteStrategy();
-        AutoTableGlobalConfig.getStrategyMap().computeIfAbsent(sqliteStrategy.dbDialect(), $ -> sqliteStrategy);
+        // 注册内置的不同数据源策略
+        AutoTableGlobalConfig.addStrategy(new MysqlStrategy());
+        AutoTableGlobalConfig.addStrategy(new PgsqlStrategy());
+        AutoTableGlobalConfig.addStrategy(new SqliteStrategy());
 
         // 获取扫描包路径
         String[] packs = getModelPackage(autoTableProperties);
 
         // 从包package中获取所有的Class
         List<Class<? extends Annotation>> annotations = new ArrayList<>(
-                Arrays.asList(TableName.class, TableComment.class,
-                        MysqlEngine.class, MysqlCharset.class, TableIndexes.class, TableIndex.class)
+                Arrays.asList(TableName.class, TableComment.class, TableIndexes.class, TableIndex.class,
+                        MysqlEngine.class, MysqlCharset.class)
         );
         // 添加自定义的注解
         annotations.addAll(AutoTableGlobalConfig.getAutoTableOrmFrameAdapter().scannerAnnotations());
@@ -89,7 +86,7 @@ public class AutoTableBootstrap {
         datasourceHandler.handleAnalysis(classes, (databaseDialect, tables) -> {
             log.info("数据库方言（" + databaseDialect + "）");
             // 查找对应的数据源策略
-            IStrategy<?, ?, ?> databaseStrategy = AutoTableGlobalConfig.getStrategyMap().get(databaseDialect);
+            IStrategy<?, ?, ?> databaseStrategy = AutoTableGlobalConfig.getStrategy(databaseDialect);
             if (databaseStrategy != null) {
                 databaseStrategy.analyseClasses(tables);
             } else {

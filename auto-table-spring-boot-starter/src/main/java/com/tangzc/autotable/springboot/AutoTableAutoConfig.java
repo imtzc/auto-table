@@ -1,9 +1,15 @@
 package com.tangzc.autotable.springboot;
 
+import com.tangzc.autotable.core.AutoTableAnnotationFinder;
 import com.tangzc.autotable.core.AutoTableBootstrap;
 import com.tangzc.autotable.core.AutoTableGlobalConfig;
+import com.tangzc.autotable.core.AutoTableOrmFrameAdapter;
 import com.tangzc.autotable.core.dynamicds.IDataSourceHandler;
 import com.tangzc.autotable.core.dynamicds.SqlSessionFactoryManager;
+import com.tangzc.autotable.core.intercepter.BuildTableMetadataIntercepter;
+import com.tangzc.autotable.core.strategy.mysql.JavaToMysqlConverter;
+import com.tangzc.autotable.core.strategy.pgsql.JavaToPgsqlConverter;
+import com.tangzc.autotable.core.strategy.sqlite.JavaToSqliteConverter;
 import com.tangzc.autotable.springboot.properties.AutoTableProperties;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.mybatis.spring.boot.autoconfigure.MybatisAutoConfiguration;
@@ -22,7 +28,25 @@ public class AutoTableAutoConfig {
     private final AutoTableProperties autoTableProperties;
 
     @Autowired(required = false)
+    private AutoTableAnnotationFinder autoTableAnnotationFinder;
+
+    @Autowired(required = false)
+    private AutoTableOrmFrameAdapter autoTableOrmFrameAdapter;
+
+    @Autowired(required = false)
+    private BuildTableMetadataIntercepter buildTableMetadataIntercepter;
+
+    @Autowired(required = false)
     private IDataSourceHandler<?> dynamicDataSourceHandler;
+
+    @Autowired(required = false)
+    private JavaToMysqlConverter javaToMysqlConverter;
+
+    @Autowired(required = false)
+    private JavaToPgsqlConverter javaToPgsqlConverter;
+
+    @Autowired(required = false)
+    private JavaToSqliteConverter javaToSqliteConverter;
 
     public AutoTableAutoConfig(SqlSessionTemplate sqlSessionTemplate, AutoTableProperties autoTableProperties) {
         this.sqlSessionTemplate = sqlSessionTemplate;
@@ -37,13 +61,37 @@ public class AutoTableAutoConfig {
 
         // 设置全局的配置
         AutoTableGlobalConfig.setAutoTableProperties(autoTableProperties.toConfig());
-        // 有自定义多数据源处理逻辑，就使用多数据源模式
+        // 设置内置的注解扫描器
+        AutoTableGlobalConfig.setAutoTableAnnotationFinder(new CustomAnnotationFinder());
+
+        // 假如有自定的注解扫描器，就使用自定义的注解扫描器
+        if (autoTableAnnotationFinder != null) {
+            AutoTableGlobalConfig.setAutoTableAnnotationFinder(autoTableAnnotationFinder);
+        }
+        // 假如有自定义的orm框架适配器，就使用自定义的orm框架适配器
+        if (autoTableOrmFrameAdapter != null) {
+            AutoTableGlobalConfig.setAutoTableOrmFrameAdapter(autoTableOrmFrameAdapter);
+        }
+        // 假如有自定义的创建表拦截器，就使用自定义的创建表拦截器
+        if (buildTableMetadataIntercepter != null) {
+            AutoTableGlobalConfig.setBuildTableMetadataIntercepter(buildTableMetadataIntercepter);
+        }
+        // 假如有自定义的动态数据源处理器，就使用自定义的动态数据源处理器
         if (dynamicDataSourceHandler != null) {
             AutoTableGlobalConfig.setDatasourceHandler(dynamicDataSourceHandler);
         }
-
-        // 设置自定义的注解扫描器
-        AutoTableGlobalConfig.setAutoTableAnnotationFinder(new CustomAnnotationFinder());
+        // 假如有自定义的java到mysql的转换器，就使用自定义的java到mysql的转换器
+        if (javaToMysqlConverter != null) {
+            AutoTableGlobalConfig.setJavaToMysqlConverter(javaToMysqlConverter);
+        }
+        // 假如有自定义的java到pgsql的转换器，就使用自定义的java到pgsql的转换器
+        if (javaToPgsqlConverter != null) {
+            AutoTableGlobalConfig.setJavaToPgsqlConverter(javaToPgsqlConverter);
+        }
+        // 假如有自定义的java到sqlite的转换器，就使用自定义的java到sqlite的转换器
+        if (javaToSqliteConverter != null) {
+            AutoTableGlobalConfig.setJavaToSqliteConverter(javaToSqliteConverter);
+        }
 
         // 启动AutoTable
         AutoTableBootstrap.start();

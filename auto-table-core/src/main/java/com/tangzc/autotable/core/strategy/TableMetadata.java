@@ -1,15 +1,21 @@
 package com.tangzc.autotable.core.strategy;
 
+import lombok.Getter;
+
 /**
  * Bean的基础信息元数据
  *
  * @author don
  */
-public interface TableMetadata {
+@Getter
+public abstract class TableMetadata {
 
     /**
-     * 获取表名
-     * @return tableName
+     * 表名
      */
-    String getTableName();
+    protected String tableName;
+
+    public TableMetadata(String tableName) {
+        this.tableName = tableName;
+    }
 }

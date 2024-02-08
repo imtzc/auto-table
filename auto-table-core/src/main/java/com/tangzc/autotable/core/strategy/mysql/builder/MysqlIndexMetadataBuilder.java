@@ -21,7 +21,6 @@ import java.util.stream.Collectors;
 /**
  * @author don
  */
-@Data
 public class MysqlIndexMetadataBuilder {
 
     public static MysqlIndexMetadata build(Class<?> clazz, Field field, String indexPrefix) {

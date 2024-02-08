@@ -4,6 +4,7 @@ import com.tangzc.autotable.annotation.enums.DefaultValueEnum;
 import com.tangzc.autotable.annotation.enums.IndexSortTypeEnum;
 import com.tangzc.autotable.annotation.enums.IndexTypeEnum;
 import com.tangzc.autotable.core.AutoTableGlobalConfig;
+import com.tangzc.autotable.core.constants.DatabaseDialect;
 import com.tangzc.autotable.core.strategy.IStrategy;
 import com.tangzc.autotable.core.strategy.pgsql.builder.CreateTableSqlBuilder;
 import com.tangzc.autotable.core.strategy.pgsql.builder.ModifyTableSqlBuilder;
@@ -31,8 +32,8 @@ import java.util.stream.Collectors;
 public class PgsqlStrategy implements IStrategy<PgsqlTableMetadata, PgsqlCompareTableInfo, PgsqlTablesMapper> {
 
     @Override
-    public String dbDialect() {
-        return "PostgreSQL";
+    public String databaseDialect() {
+        return DatabaseDialect.POSTGRESQL;
     }
 
     @Override

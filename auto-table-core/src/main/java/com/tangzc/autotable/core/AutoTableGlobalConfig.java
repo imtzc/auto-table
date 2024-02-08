@@ -2,6 +2,7 @@ package com.tangzc.autotable.core;
 
 import com.tangzc.autotable.core.dynamicds.IDataSourceHandler;
 import com.tangzc.autotable.core.dynamicds.impl.DefaultDataSourceHandler;
+import com.tangzc.autotable.core.intercepter.BuildTableMetadataIntercepter;
 import com.tangzc.autotable.core.strategy.CompareTableInfo;
 import com.tangzc.autotable.core.strategy.IStrategy;
 import com.tangzc.autotable.core.strategy.TableMetadata;
@@ -45,11 +46,19 @@ public class AutoTableGlobalConfig {
     @Getter
     private static JavaToSqliteConverter javaToSqliteConverter = new JavaToSqliteConverter() {};
 
+    @Setter
     @Getter
+    private static BuildTableMetadataIntercepter buildTableMetadataIntercepter = (databaseDialect, tableMetadata) -> {
+    };
+
     private final static Map<String, IStrategy<? extends TableMetadata, ? extends CompareTableInfo, ?>> strategyMap = new HashMap<>();
 
     public static void addStrategy(IStrategy<? extends TableMetadata, ? extends CompareTableInfo, ?> strategy) {
-        strategyMap.put(strategy.dbDialect(), strategy);
+        strategyMap.put(strategy.databaseDialect(), strategy);
+    }
+
+    public static IStrategy<?, ?, ?> getStrategy(String databaseDialect) {
+        return strategyMap.get(databaseDialect);
     }
 
     @Data

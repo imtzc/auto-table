@@ -3,8 +3,10 @@ package com.tangzc.autotable.core.strategy.sqlite.data;
 import com.tangzc.autotable.core.strategy.CompareTableInfo;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,15 +14,9 @@ import java.util.List;
 /**
  * @author don
  */
-@Data
-@RequiredArgsConstructor
-public class SqliteCompareTableInfo implements CompareTableInfo {
-
-    /**
-     * 表名: 不可变，变了意味着新表
-     */
-    @NonNull
-    private final String name;
+@Getter
+@Setter
+public class SqliteCompareTableInfo extends CompareTableInfo {
 
     /**
      * 构建表的sql，如果不为空，则重新构建表
@@ -36,6 +32,10 @@ public class SqliteCompareTableInfo implements CompareTableInfo {
      * 待删除的索引
      */
     private List<String> deleteIndexList = new ArrayList<>();
+
+    public SqliteCompareTableInfo(@NonNull String name) {
+        super(name);
+    }
 
     @Override
     public boolean needModify() {

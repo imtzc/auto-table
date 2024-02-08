@@ -2,7 +2,9 @@ package com.tangzc.autotable.test.core;
 
 import com.tangzc.autotable.core.AutoTableBootstrap;
 import com.tangzc.autotable.core.AutoTableGlobalConfig;
+import com.tangzc.autotable.core.constants.DatabaseDialect;
 import com.tangzc.autotable.core.dynamicds.SqlSessionFactoryManager;
+import com.tangzc.autotable.core.strategy.mysql.data.MysqlTableMetadata;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.SqlSessionFactoryBuilder;
 
@@ -31,6 +33,14 @@ public class TestApplication {
         // 开启 删除不存在的列
         autoTableProperties.setAutoDropColumn(true);
         AutoTableGlobalConfig.setAutoTableProperties(autoTableProperties);
+
+        // 修改表注释
+        AutoTableGlobalConfig.setBuildTableMetadataIntercepter((databaseDialect, tableMetadata) -> {
+            if (DatabaseDialect.MYSQL.equals(databaseDialect)) {
+                MysqlTableMetadata mysqlTableMetadata = (MysqlTableMetadata) tableMetadata;
+                mysqlTableMetadata.setComment(mysqlTableMetadata.getComment() + "-我是小尾巴～");
+            }
+        });
 
         // 开始
         AutoTableBootstrap.start();
