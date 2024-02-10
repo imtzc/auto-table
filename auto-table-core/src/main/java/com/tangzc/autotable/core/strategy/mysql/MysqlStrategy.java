@@ -160,8 +160,11 @@ public class MysqlStrategy implements IStrategy<MysqlTableMetadata, MysqlCompare
         }
         // 因为上一步循环，在基于Bean上索引匹配上表中的索引后，就立即删除了表上对应的索引，所以剩下的索引都是Bean上没有声明的索引，需要根据配置判断，是否删掉多余的索引
         Set<String> needDropIndexes = tableIndexs.keySet();
-        if (AutoTableGlobalConfig.getAutoTableProperties().getAutoDropIndex() && !needDropIndexes.isEmpty()) {
-            mysqlCompareTableInfo.getDropIndexList().addAll(needDropIndexes);
+        if (!needDropIndexes.isEmpty()) {
+            // 根据配置，决定是否删除库上的多余索引
+            if (AutoTableGlobalConfig.getAutoTableProperties().getAutoDropIndex()) {
+                mysqlCompareTableInfo.getDropIndexList().addAll(needDropIndexes);
+            }
         }
     }
 

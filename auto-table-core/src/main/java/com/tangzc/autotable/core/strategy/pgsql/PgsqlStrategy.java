@@ -125,7 +125,10 @@ public class PgsqlStrategy implements IStrategy<PgsqlTableMetadata, PgsqlCompare
         // 需要删除的索引
         Set<String> needRemoveIndexes = pgsqlDbIndexMap.keySet();
         if (!needRemoveIndexes.isEmpty()) {
-            pgsqlCompareTableInfo.addDropIndexes(needRemoveIndexes);
+            // 根据配置，决定是否删除库上的多余索引
+            if (AutoTableGlobalConfig.getAutoTableProperties().getAutoDropIndex()) {
+                pgsqlCompareTableInfo.addDropIndexes(needRemoveIndexes);
+            }
         }
     }
 
@@ -170,7 +173,10 @@ public class PgsqlStrategy implements IStrategy<PgsqlTableMetadata, PgsqlCompare
         // 需要删除的字段
         Set<String> needRemoveColumns = pgsqlFieldDetailMap.keySet();
         if (!needRemoveColumns.isEmpty()) {
-            pgsqlCompareTableInfo.addDropColumns(needRemoveColumns);
+            // 根据配置，决定是否删除库上的多余字段
+            if (AutoTableGlobalConfig.getAutoTableProperties().getAutoDropColumn()) {
+                pgsqlCompareTableInfo.addDropColumns(needRemoveColumns);
+            }
         }
 
         /* 处理主键 */
