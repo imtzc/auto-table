@@ -38,7 +38,7 @@ public class TestApplication {
         AutoTableGlobalConfig.setBuildTableMetadataIntercepter((databaseDialect, tableMetadata) -> {
             if (DatabaseDialect.MYSQL.equals(databaseDialect)) {
                 MysqlTableMetadata mysqlTableMetadata = (MysqlTableMetadata) tableMetadata;
-                mysqlTableMetadata.setComment(mysqlTableMetadata.getComment() + "-我是小尾巴～");
+                mysqlTableMetadata.setComment(mysqlTableMetadata.getComment() + "-我是表注释的小尾巴～");
             }
         });
 

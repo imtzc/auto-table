@@ -5,5 +5,10 @@ import com.tangzc.autotable.core.strategy.TableMetadata;
 @FunctionalInterface
 public interface BuildTableMetadataIntercepter {
 
-    void intercept(String databaseDialect, TableMetadata tableMetadata);
+    /**
+     * 拦截器
+     * @param databaseDialect 数据库方言：MySQL、PostgreSQL、SQLite
+     * @param tableMetadata 表元数据：MysqlTableMetadata、PgsqlTableMetadata、SqliteTableMetadata
+     */
+    void intercept(final String databaseDialect, final TableMetadata tableMetadata);
 }
