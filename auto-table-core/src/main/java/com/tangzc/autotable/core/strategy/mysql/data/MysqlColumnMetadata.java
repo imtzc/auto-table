@@ -1,22 +1,11 @@
 package com.tangzc.autotable.core.strategy.mysql.data;
 
-import com.tangzc.autotable.annotation.ColumnDefault;
-import com.tangzc.autotable.annotation.ColumnType;
 import com.tangzc.autotable.annotation.enums.DefaultValueEnum;
-import com.tangzc.autotable.annotation.mysql.MysqlColumnCharset;
-import com.tangzc.autotable.core.AutoTableOrmFrameAdapter;
-import com.tangzc.autotable.core.AutoTableGlobalConfig;
-import com.tangzc.autotable.core.strategy.mysql.ParamValidChecker;
-import com.tangzc.autotable.core.strategy.mysql.JavaToMysqlConverter;
+import com.tangzc.autotable.core.converter.DatabaseTypeAndLength;
 import com.tangzc.autotable.core.utils.StringConnectHelper;
 import com.tangzc.autotable.core.utils.StringUtils;
-import com.tangzc.autotable.core.utils.TableBeanUtils;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-
-import java.lang.reflect.Field;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * 用于存放创建表的字段信息
@@ -40,7 +29,7 @@ public class MysqlColumnMetadata {
     /**
      * 字段类型
      */
-    private MysqlTypeAndLength type;
+    private DatabaseTypeAndLength type;
 
     /**
      * 字段是否非空
@@ -99,7 +88,7 @@ public class MysqlColumnMetadata {
         // 例子：`id` int(32) NOT NULL AUTO_INCREMENT COMMENT '主键'
         return StringConnectHelper.newInstance("`{columnName}` {typeAndLength} {character} {collate} {null} {default} {autoIncrement} {columnComment} {position}")
                 .replace("{columnName}", this.getName())
-                .replace("{typeAndLength}", this.getType().getFullType())
+                .replace("{typeAndLength}", MysqlTypeHelper.getFullType(this.type))
                 .replace("{character}", $ -> {
                     if (StringUtils.hasText(this.getCharacterSet())) {
                         return "CHARACTER SET " + this.getCharacterSet();

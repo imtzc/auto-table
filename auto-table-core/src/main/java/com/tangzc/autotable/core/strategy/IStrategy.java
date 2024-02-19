@@ -104,7 +104,6 @@ public interface IStrategy<TABLE_META extends TableMetadata, COMPARE_TABLE_INFO 
         }
     }
 
-    // TODO
     default void compareAndModifyTable(TABLE_META tableMetadata) {
         String tableName = tableMetadata.getTableName();
 

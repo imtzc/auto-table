@@ -1,4 +1,4 @@
-package com.tangzc.autotable.core.strategy.mysql.data.enums;
+package com.tangzc.autotable.core.converter.type;
 
 import com.tangzc.autotable.annotation.mysql.MysqlTypeConstant;
 import lombok.Getter;
@@ -13,7 +13,7 @@ import lombok.Getter;
  * @author don
  */
 @Getter
-public enum MySqlDefaultTypeEnum {
+public enum MySqlDefaultTypeEnum implements DefaultTypeEnumInterface {
 
     /**
      * 整数
@@ -69,23 +69,19 @@ public enum MySqlDefaultTypeEnum {
     /**
      * 默认类型长度
      */
-    private final Integer lengthDefault;
+    private final Integer defaultLength;
     /**
      * 默认小数点后长度
      */
-    private final Integer decimalLengthDefault;
+    private final Integer defaultDecimalLength;
     /**
      * 类型名称
      */
     private final String typeName;
 
-    MySqlDefaultTypeEnum(String typeName, Integer lengthDefault, Integer decimalLengthDefault) {
+    MySqlDefaultTypeEnum(String typeName, Integer defaultLength, Integer defaultDecimalLength) {
         this.typeName = typeName;
-        this.lengthDefault = lengthDefault;
-        this.decimalLengthDefault = decimalLengthDefault;
-    }
-
-    public String typeName() {
-        return this.typeName;
+        this.defaultLength = defaultLength;
+        this.defaultDecimalLength = defaultDecimalLength;
     }
 }

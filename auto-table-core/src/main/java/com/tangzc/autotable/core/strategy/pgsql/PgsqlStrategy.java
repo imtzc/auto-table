@@ -13,6 +13,7 @@ import com.tangzc.autotable.core.strategy.pgsql.data.PgsqlColumnMetadata;
 import com.tangzc.autotable.core.strategy.pgsql.data.PgsqlCompareTableInfo;
 import com.tangzc.autotable.core.strategy.pgsql.data.PgsqlIndexMetadata;
 import com.tangzc.autotable.core.strategy.pgsql.data.PgsqlTableMetadata;
+import com.tangzc.autotable.core.strategy.pgsql.data.PgsqlTypeHelper;
 import com.tangzc.autotable.core.strategy.pgsql.data.dbdata.PgsqlDbColumn;
 import com.tangzc.autotable.core.strategy.pgsql.data.dbdata.PgsqlDbIndex;
 import com.tangzc.autotable.core.strategy.pgsql.data.dbdata.PgsqlDbPrimary;
@@ -200,8 +201,8 @@ public class PgsqlStrategy implements IStrategy<PgsqlTableMetadata, PgsqlCompare
     }
 
     private static boolean isTypeDiff(PgsqlColumnMetadata pgsqlColumnMetadata, PgsqlDbColumn pgsqlDbColumn) {
-        String dataTypeFormat = pgsqlDbColumn.getDataTypeFormat().toLowerCase();
-        String fullType = pgsqlColumnMetadata.getType().getFullType().toLowerCase();
+        String dataTypeFormat = pgsqlDbColumn.getDataTypeFormat();
+        String fullType = PgsqlTypeHelper.getFullType(pgsqlColumnMetadata.getType()).toLowerCase();
         // 数字类型的，默认没有长度，但是数据库查询出来的有长度。 "int4(32)".startWith("int4")
         if (dataTypeFormat.startsWith("int")) {
             return !dataTypeFormat.startsWith(fullType);

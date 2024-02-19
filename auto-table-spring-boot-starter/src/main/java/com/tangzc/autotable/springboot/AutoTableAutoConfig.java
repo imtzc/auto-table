@@ -4,12 +4,10 @@ import com.tangzc.autotable.core.AutoTableAnnotationFinder;
 import com.tangzc.autotable.core.AutoTableBootstrap;
 import com.tangzc.autotable.core.AutoTableGlobalConfig;
 import com.tangzc.autotable.core.AutoTableOrmFrameAdapter;
+import com.tangzc.autotable.core.converter.JavaTypeToDatabaseTypeConverter;
 import com.tangzc.autotable.core.dynamicds.IDataSourceHandler;
 import com.tangzc.autotable.core.dynamicds.SqlSessionFactoryManager;
 import com.tangzc.autotable.core.intercepter.BuildTableMetadataIntercepter;
-import com.tangzc.autotable.core.strategy.mysql.JavaToMysqlConverter;
-import com.tangzc.autotable.core.strategy.pgsql.JavaToPgsqlConverter;
-import com.tangzc.autotable.core.strategy.sqlite.JavaToSqliteConverter;
 import com.tangzc.autotable.springboot.properties.AutoTableProperties;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.mybatis.spring.boot.autoconfigure.MybatisAutoConfiguration;
@@ -40,13 +38,7 @@ public class AutoTableAutoConfig {
     private IDataSourceHandler<?> dynamicDataSourceHandler;
 
     @Autowired(required = false)
-    private JavaToMysqlConverter javaToMysqlConverter;
-
-    @Autowired(required = false)
-    private JavaToPgsqlConverter javaToPgsqlConverter;
-
-    @Autowired(required = false)
-    private JavaToSqliteConverter javaToSqliteConverter;
+    private JavaTypeToDatabaseTypeConverter javaTypeToDatabaseTypeConverter;
 
     public AutoTableAutoConfig(SqlSessionTemplate sqlSessionTemplate, AutoTableProperties autoTableProperties) {
         this.sqlSessionTemplate = sqlSessionTemplate;
@@ -80,17 +72,9 @@ public class AutoTableAutoConfig {
         if (dynamicDataSourceHandler != null) {
             AutoTableGlobalConfig.setDatasourceHandler(dynamicDataSourceHandler);
         }
-        // 假如有自定义的java到mysql的转换器，就使用自定义的java到mysql的转换器
-        if (javaToMysqlConverter != null) {
-            AutoTableGlobalConfig.setJavaToMysqlConverter(javaToMysqlConverter);
-        }
-        // 假如有自定义的java到pgsql的转换器，就使用自定义的java到pgsql的转换器
-        if (javaToPgsqlConverter != null) {
-            AutoTableGlobalConfig.setJavaToPgsqlConverter(javaToPgsqlConverter);
-        }
-        // 假如有自定义的java到sqlite的转换器，就使用自定义的java到sqlite的转换器
-        if (javaToSqliteConverter != null) {
-            AutoTableGlobalConfig.setJavaToSqliteConverter(javaToSqliteConverter);
+        // 假如有自定义的java到数据库的转换器，就使用自定义的java到数据库的转换器
+        if (javaTypeToDatabaseTypeConverter != null) {
+            AutoTableGlobalConfig.setJavaTypeToDatabaseTypeConverter(javaTypeToDatabaseTypeConverter);
         }
 
         // 启动AutoTable

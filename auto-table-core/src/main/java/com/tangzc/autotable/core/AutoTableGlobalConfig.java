@@ -1,14 +1,12 @@
 package com.tangzc.autotable.core;
 
+import com.tangzc.autotable.core.converter.JavaTypeToDatabaseTypeConverter;
 import com.tangzc.autotable.core.dynamicds.IDataSourceHandler;
 import com.tangzc.autotable.core.dynamicds.impl.DefaultDataSourceHandler;
 import com.tangzc.autotable.core.intercepter.BuildTableMetadataIntercepter;
 import com.tangzc.autotable.core.strategy.CompareTableInfo;
 import com.tangzc.autotable.core.strategy.IStrategy;
 import com.tangzc.autotable.core.strategy.TableMetadata;
-import com.tangzc.autotable.core.strategy.mysql.JavaToMysqlConverter;
-import com.tangzc.autotable.core.strategy.pgsql.JavaToPgsqlConverter;
-import com.tangzc.autotable.core.strategy.sqlite.JavaToSqliteConverter;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
@@ -36,15 +34,7 @@ public class AutoTableGlobalConfig {
 
     @Setter
     @Getter
-    private static JavaToMysqlConverter javaToMysqlConverter = new JavaToMysqlConverter(){};
-
-    @Setter
-    @Getter
-    private static JavaToPgsqlConverter javaToPgsqlConverter = new JavaToPgsqlConverter(){};
-
-    @Setter
-    @Getter
-    private static JavaToSqliteConverter javaToSqliteConverter = new JavaToSqliteConverter() {};
+    private static JavaTypeToDatabaseTypeConverter javaTypeToDatabaseTypeConverter = new JavaTypeToDatabaseTypeConverter() {};
 
     @Setter
     @Getter

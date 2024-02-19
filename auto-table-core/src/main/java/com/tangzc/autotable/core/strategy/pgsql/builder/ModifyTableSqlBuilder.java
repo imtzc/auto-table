@@ -3,8 +3,9 @@ package com.tangzc.autotable.core.strategy.pgsql.builder;
 import com.tangzc.autotable.annotation.enums.DefaultValueEnum;
 import com.tangzc.autotable.core.strategy.pgsql.data.PgsqlColumnMetadata;
 import com.tangzc.autotable.core.strategy.pgsql.data.PgsqlCompareTableInfo;
-import lombok.extern.slf4j.Slf4j;
+import com.tangzc.autotable.core.strategy.pgsql.data.PgsqlTypeHelper;
 import com.tangzc.autotable.core.utils.StringUtils;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,7 +55,7 @@ public class ModifyTableSqlBuilder {
             // 修改字段
             String columnName = columnMetadata.getName();
             // 类型
-            alterTableSqlList.add("  ALTER COLUMN \"" + columnName + "\" TYPE " + columnMetadata.getType().getFullType());
+            alterTableSqlList.add("  ALTER COLUMN \"" + columnName + "\" TYPE " + PgsqlTypeHelper.getFullType(columnMetadata.getType()));
             // 非空
             alterTableSqlList.add("  ALTER COLUMN \"" + columnName + "\" " + (columnMetadata.isNotNull() ? "SET" : "DROP") + " NOT NULL");
             // 默认值

@@ -1,0 +1,39 @@
+package com.tangzc.autotable.core.converter;
+
+import lombok.Data;
+
+import java.util.List;
+
+/**
+ * @author don
+ */
+@Data
+public class DatabaseTypeAndLength {
+    /**
+     * 类型
+     */
+    private String type;
+    /**
+     * 长度
+     */
+    private Integer length;
+    /**
+     * 小数位数
+     */
+    private Integer decimalLength;
+    /**
+     * enum、set的值数组
+     */
+    private List<String> values;
+
+    public DatabaseTypeAndLength(String type, Integer length, Integer decimalLength, List<String> values) {
+        this.type = type;
+        if (length != null && length >= 0) {
+            this.length = length;
+        }
+        if (decimalLength != null && decimalLength >= 0) {
+            this.decimalLength = decimalLength;
+        }
+        this.values = values;
+    }
+}

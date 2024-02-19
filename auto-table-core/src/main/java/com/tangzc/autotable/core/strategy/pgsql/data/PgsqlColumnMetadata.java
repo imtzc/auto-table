@@ -1,6 +1,7 @@
 package com.tangzc.autotable.core.strategy.pgsql.data;
 
 import com.tangzc.autotable.annotation.enums.DefaultValueEnum;
+import com.tangzc.autotable.core.converter.DatabaseTypeAndLength;
 import com.tangzc.autotable.core.utils.StringConnectHelper;
 import com.tangzc.autotable.core.utils.StringUtils;
 import lombok.Data;
@@ -28,7 +29,7 @@ public class PgsqlColumnMetadata {
     /**
      * 字段类型
      */
-    private PgsqlTypeAndLength type;
+    private DatabaseTypeAndLength type;
 
     /**
      * 字段是否非空
@@ -63,7 +64,7 @@ public class PgsqlColumnMetadata {
             return null;
         }
 
-        if (this.type.isBoolean()) {
+        if (PgsqlTypeHelper.isBoolean(this.type)) {
             if ("1".equals(defaultValue)) {
                 return "true";
             } else if ("0".equals(defaultValue)) {
@@ -71,11 +72,11 @@ public class PgsqlColumnMetadata {
             }
         }
         // 兼容逻辑：如果是字符串的类型，自动包一层''（如果没有的话）
-        if (this.type.isCharString() && !defaultValue.startsWith("'") && !defaultValue.endsWith("'")) {
+        if (PgsqlTypeHelper.isCharString(this.type) && !defaultValue.startsWith("'") && !defaultValue.endsWith("'")) {
             return "'" + defaultValue + "'";
         }
         // 兼容逻辑：如果是日期，且非函数，自动包一层''（如果没有的话）
-        if (this.type.isTime() && defaultValue.matches("(\\d+.?)+") && !defaultValue.startsWith("'") && !defaultValue.endsWith("'")) {
+        if (PgsqlTypeHelper.isTime(this.type) && defaultValue.matches("(\\d+.?)+") && !defaultValue.startsWith("'") && !defaultValue.endsWith("'")) {
             return "'" + defaultValue + "'";
         }
         return defaultValue;
@@ -90,13 +91,12 @@ public class PgsqlColumnMetadata {
         return StringConnectHelper.newInstance("\"{columnName}\" {typeAndLength} {null} {default}")
                 .replace("{columnName}", this.getName())
                 .replace("{typeAndLength}", (key) -> {
-                    PgsqlTypeAndLength typeAndLength = this.getType();
                     /* 如果是自增，忽略指定的类型，交给pgsql自动处理，pgsql会设定int4(32)类型，
                     并自动生成一个序列：表名_字段名_seq，同时设置字段的默认值为：nextval('表名_字段名_seq'::regclass) */
                     if (this.autoIncrement) {
                         return "serial";
                     }
-                    return typeAndLength.getFullType();
+                    return PgsqlTypeHelper.getFullType(this.type);
                 })
                 .replace("{null}", this.isNotNull() ? "NOT NULL" : "")
                 .replace("{default}", (key) -> {

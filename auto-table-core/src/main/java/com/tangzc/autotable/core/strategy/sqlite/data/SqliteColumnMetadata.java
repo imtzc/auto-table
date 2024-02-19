@@ -1,6 +1,8 @@
 package com.tangzc.autotable.core.strategy.sqlite.data;
 
 import com.tangzc.autotable.annotation.enums.DefaultValueEnum;
+import com.tangzc.autotable.core.converter.DatabaseTypeAndLength;
+import com.tangzc.autotable.core.strategy.sqlite.SqliteTypeHelper;
 import com.tangzc.autotable.core.utils.StringConnectHelper;
 import com.tangzc.autotable.core.utils.StringUtils;
 import lombok.Data;
@@ -28,7 +30,7 @@ public class SqliteColumnMetadata {
     /**
      * 字段类型
      */
-    private SqliteTypeAndLength type;
+    private DatabaseTypeAndLength type;
 
     /**
      * 字段是否非空
@@ -69,7 +71,7 @@ public class SqliteColumnMetadata {
     public String toColumnSql(boolean isSinglePrimaryKey, boolean addComma) {
         return StringConnectHelper.newInstance("\"{columnName}\" {typeAndLength} {null} {default} {primaryKey}{comma}{columnComment}")
                 .replace("{columnName}", this.getName())
-                .replace("{typeAndLength}", this.type.getFullType())
+                .replace("{typeAndLength}", SqliteTypeHelper.getFullType(this.type))
                 .replace("{null}", this.isNotNull() ? "NOT NULL" : "NULL")
                 .replace("{default}", (key) -> {
                     // 指定NULL

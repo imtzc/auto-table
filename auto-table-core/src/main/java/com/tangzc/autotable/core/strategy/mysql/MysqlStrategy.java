@@ -4,6 +4,7 @@ import com.tangzc.autotable.annotation.enums.DefaultValueEnum;
 import com.tangzc.autotable.annotation.enums.IndexSortTypeEnum;
 import com.tangzc.autotable.core.AutoTableGlobalConfig;
 import com.tangzc.autotable.core.constants.DatabaseDialect;
+import com.tangzc.autotable.core.converter.DatabaseTypeAndLength;
 import com.tangzc.autotable.core.strategy.IStrategy;
 import com.tangzc.autotable.core.strategy.mysql.builder.CreateTableSqlBuilder;
 import com.tangzc.autotable.core.strategy.mysql.builder.ModifyTableSqlBuilder;
@@ -12,7 +13,7 @@ import com.tangzc.autotable.core.strategy.mysql.data.MysqlColumnMetadata;
 import com.tangzc.autotable.core.strategy.mysql.data.MysqlCompareTableInfo;
 import com.tangzc.autotable.core.strategy.mysql.data.MysqlIndexMetadata;
 import com.tangzc.autotable.core.strategy.mysql.data.MysqlTableMetadata;
-import com.tangzc.autotable.core.strategy.mysql.data.MysqlTypeAndLength;
+import com.tangzc.autotable.core.strategy.mysql.data.MysqlTypeHelper;
 import com.tangzc.autotable.core.strategy.mysql.data.dbdata.InformationSchemaColumn;
 import com.tangzc.autotable.core.strategy.mysql.data.dbdata.InformationSchemaStatistics;
 import com.tangzc.autotable.core.strategy.mysql.data.dbdata.InformationSchemaTable;
@@ -280,15 +281,15 @@ public class MysqlStrategy implements IStrategy<MysqlTableMetadata, MysqlCompare
                 return !"".equals(columnDefault);
             }
         } else {
-            MysqlTypeAndLength columnType = mysqlColumnMetadata.getType();
+            DatabaseTypeAndLength columnType = mysqlColumnMetadata.getType();
             // 如果是数据库是bit类型，默认值是b'1' 或者 b'0' 的形式
-            if (columnType.isBoolean() && columnDefault != null && columnDefault.startsWith("b'") && columnDefault.endsWith("'")) {
+            if (MysqlTypeHelper.isBoolean(columnType) && columnDefault != null && columnDefault.startsWith("b'") && columnDefault.endsWith("'")) {
                 columnDefault = columnDefault.substring(2, columnDefault.length() - 1);
             }
             // 自定义值 默认值对比
             String defaultValue = mysqlColumnMetadata.getDefaultValue();
             // mysql中，如果是数据库浮点数，默认值后面会带上对应的小数位数，策略：数据库值于注解指定的值，均去掉多余的0进行对比
-            if (columnType.isFloatNumber() && columnDefault != null && columnDefault.matches("[0-9]+(.[0-9]+)?")) {
+            if (MysqlTypeHelper.isFloatNumber(columnType) && columnDefault != null && columnDefault.matches("[0-9]+(.[0-9]+)?")) {
                 // 先转数字，再转字符串，消除多余的0，异常忽略
                 try {
                     columnDefault = String.valueOf(Double.parseDouble(columnDefault));
@@ -300,7 +301,7 @@ public class MysqlStrategy implements IStrategy<MysqlTableMetadata, MysqlCompare
                 }
             }
             // 兼容逻辑：如果是需要字符串兼容的类型（字符串、日期），使用者在默认值前后携带了单引号（'）的话，则在比对的时候自动去掉
-            if (columnType.needStringCompatibility() && defaultValue != null && defaultValue.startsWith("'") && defaultValue.endsWith("'")) {
+            if (MysqlTypeHelper.needStringCompatibility(columnType) && defaultValue != null && defaultValue.startsWith("'") && defaultValue.endsWith("'")) {
                 defaultValue = defaultValue.substring(1, defaultValue.length() - 1);
             }
             return !Objects.equals(defaultValue, columnDefault);
@@ -313,17 +314,17 @@ public class MysqlStrategy implements IStrategy<MysqlTableMetadata, MysqlCompare
      */
     private static boolean isFieldTypeChanged(InformationSchemaColumn informationSchemaColumn, MysqlColumnMetadata mysqlColumnMetadata) {
 
-        MysqlTypeAndLength fieldType = mysqlColumnMetadata.getType();
+        DatabaseTypeAndLength fieldType = mysqlColumnMetadata.getType();
         // 整数类型，只对比类型，不对比长度
-        if (fieldType.isNoLengthNumber()) {
-            return !fieldType.typeName().equalsIgnoreCase(informationSchemaColumn.getDataType());
+        if (MysqlTypeHelper.isNoLengthNumber(fieldType)) {
+            return !fieldType.getType().equalsIgnoreCase(informationSchemaColumn.getDataType());
         }
 
         // 非整数类型，类型全文匹配：varchar(255) double(6,2) enum('A','B')
-        String fullType = fieldType.getFullType();
+        String fullType = MysqlTypeHelper.getFullType(fieldType);
 
         // 枚举类的，不忽略大小写比较
-        if (fieldType.isEnum()) {
+        if (MysqlTypeHelper.isEnum(fieldType)) {
             return !fullType.equals(informationSchemaColumn.getColumnType());
         }
 
