@@ -53,25 +53,30 @@ public class AutoTableAutoConfig {
 
         // 设置全局的配置
         AutoTableGlobalConfig.setAutoTableProperties(autoTableProperties.toConfig());
-        // 设置内置的注解扫描器
-        AutoTableGlobalConfig.setAutoTableAnnotationFinder(new CustomAnnotationFinder());
 
         // 假如有自定的注解扫描器，就使用自定义的注解扫描器
         if (autoTableAnnotationFinder != null) {
             AutoTableGlobalConfig.setAutoTableAnnotationFinder(autoTableAnnotationFinder);
+        } else {
+            // 没有，则设置内置的注解扫描器
+            AutoTableGlobalConfig.setAutoTableAnnotationFinder(new CustomAnnotationFinder());
         }
+
         // 假如有自定义的orm框架适配器，就使用自定义的orm框架适配器
         if (autoTableOrmFrameAdapter != null) {
             AutoTableGlobalConfig.setAutoTableOrmFrameAdapter(autoTableOrmFrameAdapter);
         }
-        // 假如有自定义的创建表拦截器，就使用自定义的创建表拦截器
-        if (buildTableMetadataIntercepter != null) {
-            AutoTableGlobalConfig.setBuildTableMetadataIntercepter(buildTableMetadataIntercepter);
-        }
+
         // 假如有自定义的动态数据源处理器，就使用自定义的动态数据源处理器
         if (dynamicDataSourceHandler != null) {
             AutoTableGlobalConfig.setDatasourceHandler(dynamicDataSourceHandler);
         }
+
+        // 假如有自定义的创建表拦截器，就使用自定义的创建表拦截器
+        if (buildTableMetadataIntercepter != null) {
+            AutoTableGlobalConfig.setBuildTableMetadataIntercepter(buildTableMetadataIntercepter);
+        }
+
         // 假如有自定义的java到数据库的转换器，就使用自定义的java到数据库的转换器
         if (javaTypeToDatabaseTypeConverter != null) {
             AutoTableGlobalConfig.setJavaTypeToDatabaseTypeConverter(javaTypeToDatabaseTypeConverter);
