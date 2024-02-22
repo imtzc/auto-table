@@ -60,10 +60,8 @@ public class PgsqlStrategy implements IStrategy<PgsqlTableMetadata, PgsqlCompare
     @Override
     public void createTable(PgsqlTableMetadata tableMetadata) {
         String buildSql = CreateTableSqlBuilder.buildSql(tableMetadata);
-        log.info("开始创建表：{}", tableMetadata.getTableName());
         log.info("执行SQL：{}", buildSql);
         execute(pgsqlTablesMapper -> pgsqlTablesMapper.executeSql(buildSql));
-        log.info("结束创建表：{}", tableMetadata.getTableName());
     }
 
     @Override
@@ -255,9 +253,7 @@ public class PgsqlStrategy implements IStrategy<PgsqlTableMetadata, PgsqlCompare
     @Override
     public void modifyTable(PgsqlCompareTableInfo pgsqlCompareTableInfo) {
         String buildSql = ModifyTableSqlBuilder.buildSql(pgsqlCompareTableInfo);
-        log.info("开始修改表：{}", pgsqlCompareTableInfo.getName());
         log.info("执行SQL：{}", buildSql);
         execute(pgsqlTablesMapper -> pgsqlTablesMapper.executeSql(buildSql));
-        log.info("结束修改表：{}", pgsqlCompareTableInfo.getName());
     }
 }
