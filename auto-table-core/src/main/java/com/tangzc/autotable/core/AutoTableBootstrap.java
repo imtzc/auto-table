@@ -53,6 +53,8 @@ public class AutoTableBootstrap {
                             " Git: https://gitee.com/tangzc/auto-table\n");
         }
 
+        final long start = System.currentTimeMillis();
+
         // 注册内置的不同数据源策略
         AutoTableGlobalConfig.addStrategy(new MysqlStrategy());
         AutoTableGlobalConfig.addStrategy(new PgsqlStrategy());
@@ -93,6 +95,7 @@ public class AutoTableBootstrap {
                 log.warn("没有找到对应的数据库（" + databaseDialect + "）方言策略，无法执行自动建表");
             }
         });
+        log.info("AutoTable执行结束。耗时：{}", (System.currentTimeMillis() - start) + "ms");
     }
 
     private static String[] getModelPackage(AutoTableGlobalConfig.PropertyConfig autoTableProperties) {

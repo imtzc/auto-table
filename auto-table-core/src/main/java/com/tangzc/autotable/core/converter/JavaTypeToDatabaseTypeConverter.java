@@ -178,7 +178,7 @@ public interface JavaTypeToDatabaseTypeConverter {
         DefaultTypeEnumInterface sqlType = typeMap.get(fieldClass);
 
         if (sqlType == null) {
-            log.warn("字段{}在{}下找不到对应的数据库类型，默认使用了字符串类型，如果想自定义，请调用JavaTypeToDatabaseTypeConverter.addTypeMap(DatabaseDialect.{}, {}.class, ?)添加映射关系", fieldClass.getName(), databaseDialect, databaseDialect, fieldClass.getSimpleName());
+            log.warn("{}下的字段{}在{}下找不到对应的数据库类型，默认使用了字符串类型，如果想自定义，请调用JavaTypeToDatabaseTypeConverter.addTypeMap(DatabaseDialect.{}, {}.class, ?)添加映射关系", clazz.getName(), fieldClass.getSimpleName(), databaseDialect, databaseDialect, fieldClass.getSimpleName());
             sqlType = typeMap.get(String.class);
         }
         typeAndLength = new DatabaseTypeAndLength(sqlType.getTypeName(), sqlType.getDefaultLength(), sqlType.getDefaultDecimalLength(), Collections.emptyList());

@@ -12,14 +12,15 @@ import com.tangzc.autotable.springboot.properties.AutoTableProperties;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.mybatis.spring.boot.autoconfigure.MybatisAutoConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.ApplicationArguments;
+import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @AutoConfigureAfter({DataSourceAutoConfiguration.class, MybatisAutoConfiguration.class})
-public class AutoTableAutoConfig implements CommandLineRunner {
+public class AutoTableAutoConfig implements ApplicationRunner {
 
     private final SqlSessionTemplate sqlSessionTemplate;
     private final AutoTableProperties autoTableProperties;
@@ -45,7 +46,7 @@ public class AutoTableAutoConfig implements CommandLineRunner {
     }
 
     @Override
-    public void run(String... args) throws Exception {
+    public void run(ApplicationArguments args) {
 
         // 默认设置全局的SqlSessionFactory
         SqlSessionFactoryManager.setSqlSessionFactory(sqlSessionTemplate.getSqlSessionFactory());
