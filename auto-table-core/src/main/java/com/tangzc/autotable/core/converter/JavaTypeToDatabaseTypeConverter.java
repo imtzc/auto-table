@@ -3,6 +3,7 @@ package com.tangzc.autotable.core.converter;
 import com.tangzc.autotable.annotation.ColumnType;
 import com.tangzc.autotable.core.constants.DatabaseDialect;
 import com.tangzc.autotable.core.converter.type.DefaultTypeEnumInterface;
+import com.tangzc.autotable.core.converter.type.MySqlDefaultTypeEnum;
 import com.tangzc.autotable.core.converter.type.PgsqlDefaultTypeEnum;
 import com.tangzc.autotable.core.converter.type.SqliteDefaultTypeEnum;
 import com.tangzc.autotable.core.utils.TableBeanUtils;
@@ -32,36 +33,36 @@ public interface JavaTypeToDatabaseTypeConverter {
 
     Map<String, Map<Class<?>, DefaultTypeEnumInterface>> JAVA_TO_DB_TYPE_MAP = new HashMap<String, Map<Class<?>, DefaultTypeEnumInterface>>() {{
         put(DatabaseDialect.MySQL, new HashMap<Class<?>, DefaultTypeEnumInterface>() {{
-            put(String.class, PgsqlDefaultTypeEnum.VARCHAR);
-            put(Character.class, PgsqlDefaultTypeEnum.CHAR);
-            put(char.class, PgsqlDefaultTypeEnum.CHAR);
+            put(String.class, MySqlDefaultTypeEnum.VARCHAR);
+            put(Character.class, MySqlDefaultTypeEnum.CHAR);
+            put(char.class, MySqlDefaultTypeEnum.CHAR);
 
-            put(BigInteger.class, PgsqlDefaultTypeEnum.INT8);
-            put(Long.class, PgsqlDefaultTypeEnum.INT8);
-            put(long.class, PgsqlDefaultTypeEnum.INT8);
+            put(BigInteger.class, MySqlDefaultTypeEnum.BIGINT);
+            put(Long.class, MySqlDefaultTypeEnum.BIGINT);
+            put(long.class, MySqlDefaultTypeEnum.BIGINT);
 
-            put(Integer.class, PgsqlDefaultTypeEnum.INT4);
-            put(int.class, PgsqlDefaultTypeEnum.INT4);
+            put(Integer.class, MySqlDefaultTypeEnum.INT);
+            put(int.class, MySqlDefaultTypeEnum.INT);
 
-            put(Boolean.class, PgsqlDefaultTypeEnum.BOOL);
-            put(boolean.class, PgsqlDefaultTypeEnum.BOOL);
+            put(Boolean.class, MySqlDefaultTypeEnum.BIT);
+            put(boolean.class, MySqlDefaultTypeEnum.BIT);
 
-            put(Float.class, PgsqlDefaultTypeEnum.FLOAT4);
-            put(float.class, PgsqlDefaultTypeEnum.FLOAT4);
-            put(Double.class, PgsqlDefaultTypeEnum.FLOAT8);
-            put(double.class, PgsqlDefaultTypeEnum.FLOAT8);
-            put(BigDecimal.class, PgsqlDefaultTypeEnum.NUMERIC);
+            put(Float.class, MySqlDefaultTypeEnum.FLOAT);
+            put(float.class, MySqlDefaultTypeEnum.FLOAT);
+            put(Double.class, MySqlDefaultTypeEnum.DOUBLE);
+            put(double.class, MySqlDefaultTypeEnum.DOUBLE);
+            put(BigDecimal.class, MySqlDefaultTypeEnum.DECIMAL);
 
-            put(Date.class, PgsqlDefaultTypeEnum.TIMESTAMP);
-            put(java.sql.Date.class, PgsqlDefaultTypeEnum.TIMESTAMP);
-            put(java.sql.Timestamp.class, PgsqlDefaultTypeEnum.TIMESTAMP);
-            put(java.sql.Time.class, PgsqlDefaultTypeEnum.TIME);
-            put(LocalDateTime.class, PgsqlDefaultTypeEnum.TIMESTAMP);
-            put(LocalDate.class, PgsqlDefaultTypeEnum.DATE);
-            put(LocalTime.class, PgsqlDefaultTypeEnum.TIME);
+            put(Date.class, MySqlDefaultTypeEnum.DATETIME);
+            put(java.sql.Date.class, MySqlDefaultTypeEnum.DATE);
+            put(java.sql.Timestamp.class, MySqlDefaultTypeEnum.DATETIME);
+            put(java.sql.Time.class, MySqlDefaultTypeEnum.TIME);
+            put(LocalDateTime.class, MySqlDefaultTypeEnum.DATETIME);
+            put(LocalDate.class, MySqlDefaultTypeEnum.DATE);
+            put(LocalTime.class, MySqlDefaultTypeEnum.TIME);
 
-            put(Short.class, PgsqlDefaultTypeEnum.INT2);
-            put(short.class, PgsqlDefaultTypeEnum.INT2);
+            put(Short.class, MySqlDefaultTypeEnum.SMALLINT);
+            put(short.class, MySqlDefaultTypeEnum.SMALLINT);
         }});
 
         put(DatabaseDialect.PostgreSQL, new HashMap<Class<?>, DefaultTypeEnumInterface>() {{
