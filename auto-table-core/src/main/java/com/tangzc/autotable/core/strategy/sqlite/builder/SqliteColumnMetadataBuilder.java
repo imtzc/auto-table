@@ -52,7 +52,7 @@ public class SqliteColumnMetadataBuilder {
     }
 
     private static DatabaseTypeAndLength getAndLength(Class<?> clazz, Field field) {
-        DatabaseTypeAndLength typeAndLength = AutoTableGlobalConfig.getJavaTypeToDatabaseTypeConverter().convert(DatabaseDialect.SQLITE, clazz, field);
+        DatabaseTypeAndLength typeAndLength = AutoTableGlobalConfig.getJavaTypeToDatabaseTypeConverter().convert(DatabaseDialect.SQLite, clazz, field);
         // 纠正类型的写法为正规方式
         String type = typeAndLength.getType().toLowerCase();
         if (type.contains("int")) {

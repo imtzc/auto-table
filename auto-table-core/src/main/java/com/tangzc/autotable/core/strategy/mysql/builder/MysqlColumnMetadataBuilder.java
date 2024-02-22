@@ -94,7 +94,7 @@ public class MysqlColumnMetadataBuilder {
 
         // 类型为空根据字段类型去默认匹配类型
         JavaTypeToDatabaseTypeConverter typeConverter = AutoTableGlobalConfig.getJavaTypeToDatabaseTypeConverter();
-        DatabaseTypeAndLength type = typeConverter.convert(DatabaseDialect.MYSQL, clazz, field);
+        DatabaseTypeAndLength type = typeConverter.convert(DatabaseDialect.MySQL, clazz, field);
 
         // 如果是枚举类型，但是没有指定枚举的可选值
         if (MysqlTypeHelper.isEnum(type) && type.getValues().isEmpty()) {

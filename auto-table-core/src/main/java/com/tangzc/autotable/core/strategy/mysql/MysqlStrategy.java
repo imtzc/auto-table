@@ -41,7 +41,7 @@ public class MysqlStrategy implements IStrategy<MysqlTableMetadata, MysqlCompare
 
     @Override
     public String databaseDialect() {
-        return DatabaseDialect.MYSQL;
+        return DatabaseDialect.MySQL;
     }
 
     @Override

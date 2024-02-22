@@ -32,10 +32,10 @@ public interface AutoTableOrmFrameAdapter {
     boolean isAutoIncrement(Field field, Class<?> clazz);
 
     /**
-     * 用户自定义的字段类型
+     * 三方框架定义的字段类型，通常是某些特殊注解或者枚举，定义为字符串类型
      */
     default Class<?> customFieldTypeHandler(Class<?> clazz, Field field) {
-        return null;
+        return field.getType();
     }
 
     /**

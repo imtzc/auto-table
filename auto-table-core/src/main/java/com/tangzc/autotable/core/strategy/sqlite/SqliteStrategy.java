@@ -27,7 +27,7 @@ public class SqliteStrategy implements IStrategy<SqliteTableMetadata, SqliteComp
 
     @Override
     public String databaseDialect() {
-        return DatabaseDialect.SQLITE;
+        return DatabaseDialect.SQLite;
     }
 
     @Override

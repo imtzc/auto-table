@@ -36,7 +36,7 @@ public class TestApplication {
 
         // 修改表注释
         AutoTableGlobalConfig.setBuildTableMetadataIntercepter((databaseDialect, tableMetadata) -> {
-            if (DatabaseDialect.MYSQL.equals(databaseDialect)) {
+            if (DatabaseDialect.MySQL.equals(databaseDialect)) {
                 MysqlTableMetadata mysqlTableMetadata = (MysqlTableMetadata) tableMetadata;
                 mysqlTableMetadata.setComment(mysqlTableMetadata.getComment() + "-我是表注释的小尾巴～");
             }

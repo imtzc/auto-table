@@ -34,7 +34,7 @@ public class PgsqlStrategy implements IStrategy<PgsqlTableMetadata, PgsqlCompare
 
     @Override
     public String databaseDialect() {
-        return DatabaseDialect.POSTGRESQL;
+        return DatabaseDialect.PostgreSQL;
     }
 
     @Override

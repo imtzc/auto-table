@@ -26,7 +26,7 @@ public class PgsqlColumnMetadataBuilder {
         JavaTypeToDatabaseTypeConverter javaTypeToDatabaseTypeConverter = AutoTableGlobalConfig.getJavaTypeToDatabaseTypeConverter();
         PgsqlColumnMetadata pgsqlColumnMetadata = new PgsqlColumnMetadata();
         pgsqlColumnMetadata.setName(TableBeanUtils.getRealColumnName(clazz, field));
-        pgsqlColumnMetadata.setType(javaTypeToDatabaseTypeConverter.convert(DatabaseDialect.POSTGRESQL, clazz, field));
+        pgsqlColumnMetadata.setType(javaTypeToDatabaseTypeConverter.convert(DatabaseDialect.PostgreSQL, clazz, field));
         pgsqlColumnMetadata.setNotNull(TableBeanUtils.isNotNull(field, clazz));
         pgsqlColumnMetadata.setPrimary(TableBeanUtils.isPrimary(field, clazz));
         pgsqlColumnMetadata.setAutoIncrement(TableBeanUtils.isAutoIncrement(field, clazz));

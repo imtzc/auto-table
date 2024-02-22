@@ -30,8 +30,8 @@ public interface JavaTypeToDatabaseTypeConverter {
 
     Logger log = LoggerFactory.getLogger(JavaTypeToDatabaseTypeConverter.class);
 
-    Map<String, Map<Class<?>, ? extends DefaultTypeEnumInterface>> JAVA_TO_DB_TYPE_MAP = new HashMap<String, Map<Class<?>, ? extends DefaultTypeEnumInterface>>(){{
-        put(DatabaseDialect.MYSQL, new HashMap<Class<?>, PgsqlDefaultTypeEnum>() {{
+    Map<String, Map<Class<?>, DefaultTypeEnumInterface>> JAVA_TO_DB_TYPE_MAP = new HashMap<String, Map<Class<?>, DefaultTypeEnumInterface>>() {{
+        put(DatabaseDialect.MySQL, new HashMap<Class<?>, DefaultTypeEnumInterface>() {{
             put(String.class, PgsqlDefaultTypeEnum.VARCHAR);
             put(Character.class, PgsqlDefaultTypeEnum.CHAR);
             put(char.class, PgsqlDefaultTypeEnum.CHAR);
@@ -64,7 +64,7 @@ public interface JavaTypeToDatabaseTypeConverter {
             put(short.class, PgsqlDefaultTypeEnum.INT2);
         }});
 
-        put(DatabaseDialect.POSTGRESQL, new HashMap<Class<?>, PgsqlDefaultTypeEnum>() {{
+        put(DatabaseDialect.PostgreSQL, new HashMap<Class<?>, DefaultTypeEnumInterface>() {{
             put(String.class, PgsqlDefaultTypeEnum.VARCHAR);
             put(Character.class, PgsqlDefaultTypeEnum.CHAR);
             put(char.class, PgsqlDefaultTypeEnum.CHAR);
@@ -97,7 +97,7 @@ public interface JavaTypeToDatabaseTypeConverter {
             put(short.class, PgsqlDefaultTypeEnum.INT2);
         }});
 
-        put(DatabaseDialect.SQLITE, new HashMap<Class<?>, SqliteDefaultTypeEnum>() {{
+        put(DatabaseDialect.SQLite, new HashMap<Class<?>, DefaultTypeEnumInterface>() {{
             put(String.class, SqliteDefaultTypeEnum.TEXT);
             put(Character.class, SqliteDefaultTypeEnum.TEXT);
             put(char.class, SqliteDefaultTypeEnum.TEXT);
@@ -132,6 +132,19 @@ public interface JavaTypeToDatabaseTypeConverter {
     }};
 
     /**
+     * 添加类型映射
+     *
+     * @param databaseDialect 数据库类型，参考{@link DatabaseDialect}中的常量
+     * @param clazz           字段类型
+     * @param typeEnum        数据库类型
+     */
+    static void addTypeMap(String databaseDialect, Class<?> clazz, DefaultTypeEnumInterface typeEnum) {
+        if (JAVA_TO_DB_TYPE_MAP.containsKey(databaseDialect)) {
+            JAVA_TO_DB_TYPE_MAP.get(databaseDialect).put(clazz, typeEnum);
+        }
+    }
+
+    /**
      * java转数据库类型
      */
     default DatabaseTypeAndLength convert(String databaseDialect, Class<?> clazz, Field field) {
@@ -156,7 +169,7 @@ public interface JavaTypeToDatabaseTypeConverter {
         DatabaseTypeAndLength typeAndLength;
         Class<?> fieldClass = TableBeanUtils.getFieldType(clazz, field);
 
-        Map<Class<?>, ? extends DefaultTypeEnumInterface> typeMap = JAVA_TO_DB_TYPE_MAP.getOrDefault(databaseDialect, Collections.emptyMap());
+        Map<Class<?>, DefaultTypeEnumInterface> typeMap = JAVA_TO_DB_TYPE_MAP.getOrDefault(databaseDialect, Collections.emptyMap());
         if (typeMap.isEmpty()) {
             log.warn("数据库方言" + databaseDialect + "没有找到对应的数据库类型映射关系");
         }
@@ -164,7 +177,8 @@ public interface JavaTypeToDatabaseTypeConverter {
         DefaultTypeEnumInterface sqlType = typeMap.get(fieldClass);
 
         if (sqlType == null) {
-            throw new RuntimeException("字段" + fieldClass + "找不到" + databaseDialect + "对应的类型，请自行实现" + JavaTypeToDatabaseTypeConverter.class.getName());
+            log.warn("字段{}在{}下找不到对应的数据库类型，默认使用了字符串类型，如果想自定义，请调用JavaTypeToDatabaseTypeConverter.addTypeMap(DatabaseDialect.{}, {}.class, ?)添加映射关系", fieldClass.getName(), databaseDialect, databaseDialect, fieldClass.getSimpleName());
+            sqlType = typeMap.get(String.class);
         }
         typeAndLength = new DatabaseTypeAndLength(sqlType.getTypeName(), sqlType.getDefaultLength(), sqlType.getDefaultDecimalLength(), Collections.emptyList());
         return typeAndLength;

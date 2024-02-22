@@ -59,6 +59,7 @@ public interface IDataSourceHandler<T extends Serializable> {
         try (Connection connection = configuration.getEnvironment().getDataSource().getConnection()) {
             // 通过连接获取DatabaseMetaData对象
             DatabaseMetaData metaData = connection.getMetaData();
+            log.info("数据库链接 => {}", metaData.getURL());
             // 获取数据库方言
             return metaData.getDatabaseProductName();
         } catch (SQLException e) {
