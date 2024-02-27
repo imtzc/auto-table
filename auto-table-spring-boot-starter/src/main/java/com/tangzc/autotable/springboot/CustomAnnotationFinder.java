@@ -10,31 +10,31 @@ import java.lang.reflect.Method;
 public class CustomAnnotationFinder implements AutoTableAnnotationFinder {
     @Override
     public <A extends Annotation> A find(Class<?> clazz, Class<A> annotationClass) {
-        return AnnotatedElementUtils.findMergedAnnotation(clazz, annotationClass);
+        return AnnotatedElementUtils.getMergedAnnotation(clazz, annotationClass);
     }
 
     @Override
     public <A extends Annotation> A find(Method method, Class<A> annotationClass) {
-        return AnnotatedElementUtils.findMergedAnnotation(method, annotationClass);
+        return AnnotatedElementUtils.getMergedAnnotation(method, annotationClass);
     }
 
     @Override
     public <A extends Annotation> A find(Field field, Class<A> annotationClass) {
-        return AnnotatedElementUtils.findMergedAnnotation(field, annotationClass);
+        return AnnotatedElementUtils.getMergedAnnotation(field, annotationClass);
     }
 
     @Override
     public <A extends Annotation> boolean exist(Class<?> clazz, Class<A> annotationClass) {
-        return AnnotatedElementUtils.hasAnnotation(clazz, annotationClass);
+        return AnnotatedElementUtils.isAnnotated(clazz, annotationClass);
     }
 
     @Override
     public <A extends Annotation> boolean exist(Method method, Class<A> annotationClass) {
-        return AnnotatedElementUtils.hasAnnotation(method, annotationClass);
+        return AnnotatedElementUtils.isAnnotated(method, annotationClass);
     }
 
     @Override
     public <A extends Annotation> boolean exist(Field field, Class<A> annotationClass) {
-        return AnnotatedElementUtils.hasAnnotation(field, annotationClass);
+        return AnnotatedElementUtils.isAnnotated(field, annotationClass);
     }
 }

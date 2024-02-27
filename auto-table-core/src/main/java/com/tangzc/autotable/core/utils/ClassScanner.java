@@ -38,8 +38,8 @@ public class ClassScanner {
                 .map(basePackage -> {
                     try {
                         return getClasses(basePackage,
-                                clazz -> includeAnnotations.stream()
-                                        .anyMatch(anno -> autoTableAnnotationFinder.exist(clazz, anno))
+                                clazz -> includeAnnotations.stream().anyMatch(anno -> autoTableAnnotationFinder.exist(clazz, anno)) &&
+                                        excludeAnnotations.stream().noneMatch(anno -> autoTableAnnotationFinder.exist(clazz, anno))
                         );
                     } catch (IOException | ClassNotFoundException e) {
                         throw new RuntimeException("扫描包" + basePackage + "下实体出错", e);
