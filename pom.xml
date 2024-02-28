@@ -7,7 +7,33 @@
     <groupId>com.tangzc</groupId>
     <artifactId>auto-table</artifactId>
     <version>1.0.0</version>
+    <name>${project.groupId}:${project.artifactId}</name>
+    <description>自动维护表结构的框架</description>
+    <url>${projectUrl}</url><!--填入开发者信息，姓名、邮箱、项目地址-->
+    <developers>
+        <developer>
+            <name>唐振超</name>
+            <email>imtzc@qq.com</email>
+            <url>https://gitee.com/tangzc</url>
+        </developer>
+    </developers>
+    <licenses>
+        <!--以下内容不需要修改，直接复制咱贴即可-->
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo,manual</distribution>
+        </license>
+    </licenses>
+    <scm>
+        <!-- 采用projectUrl变量代替这个值，方便给重复利用这个配置，也就是上面的标签替换一下值就行 -->
+        <connection>${projectUrl}</connection>
+        <developerConnection>${projectUrl}</developerConnection>
+        <url>${projectUrl}</url>
+    </scm>
+
     <packaging>pom</packaging>
+
     <modules>
         <module>auto-table-core</module>
         <module>auto-table-annotation</module>
@@ -37,19 +63,13 @@
         实际就是项目地址加上 .git
         -->
         <projectUrl>https://gitee.com/tangzc/auto-table.git</projectUrl>
-        <serverId>ossrh</serverId><!-- 服务id 也就是setting.xml中的servers.server.id -->
-        <serverUrl>https://s01.oss.sonatype.org/</serverUrl>
     </properties>
 
     <distributionManagement>
-        <snapshotRepository>
-            <id>${serverId}</id>
-            <url>${serverUrl}content/repositories/snapshots</url>
-        </snapshotRepository>
         <repository>
-            <!--这个id和settings.xml中servers.server.id要相同，因为上传jar需要登录才有权限-->
-            <id>${serverId}</id>
-            <url>${serverUrl}service/local/staging/deploy/maven2/</url>
+            <id>central</id>
+            <name>central-releases</name>
+            <url>https://s01.oss.sonatype.org/</url>
         </repository>
     </distributionManagement>
 
@@ -70,7 +90,43 @@
     </dependencyManagement>
 
     <build>
+        <pluginManagement>
+            <plugins>
+                <!-- 生成MD5校验文件 -->
+                <plugin>
+                    <groupId>net.ju-n.maven.plugins</groupId>
+                    <artifactId>checksum-maven-plugin</artifactId>
+                    <version>1.4</version>
+                    <executions>
+                        <execution>
+                            <id>checksum-maven-plugin-files</id>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>files</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <fileSets>
+                            <fileSet>
+                                <directory>${project.build.directory}</directory>
+                                <includes>
+                                    <include>*.jar</include>
+                                    <include>*.pom</include>
+                                </includes>
+                            </fileSet>
+                        </fileSets>
+                        <algorithms>
+                            <algorithm>SHA-1</algorithm>
+                            <algorithm>MD5</algorithm>
+                        </algorithms>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+
         <plugins>
+
             <!-- 编译插件 -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -105,7 +161,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-                <version>3.2.1</version>
+                <version>3.3.0</version>
                 <executions>
                     <execution>
                         <id>attach-sources</id>
@@ -118,7 +174,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.3.1</version>
+                <version>3.6.3</version>
                 <configuration>
                     <charset>UTF-8</charset><!-- utf-8读取文件 -->
                     <encoding>UTF-8</encoding><!-- utf-8进行编码代码 -->
@@ -137,7 +193,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-gpg-plugin</artifactId>
-                <version>1.5</version>
+                <version>3.1.0</version>
                 <executions>
                     <execution>
                         <id>sign-artifacts</id>
@@ -150,41 +206,17 @@
             </plugin>
 
             <plugin>
-                <groupId>org.sonatype.plugins</groupId>
-                <artifactId>nexus-staging-maven-plugin</artifactId>
-                <version>1.6.7</version>
+                <groupId>org.sonatype.central</groupId>
+                <artifactId>central-publishing-maven-plugin</artifactId>
+                <version>0.3.0</version>
                 <extensions>true</extensions>
                 <configuration>
-                    <serverId>${serverId}</serverId>
-                    <nexusUrl>${serverUrl}</nexusUrl>
-                    <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                    <publishingServerId>central</publishingServerId>
+                    <tokenAuth>true</tokenAuth>
+                    <autoPublish>true</autoPublish>
                 </configuration>
             </plugin>
         </plugins>
     </build>
-
-    <!--填入开发者信息，姓名、邮箱、项目地址-->
-    <developers>
-        <developer>
-            <name>唐振超</name>
-            <email>imtzc@qq.com</email>
-            <url>${projectUrl}</url>
-        </developer>
-    </developers>
-    <!--以下部分内容不需要修改，直接复制咱贴即可-->
-    <url>${projectUrl}</url>
-    <licenses>
-        <license>
-            <name>The Apache Software License, Version 2.0</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
-            <distribution>repo,manual</distribution>
-        </license>
-    </licenses>
-    <scm>
-        <!-- 采用projectUrl变量代替这个值，方便给重复利用这个配置，也就是上面的标签替换一下值就行 -->
-        <connection>${projectUrl}</connection>
-        <developerConnection>${projectUrl}</developerConnection>
-        <url>${projectUrl}</url>
-    </scm>
 
 </project>
