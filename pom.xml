@@ -47,7 +47,6 @@
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <spring-boot.version>2.7.11</spring-boot.version>
         <mybatis.version>3.5.14</mybatis.version>
         <mybatis-spring.version>2.3.2</mybatis-spring.version>
         <lombok.version>1.18.30</lombok.version>
