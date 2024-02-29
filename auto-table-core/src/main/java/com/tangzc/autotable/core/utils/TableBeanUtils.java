@@ -10,8 +10,8 @@ import com.tangzc.autotable.annotation.PrimaryKey;
 import com.tangzc.autotable.annotation.TableComment;
 import com.tangzc.autotable.annotation.TableIndex;
 import com.tangzc.autotable.annotation.TableIndexes;
-import com.tangzc.autotable.core.AutoTableOrmFrameAdapter;
 import com.tangzc.autotable.core.AutoTableGlobalConfig;
+import com.tangzc.autotable.core.AutoTableOrmFrameAdapter;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -78,7 +78,7 @@ public class TableBeanUtils {
         }
 
         ColumnNotNull column = AutoTableGlobalConfig.getAutoTableAnnotationFinder().find(field, ColumnNotNull.class);
-        return column != null;
+        return column != null && column.value();
     }
 
     public static String getComment(Field field) {

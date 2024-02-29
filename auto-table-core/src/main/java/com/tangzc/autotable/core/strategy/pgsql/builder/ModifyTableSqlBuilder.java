@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author don
@@ -59,17 +60,25 @@ public class ModifyTableSqlBuilder {
             // 非空
             alterTableSqlList.add("  ALTER COLUMN \"" + columnName + "\" " + (columnMetadata.isNotNull() ? "SET" : "DROP") + " NOT NULL");
             // 默认值
-            String defaultVal = "NULL";
+            String defaultVal = null;
             DefaultValueEnum defaultValueType = columnMetadata.getDefaultValueType();
             if (DefaultValueEnum.EMPTY_STRING == defaultValueType) {
                 defaultVal = "''";
+            } else if (DefaultValueEnum.NULL == defaultValueType) {
+                defaultVal = "NULL";
             } else {
                 String defaultValue = columnMetadata.getDefaultValue();
                 if (StringUtils.hasText(defaultValue)) {
                     defaultVal = defaultValue;
                 }
             }
-            alterTableSqlList.add("  ALTER COLUMN \"" + columnName + "\" SET DEFAULT " + defaultVal);
+            if(StringUtils.hasText(defaultVal)) {
+                // 设置默认值
+                alterTableSqlList.add("  ALTER COLUMN \"" + columnName + "\" SET DEFAULT " + defaultVal);
+            } else {
+                // 删除默认值
+                alterTableSqlList.add("  ALTER COLUMN \"" + columnName + "\" DROP DEFAULT");
+            }
         }
         // 添加主键
         List<PgsqlColumnMetadata> newPrimaries = pgsqlCompareTableInfo.getNewPrimaries();
@@ -96,7 +105,8 @@ public class ModifyTableSqlBuilder {
         // 添加索引
         String createIndexSql = CreateTableSqlBuilder.getCreateIndexSql(tableName, pgsqlCompareTableInfo.getIndexMetadataList());
 
-
-        return dropIndexSql + "\n" + alterTableSql + "\n" + addColumnCommentSql + "\n" + createIndexSql;
+        return Stream.of(dropIndexSql, alterTableSql, addColumnCommentSql, createIndexSql)
+                .filter(StringUtils::hasText)
+                .collect(Collectors.joining("\n"));
     }
 }

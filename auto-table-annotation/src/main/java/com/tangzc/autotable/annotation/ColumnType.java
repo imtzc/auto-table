@@ -21,7 +21,7 @@ public @interface ColumnType {
      *
      * @return 字段的类型
      */
-    String value();
+    String value() default "";
 
     /**
      * 字段长度，默认是-1，小于0相当于null

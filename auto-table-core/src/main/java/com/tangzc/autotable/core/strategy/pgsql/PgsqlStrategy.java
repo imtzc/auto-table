@@ -161,7 +161,7 @@ public class PgsqlStrategy implements IStrategy<PgsqlTableMetadata, PgsqlCompare
                 // 字段类型不同
                 boolean isTypeDiff = isTypeDiff(pgsqlColumnMetadata, pgsqlDbColumn);
                 // 非null不同
-                boolean isNotnullDiff = pgsqlColumnMetadata.isNotNull() == Objects.equals(pgsqlDbColumn.getIsNullable(), "YES");
+                boolean isNotnullDiff = pgsqlColumnMetadata.isNotNull() != Objects.equals(pgsqlDbColumn.getIsNullable(), "NO");
                 // 默认值不同
                 boolean isDefaultDiff = isDefaultDiff(pgsqlColumnMetadata, columnDefault);
                 if (isTypeDiff || isNotnullDiff || isDefaultDiff) {
@@ -210,17 +210,12 @@ public class PgsqlStrategy implements IStrategy<PgsqlTableMetadata, PgsqlCompare
 
     private static boolean isDefaultDiff(PgsqlColumnMetadata pgsqlColumnMetadata, String columnDefault) {
 
-        // 纠正default值，去掉标记符号
-        if (columnDefault != null && columnDefault.matches("^'.*'::character varying$")) {
-            columnDefault = columnDefault.replace("::character varying", "");
-        } else if (columnDefault != null && columnDefault.matches("^'.*'::bpchar$")) {
-            columnDefault = columnDefault.replace("::bpchar", "");
-        } else if (columnDefault != null && columnDefault.matches("^'.*'::date$")) {
-            columnDefault = columnDefault.replace("::date", "");
-        } else if (columnDefault != null && columnDefault.matches("^'.*'::time without time zone$")) {
-            columnDefault = columnDefault.replace("::time without time zone", "");
-        } else if (columnDefault != null && columnDefault.matches("^'.*'::timestamp without time zone$")) {
-            columnDefault = columnDefault.replace("::timestamp without time zone", "");
+        // 纠正default值，去掉类型转换
+        if(columnDefault != null) {
+            int castChart = columnDefault.indexOf("::");
+            if (castChart > 0) {
+                columnDefault = columnDefault.substring(0, castChart);
+            }
         }
 
         DefaultValueEnum defaultValueType = pgsqlColumnMetadata.getDefaultValueType();
@@ -230,14 +225,10 @@ public class PgsqlStrategy implements IStrategy<PgsqlTableMetadata, PgsqlCompare
                 return !"''".equals(columnDefault);
             }
             if (defaultValueType == DefaultValueEnum.NULL) {
-                return columnDefault != null;
+                return columnDefault != null && !"NULL".equalsIgnoreCase(columnDefault);
             }
         } else {
             String defaultValue = pgsqlColumnMetadata.getDefaultValue();
-            // if (!StringUtils.hasText(defaultValue)) {
-            //     return false;
-            // }
-
             return !Objects.equals(defaultValue, columnDefault);
         }
         return false;

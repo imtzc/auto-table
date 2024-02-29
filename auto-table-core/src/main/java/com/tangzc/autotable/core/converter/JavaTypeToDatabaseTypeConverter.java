@@ -6,6 +6,7 @@ import com.tangzc.autotable.core.converter.type.DefaultTypeEnumInterface;
 import com.tangzc.autotable.core.converter.type.MySqlDefaultTypeEnum;
 import com.tangzc.autotable.core.converter.type.PgsqlDefaultTypeEnum;
 import com.tangzc.autotable.core.converter.type.SqliteDefaultTypeEnum;
+import com.tangzc.autotable.core.utils.StringUtils;
 import com.tangzc.autotable.core.utils.TableBeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +21,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -150,16 +152,25 @@ public interface JavaTypeToDatabaseTypeConverter {
      */
     default DatabaseTypeAndLength convert(String databaseDialect, Class<?> clazz, Field field) {
 
-        DatabaseTypeAndLength typeAndLength;
+        DatabaseTypeAndLength typeAndLength = getDatabaseTypeAndLength(databaseDialect, clazz, field);
 
         ColumnType column = TableBeanUtils.getColumnType(field);
+        // 设置了类型
         if (column != null) {
-            // 如果设置了类型
-            int length = column.length();
-            int decimalLength = column.decimalLength();
-            typeAndLength = new DatabaseTypeAndLength(column.value(), length > -1 ? length : null, decimalLength > -1 ? decimalLength : null, Arrays.asList(column.values()));
-        } else {
-            typeAndLength = getDatabaseTypeAndLength(databaseDialect, clazz, field);
+            String type = column.value();
+            Integer length = column.length() > -1 ? column.length() : null;
+            Integer decimalLength = column.decimalLength() > -1 ? column.decimalLength() : null;
+            List<String> values = Arrays.asList(column.values());
+            // 如果明确指定了类型名，直接替换
+            if(StringUtils.hasText(type)) {
+                typeAndLength = new DatabaseTypeAndLength(type, length, decimalLength, values);
+            } else {
+                // 如果没有指定明确的类型名，但是却指定了长度，使用指定长度
+                if (length != null || decimalLength != null) {
+                    typeAndLength.setLength(length);
+                    typeAndLength.setDecimalLength(decimalLength);
+                }
+            }
         }
 
         return typeAndLength;
