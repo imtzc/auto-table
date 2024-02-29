@@ -5,6 +5,8 @@ import com.tangzc.autotable.annotation.enums.IndexSortTypeEnum;
 import com.tangzc.autotable.core.AutoTableGlobalConfig;
 import com.tangzc.autotable.core.constants.DatabaseDialect;
 import com.tangzc.autotable.core.converter.DatabaseTypeAndLength;
+import com.tangzc.autotable.core.converter.DefaultTypeEnumInterface;
+import com.tangzc.autotable.core.strategy.mysql.data.MySqlDefaultTypeEnum;
 import com.tangzc.autotable.core.strategy.IStrategy;
 import com.tangzc.autotable.core.strategy.mysql.builder.CreateTableSqlBuilder;
 import com.tangzc.autotable.core.strategy.mysql.builder.ModifyTableSqlBuilder;
@@ -21,8 +23,15 @@ import com.tangzc.autotable.core.strategy.mysql.mapper.MysqlTablesMapper;
 import com.tangzc.autotable.core.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -42,6 +51,42 @@ public class MysqlStrategy implements IStrategy<MysqlTableMetadata, MysqlCompare
     @Override
     public String databaseDialect() {
         return DatabaseDialect.MySQL;
+    }
+
+    @Override
+    public Map<Class<?>, DefaultTypeEnumInterface> typeMapping() {
+        return new HashMap<Class<?>, DefaultTypeEnumInterface>() {{
+            put(String.class, MySqlDefaultTypeEnum.VARCHAR);
+            put(Character.class, MySqlDefaultTypeEnum.CHAR);
+            put(char.class, MySqlDefaultTypeEnum.CHAR);
+
+            put(BigInteger.class, MySqlDefaultTypeEnum.BIGINT);
+            put(Long.class, MySqlDefaultTypeEnum.BIGINT);
+            put(long.class, MySqlDefaultTypeEnum.BIGINT);
+
+            put(Integer.class, MySqlDefaultTypeEnum.INT);
+            put(int.class, MySqlDefaultTypeEnum.INT);
+
+            put(Boolean.class, MySqlDefaultTypeEnum.BIT);
+            put(boolean.class, MySqlDefaultTypeEnum.BIT);
+
+            put(Float.class, MySqlDefaultTypeEnum.FLOAT);
+            put(float.class, MySqlDefaultTypeEnum.FLOAT);
+            put(Double.class, MySqlDefaultTypeEnum.DOUBLE);
+            put(double.class, MySqlDefaultTypeEnum.DOUBLE);
+            put(BigDecimal.class, MySqlDefaultTypeEnum.DECIMAL);
+
+            put(Date.class, MySqlDefaultTypeEnum.DATETIME);
+            put(java.sql.Date.class, MySqlDefaultTypeEnum.DATE);
+            put(java.sql.Timestamp.class, MySqlDefaultTypeEnum.DATETIME);
+            put(java.sql.Time.class, MySqlDefaultTypeEnum.TIME);
+            put(LocalDateTime.class, MySqlDefaultTypeEnum.DATETIME);
+            put(LocalDate.class, MySqlDefaultTypeEnum.DATE);
+            put(LocalTime.class, MySqlDefaultTypeEnum.TIME);
+
+            put(Short.class, MySqlDefaultTypeEnum.SMALLINT);
+            put(short.class, MySqlDefaultTypeEnum.SMALLINT);
+        }};
     }
 
     @Override

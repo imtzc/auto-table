@@ -1,7 +1,7 @@
 package com.tangzc.autotable.core.strategy.sqlite;
 
 import com.tangzc.autotable.core.converter.DatabaseTypeAndLength;
-import com.tangzc.autotable.core.converter.type.SqliteDefaultTypeEnum;
+import com.tangzc.autotable.core.strategy.sqlite.data.SqliteDefaultTypeEnum;
 
 /**
  * @author don

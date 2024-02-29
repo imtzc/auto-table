@@ -1,6 +1,8 @@
 package com.tangzc.autotable.core.strategy.sqlite;
 
 import com.tangzc.autotable.core.constants.DatabaseDialect;
+import com.tangzc.autotable.core.converter.DefaultTypeEnumInterface;
+import com.tangzc.autotable.core.strategy.sqlite.data.SqliteDefaultTypeEnum;
 import com.tangzc.autotable.core.strategy.IStrategy;
 import com.tangzc.autotable.core.strategy.sqlite.builder.CreateTableSqlBuilder;
 import com.tangzc.autotable.core.strategy.sqlite.builder.SqliteTableMetadataBuilder;
@@ -11,8 +13,14 @@ import com.tangzc.autotable.core.strategy.sqlite.data.dbdata.SqliteMaster;
 import com.tangzc.autotable.core.strategy.sqlite.mapper.SqliteTablesMapper;
 import com.tangzc.autotable.core.utils.StringUtils;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -28,6 +36,42 @@ public class SqliteStrategy implements IStrategy<SqliteTableMetadata, SqliteComp
     @Override
     public String databaseDialect() {
         return DatabaseDialect.SQLite;
+    }
+
+    @Override
+    public Map<Class<?>, DefaultTypeEnumInterface> typeMapping() {
+        return new HashMap<Class<?>, DefaultTypeEnumInterface>() {{
+            put(String.class, SqliteDefaultTypeEnum.TEXT);
+            put(Character.class, SqliteDefaultTypeEnum.TEXT);
+            put(char.class, SqliteDefaultTypeEnum.TEXT);
+
+            put(BigInteger.class, SqliteDefaultTypeEnum.INTEGER);
+            put(Long.class, SqliteDefaultTypeEnum.INTEGER);
+            put(long.class, SqliteDefaultTypeEnum.INTEGER);
+
+            put(Integer.class, SqliteDefaultTypeEnum.INTEGER);
+            put(int.class, SqliteDefaultTypeEnum.INTEGER);
+
+            put(Boolean.class, SqliteDefaultTypeEnum.INTEGER);
+            put(boolean.class, SqliteDefaultTypeEnum.INTEGER);
+
+            put(Float.class, SqliteDefaultTypeEnum.REAL);
+            put(float.class, SqliteDefaultTypeEnum.REAL);
+            put(Double.class, SqliteDefaultTypeEnum.REAL);
+            put(double.class, SqliteDefaultTypeEnum.REAL);
+            put(BigDecimal.class, SqliteDefaultTypeEnum.REAL);
+
+            put(Date.class, SqliteDefaultTypeEnum.TEXT);
+            put(java.sql.Date.class, SqliteDefaultTypeEnum.TEXT);
+            put(java.sql.Timestamp.class, SqliteDefaultTypeEnum.TEXT);
+            put(java.sql.Time.class, SqliteDefaultTypeEnum.TEXT);
+            put(LocalDateTime.class, SqliteDefaultTypeEnum.TEXT);
+            put(LocalDate.class, SqliteDefaultTypeEnum.TEXT);
+            put(LocalTime.class, SqliteDefaultTypeEnum.TEXT);
+
+            put(Short.class, SqliteDefaultTypeEnum.INTEGER);
+            put(short.class, SqliteDefaultTypeEnum.INTEGER);
+        }};
     }
 
     @Override

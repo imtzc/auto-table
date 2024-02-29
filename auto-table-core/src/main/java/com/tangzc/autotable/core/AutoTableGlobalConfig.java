@@ -45,6 +45,7 @@ public class AutoTableGlobalConfig {
 
     public static void addStrategy(IStrategy<? extends TableMetadata, ? extends CompareTableInfo, ?> strategy) {
         strategyMap.put(strategy.databaseDialect(), strategy);
+        JavaTypeToDatabaseTypeConverter.addTypeMapping(strategy.databaseDialect(), strategy.typeMapping());
     }
 
     public static IStrategy<?, ?, ?> getStrategy(String databaseDialect) {

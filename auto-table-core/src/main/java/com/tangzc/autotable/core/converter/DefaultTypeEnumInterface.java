@@ -1,5 +1,8 @@
-package com.tangzc.autotable.core.converter.type;
+package com.tangzc.autotable.core.converter;
 
+/**
+ * 数据库数据类型接口
+ */
 public interface DefaultTypeEnumInterface {
     /**
      * 默认类型长度

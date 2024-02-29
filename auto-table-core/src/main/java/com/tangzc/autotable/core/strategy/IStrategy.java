@@ -2,6 +2,7 @@ package com.tangzc.autotable.core.strategy;
 
 import com.tangzc.autotable.core.AutoTableGlobalConfig;
 import com.tangzc.autotable.core.RunMode;
+import com.tangzc.autotable.core.converter.DefaultTypeEnumInterface;
 import com.tangzc.autotable.core.dynamicds.SqlSessionFactoryManager;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.SqlSession;
@@ -12,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -22,12 +24,6 @@ import java.util.function.Function;
 public interface IStrategy<TABLE_META extends TableMetadata, COMPARE_TABLE_INFO extends CompareTableInfo, MAPPER> {
 
     Logger log = LoggerFactory.getLogger(IStrategy.class);
-
-    /**
-     * 策略对应的数据库方言，与数据库驱动中的接口{@link java.sql.DatabaseMetaData#getDatabaseProductName()}实现返回值一致
-     * @return 方言
-     */
-    String databaseDialect();
 
     default void execute(Consumer<MAPPER> execute) {
 
@@ -152,6 +148,18 @@ public interface IStrategy<TABLE_META extends TableMetadata, COMPARE_TABLE_INFO 
             validateResult.add("表" + tableName + "不存在");
         }
     }
+
+    /**
+     * 策略对应的数据库方言，与数据库驱动中的接口{@link java.sql.DatabaseMetaData#getDatabaseProductName()}实现返回值一致
+     * @return 方言
+     */
+    String databaseDialect();
+
+    /**
+     * java字段类型与数据库类型映射关系
+     * @return 映射
+     */
+    Map<Class<?>, DefaultTypeEnumInterface> typeMapping();
 
     /**
      * 根据表名删除表

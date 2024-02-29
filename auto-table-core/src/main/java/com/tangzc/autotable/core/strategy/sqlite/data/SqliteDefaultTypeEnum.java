@@ -1,5 +1,6 @@
-package com.tangzc.autotable.core.converter.type;
+package com.tangzc.autotable.core.strategy.sqlite.data;
 
+import com.tangzc.autotable.core.converter.DefaultTypeEnumInterface;
 import lombok.Getter;
 
 /**

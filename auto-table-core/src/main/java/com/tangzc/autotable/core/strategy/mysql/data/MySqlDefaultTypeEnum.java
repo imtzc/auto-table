@@ -1,6 +1,7 @@
-package com.tangzc.autotable.core.converter.type;
+package com.tangzc.autotable.core.strategy.mysql.data;
 
 import com.tangzc.autotable.annotation.mysql.MysqlTypeConstant;
+import com.tangzc.autotable.core.converter.DefaultTypeEnumInterface;
 import lombok.Getter;
 
 /**

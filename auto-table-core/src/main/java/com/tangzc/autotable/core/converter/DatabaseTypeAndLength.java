@@ -5,6 +5,7 @@ import lombok.Data;
 import java.util.List;
 
 /**
+ * 统一的数据类型描述对象
  * @author don
  */
 @Data

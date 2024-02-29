@@ -1,7 +1,6 @@
 package com.tangzc.autotable.core.strategy.pgsql.data;
 
 import com.tangzc.autotable.core.converter.DatabaseTypeAndLength;
-import com.tangzc.autotable.core.converter.type.PgsqlDefaultTypeEnum;
 
 /**
  * @author don

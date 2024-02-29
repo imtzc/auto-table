@@ -1,7 +1,6 @@
 package com.tangzc.autotable.core.strategy.mysql.data;
 
 import com.tangzc.autotable.core.converter.DatabaseTypeAndLength;
-import com.tangzc.autotable.core.converter.type.MySqlDefaultTypeEnum;
 
 import java.util.Arrays;
 import java.util.HashSet;

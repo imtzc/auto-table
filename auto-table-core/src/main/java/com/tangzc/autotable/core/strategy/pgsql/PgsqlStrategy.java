@@ -5,6 +5,8 @@ import com.tangzc.autotable.annotation.enums.IndexSortTypeEnum;
 import com.tangzc.autotable.annotation.enums.IndexTypeEnum;
 import com.tangzc.autotable.core.AutoTableGlobalConfig;
 import com.tangzc.autotable.core.constants.DatabaseDialect;
+import com.tangzc.autotable.core.converter.DefaultTypeEnumInterface;
+import com.tangzc.autotable.core.strategy.pgsql.data.PgsqlDefaultTypeEnum;
 import com.tangzc.autotable.core.strategy.IStrategy;
 import com.tangzc.autotable.core.strategy.pgsql.builder.CreateTableSqlBuilder;
 import com.tangzc.autotable.core.strategy.pgsql.builder.ModifyTableSqlBuilder;
@@ -20,6 +22,13 @@ import com.tangzc.autotable.core.strategy.pgsql.data.dbdata.PgsqlDbPrimary;
 import com.tangzc.autotable.core.strategy.pgsql.mapper.PgsqlTablesMapper;
 import com.tangzc.autotable.core.utils.StringUtils;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -35,6 +44,42 @@ public class PgsqlStrategy implements IStrategy<PgsqlTableMetadata, PgsqlCompare
     @Override
     public String databaseDialect() {
         return DatabaseDialect.PostgreSQL;
+    }
+
+    @Override
+    public Map<Class<?>, DefaultTypeEnumInterface> typeMapping() {
+        return new HashMap<Class<?>, DefaultTypeEnumInterface>() {{
+            put(String.class, PgsqlDefaultTypeEnum.VARCHAR);
+            put(Character.class, PgsqlDefaultTypeEnum.CHAR);
+            put(char.class, PgsqlDefaultTypeEnum.CHAR);
+
+            put(BigInteger.class, PgsqlDefaultTypeEnum.INT8);
+            put(Long.class, PgsqlDefaultTypeEnum.INT8);
+            put(long.class, PgsqlDefaultTypeEnum.INT8);
+
+            put(Integer.class, PgsqlDefaultTypeEnum.INT4);
+            put(int.class, PgsqlDefaultTypeEnum.INT4);
+
+            put(Boolean.class, PgsqlDefaultTypeEnum.BOOL);
+            put(boolean.class, PgsqlDefaultTypeEnum.BOOL);
+
+            put(Float.class, PgsqlDefaultTypeEnum.FLOAT4);
+            put(float.class, PgsqlDefaultTypeEnum.FLOAT4);
+            put(Double.class, PgsqlDefaultTypeEnum.FLOAT8);
+            put(double.class, PgsqlDefaultTypeEnum.FLOAT8);
+            put(BigDecimal.class, PgsqlDefaultTypeEnum.NUMERIC);
+
+            put(Date.class, PgsqlDefaultTypeEnum.TIMESTAMP);
+            put(java.sql.Date.class, PgsqlDefaultTypeEnum.TIMESTAMP);
+            put(java.sql.Timestamp.class, PgsqlDefaultTypeEnum.TIMESTAMP);
+            put(java.sql.Time.class, PgsqlDefaultTypeEnum.TIME);
+            put(LocalDateTime.class, PgsqlDefaultTypeEnum.TIMESTAMP);
+            put(LocalDate.class, PgsqlDefaultTypeEnum.DATE);
+            put(LocalTime.class, PgsqlDefaultTypeEnum.TIME);
+
+            put(Short.class, PgsqlDefaultTypeEnum.INT2);
+            put(short.class, PgsqlDefaultTypeEnum.INT2);
+        }};
     }
 
     @Override
