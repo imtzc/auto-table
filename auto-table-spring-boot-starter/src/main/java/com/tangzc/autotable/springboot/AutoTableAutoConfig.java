@@ -8,6 +8,9 @@ import com.tangzc.autotable.core.converter.JavaTypeToDatabaseTypeConverter;
 import com.tangzc.autotable.core.dynamicds.IDataSourceHandler;
 import com.tangzc.autotable.core.dynamicds.SqlSessionFactoryManager;
 import com.tangzc.autotable.core.intercepter.BuildTableMetadataIntercepter;
+import com.tangzc.autotable.core.strategy.CompareTableInfo;
+import com.tangzc.autotable.core.strategy.IStrategy;
+import com.tangzc.autotable.core.strategy.TableMetadata;
 import com.tangzc.autotable.springboot.properties.AutoTableProperties;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.mybatis.spring.boot.autoconfigure.MybatisAutoConfiguration;
@@ -18,12 +21,17 @@ import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.List;
+
 @Configuration
 @AutoConfigureAfter({DataSourceAutoConfiguration.class, MybatisAutoConfiguration.class})
 public class AutoTableAutoConfig implements ApplicationRunner {
 
     private final SqlSessionTemplate sqlSessionTemplate;
     private final AutoTableProperties autoTableProperties;
+
+    @Autowired(required = false)
+    private List<IStrategy<? extends TableMetadata, ? extends CompareTableInfo, ?>> strategies;
 
     @Autowired(required = false)
     private AutoTableAnnotationFinder autoTableAnnotationFinder;
@@ -60,6 +68,13 @@ public class AutoTableAutoConfig implements ApplicationRunner {
         } else {
             // 没有，则设置内置的注解扫描器
             AutoTableGlobalConfig.setAutoTableAnnotationFinder(new CustomAnnotationFinder());
+        }
+
+        // 如果有自定义的数据库策略，则加载
+        if (strategies != null && !strategies.isEmpty()) {
+            for (IStrategy<? extends TableMetadata, ? extends CompareTableInfo, ?> strategy : strategies) {
+                AutoTableGlobalConfig.addStrategy(strategy);
+            }
         }
 
         // 假如有自定义的orm框架适配器，就使用自定义的orm框架适配器
