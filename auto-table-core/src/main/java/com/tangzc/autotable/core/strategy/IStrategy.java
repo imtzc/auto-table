@@ -1,6 +1,5 @@
 package com.tangzc.autotable.core.strategy;
 
-import com.sun.istack.internal.Nullable;
 import com.tangzc.autotable.core.AutoTableGlobalConfig;
 import com.tangzc.autotable.core.RunMode;
 import com.tangzc.autotable.core.converter.DefaultTypeEnumInterface;
@@ -136,7 +135,6 @@ public interface IStrategy<TABLE_META extends TableMetadata, COMPARE_TABLE_INFO 
         }
     }
 
-    @Nullable
     default void validateTable(Class<?> beanClass, TABLE_META tableMetadata) {
         String tableName = tableMetadata.getTableName();
         // 检查数据库数据模型与实体是否一致
