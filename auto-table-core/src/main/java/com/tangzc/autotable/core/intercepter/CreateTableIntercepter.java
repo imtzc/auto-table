@@ -3,7 +3,7 @@ package com.tangzc.autotable.core.intercepter;
 import com.tangzc.autotable.core.strategy.TableMetadata;
 
 /**
- * 表信息拦截器
+ * 建表之前拦截器
  */
 @FunctionalInterface
 public interface CreateTableIntercepter {

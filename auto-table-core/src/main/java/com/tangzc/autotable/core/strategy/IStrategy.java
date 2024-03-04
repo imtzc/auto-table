@@ -68,15 +68,15 @@ public interface IStrategy<TABLE_META extends TableMetadata, COMPARE_TABLE_INFO 
     /**
      * 开始分析bean class
      *
-     * @param beanClasses 待处理的类
+     * @param entityClass 待处理的类
      */
-    default void start(Set<Class<?>> beanClasses) {
+    default void start(Set<Class<?>> entityClass) {
 
         RunMode runMode = AutoTableGlobalConfig.getAutoTableProperties().getMode();
         boolean validateMode = runMode == RunMode.validate;
 
-        AutoTableGlobalConfig.getCollectTableClassIntercepter().intercept(beanClasses);
-        for (Class<?> beanClass : beanClasses) {
+        AutoTableGlobalConfig.getCollectEntitiesIntercepter().intercept(entityClass);
+        for (Class<?> beanClass : entityClass) {
 
             TABLE_META tableMetadata = this.analyseClass(beanClass);
 
@@ -94,7 +94,7 @@ public interface IStrategy<TABLE_META extends TableMetadata, COMPARE_TABLE_INFO 
                 compareAndModifyTable(beanClass, tableMetadata);
             }
         }
-        AutoTableGlobalConfig.getRunFinishCallback().finish(beanClasses);
+        AutoTableGlobalConfig.getRunFinishCallback().finish(entityClass);
     }
 
     default void compareAndModifyTable(Class<?> beanClass, TABLE_META tableMetadata) {

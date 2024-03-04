@@ -3,7 +3,7 @@ package com.tangzc.autotable.core.callback;
 import java.util.Set;
 
 /**
- * 运行回调
+ * 执行完回调
  */
 @FunctionalInterface
 public interface RunFinishCallback {

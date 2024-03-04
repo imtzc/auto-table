@@ -86,12 +86,12 @@ public class AutoTableBootstrap {
 
         // 获取对应的数据源，根据不同数据库方言，执行不同的处理
         IDataSourceHandler<?> datasourceHandler = AutoTableGlobalConfig.getDatasourceHandler();
-        datasourceHandler.handleAnalysis(classes, (databaseDialect, tables) -> {
+        datasourceHandler.handleAnalysis(classes, (databaseDialect, entityClass) -> {
             log.info("数据库方言（" + databaseDialect + "）");
             // 查找对应的数据源策略
             IStrategy<?, ?, ?> databaseStrategy = AutoTableGlobalConfig.getStrategy(databaseDialect);
             if (databaseStrategy != null) {
-                databaseStrategy.start(tables);
+                databaseStrategy.start(entityClass);
             } else {
                 log.warn("没有找到对应的数据库（" + databaseDialect + "）方言策略，无法执行自动建表");
             }

@@ -4,7 +4,7 @@ import com.tangzc.autotable.core.strategy.CompareTableInfo;
 import com.tangzc.autotable.core.strategy.TableMetadata;
 
 /**
- * 表信息拦截器
+ * 修改表前拦截器
  */
 @FunctionalInterface
 public interface ModifyTableIntercepter {

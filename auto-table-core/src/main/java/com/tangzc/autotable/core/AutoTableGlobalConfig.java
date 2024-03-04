@@ -8,7 +8,7 @@ import com.tangzc.autotable.core.converter.JavaTypeToDatabaseTypeConverter;
 import com.tangzc.autotable.core.dynamicds.IDataSourceHandler;
 import com.tangzc.autotable.core.dynamicds.impl.DefaultDataSourceHandler;
 import com.tangzc.autotable.core.intercepter.BuildTableMetadataIntercepter;
-import com.tangzc.autotable.core.intercepter.CollectTableClassIntercepter;
+import com.tangzc.autotable.core.intercepter.CollectEntitiesIntercepter;
 import com.tangzc.autotable.core.intercepter.CreateTableIntercepter;
 import com.tangzc.autotable.core.intercepter.ModifyTableIntercepter;
 import com.tangzc.autotable.core.strategy.CompareTableInfo;
@@ -52,7 +52,7 @@ public class AutoTableGlobalConfig {
 
     @Setter
     @Getter
-    private static CollectTableClassIntercepter collectTableClassIntercepter = beanClasses -> {
+    private static CollectEntitiesIntercepter collectEntitiesIntercepter = beanClasses -> {
     };
 
     @Setter

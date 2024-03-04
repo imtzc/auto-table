@@ -33,12 +33,12 @@ public interface IDataSourceHandler<T extends Serializable> {
         Map<T, Set<Class<?>>> needHandleTableMap = classList.stream()
                 .collect(Collectors.groupingBy(this::getDataSourceName, Collectors.toSet()));
 
-        needHandleTableMap.forEach((dataSource, tables) -> {
+        needHandleTableMap.forEach((dataSource, entityClass) -> {
             // 使用数据源
             this.useDataSource(dataSource);
             try {
                 String databaseDialect = this.getDatabaseDialect();
-                consumer.accept(databaseDialect, tables);
+                consumer.accept(databaseDialect, entityClass);
             } finally {
                 this.clearDataSource(dataSource);
             }
