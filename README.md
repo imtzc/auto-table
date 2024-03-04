@@ -21,9 +21,15 @@
 
 ## 兼容多款Mybatis拓展框架
 
-AutoTable分别在表名、字段名、主键、主键策略、枚举处理、多数据源等多方面进行接口化抽取，兼容了MybatisPlus、MybatisFlex框架。
+AutoTable分别在表名、字段名、主键、主键策略、枚举处理、多数据源等多方面进行接口化抽取，兼容了大部分主流Mybatis拓展框架，如Mybatis-plus、Mybatis-flex等。
 
-同样其他框架也可以照猫画虎的进行兼容。
+### mybatis-plus拓展包
+
+<a href="https://gitee.com/tangzc/mybatis-plus-ext" target="_blank">mybatis-plus-ext</a>是mybatis-plus框架的拓展包，在框架原有基础上做了进一步的轻度封装，增强内容：免手写Mapper、多数据源自动建表、数据自动填充、自动关联查询、冗余数据自动更新、动态查询条件等。
+
+### mybatis-flex拓展包
+
+敬请期待
 
 ## 官方教程
 
