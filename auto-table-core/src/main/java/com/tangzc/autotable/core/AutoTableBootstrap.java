@@ -91,7 +91,7 @@ public class AutoTableBootstrap {
             // 查找对应的数据源策略
             IStrategy<?, ?, ?> databaseStrategy = AutoTableGlobalConfig.getStrategy(databaseDialect);
             if (databaseStrategy != null) {
-                databaseStrategy.analyseClasses(tables);
+                databaseStrategy.start(tables);
             } else {
                 log.warn("没有找到对应的数据库（" + databaseDialect + "）方言策略，无法执行自动建表");
             }

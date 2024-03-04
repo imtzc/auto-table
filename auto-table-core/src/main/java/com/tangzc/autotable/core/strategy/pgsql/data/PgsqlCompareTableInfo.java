@@ -1,11 +1,9 @@
 package com.tangzc.autotable.core.strategy.pgsql.data;
 
 import com.tangzc.autotable.core.strategy.CompareTableInfo;
-import lombok.Data;
+import com.tangzc.autotable.core.utils.StringUtils;
 import lombok.Getter;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import com.tangzc.autotable.core.utils.StringUtils;
 import lombok.Setter;
 
 import java.util.ArrayList;
@@ -13,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author don
@@ -86,6 +85,42 @@ public class PgsqlCompareTableInfo extends CompareTableInfo {
                 !newColumnMetadataList.isEmpty() ||
                 !dropIndexList.isEmpty() ||
                 !indexMetadataList.isEmpty();
+    }
+
+    @Override
+    public String validateFailedMessage() {
+        StringBuilder errorMsg = new StringBuilder();
+        if (StringUtils.hasText(comment)) {
+            errorMsg.append("表注释变更: ").append(comment).append("\n");
+        }
+        if (StringUtils.hasText(dropPrimaryKeyName)) {
+            errorMsg.append("删除主键: ").append(dropPrimaryKeyName).append("\n");
+        }
+        if (!newPrimaries.isEmpty()) {
+            errorMsg.append("新增主键: ").append(newPrimaries).append("\n");
+        }
+        if (!columnComment.isEmpty()) {
+            errorMsg.append("列注释变更: ").append(columnComment.entrySet().stream().map(entry -> entry.getKey() + ":" + entry.getValue()).collect(Collectors.joining(", "))).append("\n");
+        }
+        if (!indexComment.isEmpty()) {
+            errorMsg.append("索引注释变更: ").append(indexComment.entrySet().stream().map(entry -> entry.getKey() + ":" + entry.getValue()).collect(Collectors.joining(", "))).append("\n");
+        }
+        if (!dropColumnList.isEmpty()) {
+            errorMsg.append("删除列: ").append(String.join(",", dropColumnList)).append("\n");
+        }
+        if (!modifyColumnMetadataList.isEmpty()) {
+            errorMsg.append("修改列: ").append(modifyColumnMetadataList.stream().map(PgsqlColumnMetadata::getName).collect(Collectors.joining(","))).append("\n");
+        }
+        if (!newColumnMetadataList.isEmpty()) {
+            errorMsg.append("新增列: ").append(newColumnMetadataList.stream().map(PgsqlColumnMetadata::getName).collect(Collectors.joining(","))).append("\n");
+        }
+        if (!dropIndexList.isEmpty()) {
+            errorMsg.append("删除索引: ").append(String.join(",", dropIndexList)).append("\n");
+        }
+        if (!indexMetadataList.isEmpty()) {
+            errorMsg.append("新增索引: ").append(indexMetadataList.stream().map(PgsqlIndexMetadata::getName).collect(Collectors.joining(","))).append("\n");
+        }
+        return errorMsg.toString();
     }
 
     public void addColumnComment(String columnName, String newComment) {

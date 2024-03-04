@@ -1,5 +1,6 @@
 package com.tangzc.autotable.core.strategy;
 
+import com.sun.istack.internal.Nullable;
 import com.tangzc.autotable.core.AutoTableGlobalConfig;
 import com.tangzc.autotable.core.RunMode;
 import com.tangzc.autotable.core.converter.DefaultTypeEnumInterface;
@@ -11,8 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.ParameterizedType;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -67,16 +66,16 @@ public interface IStrategy<TABLE_META extends TableMetadata, COMPARE_TABLE_INFO 
     }
 
     /**
-     * 分析bean class
+     * 开始分析bean class
      *
      * @param beanClasses 待处理的类
      */
-    default void analyseClasses(Set<Class<?>> beanClasses) {
+    default void start(Set<Class<?>> beanClasses) {
 
         RunMode runMode = AutoTableGlobalConfig.getAutoTableProperties().getMode();
         boolean validateMode = runMode == RunMode.validate;
 
-        List<String> validateResult = new ArrayList<>();
+        AutoTableGlobalConfig.getCollectTableClassIntercepter().intercept(beanClasses);
         for (Class<?> beanClass : beanClasses) {
 
             TABLE_META tableMetadata = this.analyseClass(beanClass);
@@ -90,17 +89,15 @@ public interface IStrategy<TABLE_META extends TableMetadata, COMPARE_TABLE_INFO 
             AutoTableGlobalConfig.getBuildTableMetadataIntercepter().intercept(this.databaseDialect(), tableMetadata);
 
             if (validateMode) {
-                validateTable(validateResult, tableMetadata);
+                validateTable(beanClass, tableMetadata);
             } else {
-                compareAndModifyTable(tableMetadata);
+                compareAndModifyTable(beanClass, tableMetadata);
             }
         }
-        if (validateMode && !validateResult.isEmpty()) {
-            throw new RuntimeException("启动失败，" + this.databaseDialect() + "数据库与实体模型不对应：\n" + String.join("\n", validateResult));
-        }
+        AutoTableGlobalConfig.getRunFinishCallback().finish(beanClasses);
     }
 
-    default void compareAndModifyTable(TABLE_META tableMetadata) {
+    default void compareAndModifyTable(Class<?> beanClass, TABLE_META tableMetadata) {
         String tableName = tableMetadata.getTableName();
 
         // 表是否存在的标记
@@ -120,7 +117,9 @@ public interface IStrategy<TABLE_META extends TableMetadata, COMPARE_TABLE_INFO 
         if (!tableIsExist) {
             log.info("创建表：{}", tableName);
             // 建表
+            AutoTableGlobalConfig.getCreateTableIntercepter().beforeCreateTable(beanClass, this.databaseDialect(), tableMetadata);
             this.createTable(tableMetadata);
+            AutoTableGlobalConfig.getCreateTableFinishCallback().afterCreateTable(beanClass, this.databaseDialect(), tableMetadata);
         }
 
         // update模型，且表存在，更新表信息
@@ -130,33 +129,45 @@ public interface IStrategy<TABLE_META extends TableMetadata, COMPARE_TABLE_INFO 
             if (compareTableInfo.needModify()) {
                 log.info("修改表：{}", tableName);
                 // 修改表信息
+                AutoTableGlobalConfig.getModifyTableIntercepter().beforeModifyTable(beanClass, this.databaseDialect(), tableMetadata, compareTableInfo);
                 this.modifyTable(compareTableInfo);
+                AutoTableGlobalConfig.getModifyTableFinishCallback().afterModifyTable(beanClass, this.databaseDialect(), tableMetadata, compareTableInfo);
             }
         }
     }
 
-    default void validateTable(List<String> validateResult, TABLE_META tableMetadata) {
+    @Nullable
+    default void validateTable(Class<?> beanClass, TABLE_META tableMetadata) {
         String tableName = tableMetadata.getTableName();
         // 检查数据库数据模型与实体是否一致
         boolean tableIsExist = this.checkTableExist(tableName);
+        COMPARE_TABLE_INFO compareTableInfo = null;
         if (tableIsExist) {
-            COMPARE_TABLE_INFO compareTableInfo = this.compareTable(tableMetadata);
-            if (compareTableInfo.needModify()) {
-                validateResult.add("表" + tableName + "结构不一致");
-            }
-        } else {
-            validateResult.add("表" + tableName + "不存在");
+            compareTableInfo = this.compareTable(tableMetadata);
         }
+
+        if (compareTableInfo == null) {
+            AutoTableGlobalConfig.getValidateFinishCallback().validateFinish(false, beanClass, this.databaseDialect(), null);
+            throw new RuntimeException("启动失败，" + this.databaseDialect() + "数据表" + tableMetadata.getTableName() + "不存在");
+        }
+        if (compareTableInfo.needModify()) {
+            log.warn(compareTableInfo.validateFailedMessage());
+            AutoTableGlobalConfig.getValidateFinishCallback().validateFinish(false, beanClass, this.databaseDialect(), compareTableInfo);
+            throw new RuntimeException("启动失败，" + this.databaseDialect() + "数据表" + tableMetadata.getTableName() + "与实体" + beanClass.getName() + "不匹配");
+        }
+        AutoTableGlobalConfig.getValidateFinishCallback().validateFinish(true, beanClass, this.databaseDialect(), compareTableInfo);
     }
 
     /**
      * 策略对应的数据库方言，与数据库驱动中的接口{@link java.sql.DatabaseMetaData#getDatabaseProductName()}实现返回值一致
+     *
      * @return 方言
      */
     String databaseDialect();
 
     /**
      * java字段类型与数据库类型映射关系
+     *
      * @return 映射
      */
     Map<Class<?>, DefaultTypeEnumInterface> typeMapping();

@@ -1,9 +1,16 @@
 package com.tangzc.autotable.core;
 
+import com.tangzc.autotable.core.callback.CreateTableFinishCallback;
+import com.tangzc.autotable.core.callback.ModifyTableFinishCallback;
+import com.tangzc.autotable.core.callback.RunFinishCallback;
+import com.tangzc.autotable.core.callback.ValidateFinishCallback;
 import com.tangzc.autotable.core.converter.JavaTypeToDatabaseTypeConverter;
 import com.tangzc.autotable.core.dynamicds.IDataSourceHandler;
 import com.tangzc.autotable.core.dynamicds.impl.DefaultDataSourceHandler;
 import com.tangzc.autotable.core.intercepter.BuildTableMetadataIntercepter;
+import com.tangzc.autotable.core.intercepter.CollectTableClassIntercepter;
+import com.tangzc.autotable.core.intercepter.CreateTableIntercepter;
+import com.tangzc.autotable.core.intercepter.ModifyTableIntercepter;
 import com.tangzc.autotable.core.strategy.CompareTableInfo;
 import com.tangzc.autotable.core.strategy.IStrategy;
 import com.tangzc.autotable.core.strategy.TableMetadata;
@@ -26,7 +33,8 @@ public class AutoTableGlobalConfig {
 
     @Setter
     @Getter
-    private static AutoTableAnnotationFinder autoTableAnnotationFinder = new AutoTableAnnotationFinder(){};
+    private static AutoTableAnnotationFinder autoTableAnnotationFinder = new AutoTableAnnotationFinder() {
+    };
 
     @Setter
     @Getter
@@ -34,11 +42,48 @@ public class AutoTableGlobalConfig {
 
     @Setter
     @Getter
-    private static JavaTypeToDatabaseTypeConverter javaTypeToDatabaseTypeConverter = new JavaTypeToDatabaseTypeConverter() {};
+    private static JavaTypeToDatabaseTypeConverter javaTypeToDatabaseTypeConverter = new JavaTypeToDatabaseTypeConverter() {
+    };
 
     @Setter
     @Getter
     private static BuildTableMetadataIntercepter buildTableMetadataIntercepter = (databaseDialect, tableMetadata) -> {
+    };
+
+    @Setter
+    @Getter
+    private static CollectTableClassIntercepter collectTableClassIntercepter = beanClasses -> {
+    };
+
+    @Setter
+    @Getter
+    private static CreateTableIntercepter createTableIntercepter = (tableClass, databaseDialect, tableMetadata) -> {
+    };
+
+    @Setter
+    @Getter
+    private static ModifyTableIntercepter modifyTableIntercepter = (tableClass, databaseDialect, tableMetadata, compareTableInfo) -> {
+    };
+
+    @Setter
+    @Getter
+    private static ValidateFinishCallback validateFinishCallback = (status, tableClass, databaseDialect, compareTableInfo) -> {
+    };
+
+    @Setter
+    @Getter
+    private static CreateTableFinishCallback createTableFinishCallback = (tableClass, databaseDialect, tableMetadata) -> {
+    };
+
+    @Setter
+    @Getter
+    private static ModifyTableFinishCallback modifyTableFinishCallback = (tableClass, databaseDialect, tableMetadata, compareTableInfo) -> {
+
+    };
+
+    @Setter
+    @Getter
+    private static RunFinishCallback runFinishCallback = tableClasses -> {
     };
 
     private final static Map<String, IStrategy<? extends TableMetadata, ? extends CompareTableInfo, ?>> strategyMap = new HashMap<>();

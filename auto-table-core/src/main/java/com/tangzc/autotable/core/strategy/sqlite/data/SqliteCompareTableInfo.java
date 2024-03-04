@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 import java.util.ArrayList;
@@ -42,6 +41,21 @@ public class SqliteCompareTableInfo extends CompareTableInfo {
         return rebuildTableSql != null ||
                 !buildIndexSqlList.isEmpty() ||
                 !deleteIndexList.isEmpty();
+    }
+
+    @Override
+    public String validateFailedMessage() {
+        StringBuilder errorMsg = new StringBuilder();
+        if (rebuildTableSql != null) {
+            errorMsg.append("新的建表语句: ").append(rebuildTableSql).append("\n");
+        }
+        if (!deleteIndexList.isEmpty()) {
+            errorMsg.append("待删除的索引: ").append(String.join(",", deleteIndexList)).append("\n");
+        }
+        if (!buildIndexSqlList.isEmpty()) {
+            errorMsg.append("新增的索引: ").append(String.join(",", buildIndexSqlList)).append("\n");
+        }
+        return errorMsg.toString();
     }
 
     @Data

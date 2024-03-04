@@ -24,4 +24,9 @@ public abstract class CompareTableInfo {
      * 是否需要修改表,即表与模型是否存在差异
      */
     public abstract boolean needModify();
+
+    /**
+     * 验证模式下失败的信息
+     */
+    public abstract String validateFailedMessage();
 }

@@ -9,6 +9,7 @@ import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author don
@@ -77,6 +78,57 @@ public class MysqlCompareTableInfo extends CompareTableInfo {
                 !modifyMysqlColumnMetadataList.isEmpty() ||
                 !dropIndexList.isEmpty() ||
                 !mysqlIndexMetadataList.isEmpty();
+    }
+
+    @Override
+    public String validateFailedMessage() {
+        StringBuilder errorMsg = new StringBuilder();
+        if (engine != null) {
+            errorMsg.append("表引擎变更：").append(engine).append("\n");
+        }
+        if (characterSet != null) {
+            errorMsg.append("表字符集变更：").append(characterSet).append("\n");
+        }
+        if (collate != null) {
+            errorMsg.append("表排序规则变更：").append(collate).append("\n");
+        }
+        if (comment != null) {
+            errorMsg.append("表注释变更：").append(comment).append("\n");
+        }
+        if (dropPrimary) {
+            errorMsg.append("删除全部主键").append("\n");
+        }
+        if (!newPrimaries.isEmpty()) {
+            errorMsg.append("新增主键：").append(newPrimaries.stream().map(MysqlColumnMetadata::getName).collect(Collectors.joining(","))).append("\n");
+        }
+        if (!dropColumnList.isEmpty()) {
+            errorMsg.append("删除列：").append(String.join(",", dropColumnList)).append("\n");
+        }
+        if (!modifyMysqlColumnMetadataList.isEmpty()) {
+            String addColumn = modifyMysqlColumnMetadataList.stream()
+                    .filter(m -> m.getType() == ModifyType.ADD)
+                    .map(MysqlModifyColumnMetadata::getMysqlColumnMetadata)
+                    .map(MysqlColumnMetadata::getName)
+                    .collect(Collectors.joining(","));
+            if (!addColumn.isEmpty()) {
+                errorMsg.append("新增列：").append(addColumn).append("\n");
+            }
+            String modifyColumn = modifyMysqlColumnMetadataList.stream()
+                    .filter(m -> m.getType() == ModifyType.MODIFY)
+                    .map(MysqlModifyColumnMetadata::getMysqlColumnMetadata)
+                    .map(MysqlColumnMetadata::getName)
+                    .collect(Collectors.joining(","));
+            if (!modifyColumn.isEmpty()) {
+                errorMsg.append("修改列：").append(modifyColumn).append("\n");
+            }
+        }
+        if (!dropIndexList.isEmpty()) {
+            errorMsg.append("删除索引：").append(String.join(",", dropIndexList)).append("\n");
+        }
+        if (!mysqlIndexMetadataList.isEmpty()) {
+            errorMsg.append("新增索引：").append(mysqlIndexMetadataList.stream().map(MysqlIndexMetadata::getName).collect(Collectors.joining(","))).append("\n");
+        }
+        return errorMsg.toString();
     }
 
     public void addNewColumnMetadata(MysqlColumnMetadata mysqlColumnMetadata) {
