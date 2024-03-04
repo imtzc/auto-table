@@ -14,47 +14,49 @@ import com.tangzc.autotable.core.strategy.TableMetadata;
 import com.tangzc.autotable.springboot.properties.AutoTableProperties;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.mybatis.spring.boot.autoconfigure.MybatisAutoConfiguration;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.ApplicationArguments;
-import org.springframework.boot.ApplicationRunner;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.context.annotation.Configuration;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Configuration
 @AutoConfigureAfter({DataSourceAutoConfiguration.class, MybatisAutoConfiguration.class})
-public class AutoTableAutoConfig implements ApplicationRunner {
+public class AutoTableAutoConfig {
 
     private final SqlSessionTemplate sqlSessionTemplate;
     private final AutoTableProperties autoTableProperties;
+    private final List<IStrategy<? extends TableMetadata, ? extends CompareTableInfo, ?>> strategies;
+    private final AutoTableAnnotationFinder autoTableAnnotationFinder;
+    private final AutoTableOrmFrameAdapter autoTableOrmFrameAdapter;
+    private final BuildTableMetadataIntercepter buildTableMetadataIntercepter;
+    private final IDataSourceHandler<?> dynamicDataSourceHandler;
+    private final JavaTypeToDatabaseTypeConverter javaTypeToDatabaseTypeConverter;
 
-    @Autowired(required = false)
-    private List<IStrategy<? extends TableMetadata, ? extends CompareTableInfo, ?>> strategies;
+    public AutoTableAutoConfig(SqlSessionTemplate sqlSessionTemplate,
+                               AutoTableProperties autoTableProperties,
+                               ObjectProvider<IStrategy<? extends TableMetadata, ? extends CompareTableInfo, ?>> strategies,
+                               ObjectProvider<AutoTableAnnotationFinder> autoTableAnnotationFinder,
+                               ObjectProvider<AutoTableOrmFrameAdapter> autoTableOrmFrameAdapter,
+                               ObjectProvider<BuildTableMetadataIntercepter> buildTableMetadataIntercepter,
+                               ObjectProvider<IDataSourceHandler<?>> dynamicDataSourceHandler,
+                               ObjectProvider<JavaTypeToDatabaseTypeConverter> javaTypeToDatabaseTypeConverter) {
 
-    @Autowired(required = false)
-    private AutoTableAnnotationFinder autoTableAnnotationFinder;
-
-    @Autowired(required = false)
-    private AutoTableOrmFrameAdapter autoTableOrmFrameAdapter;
-
-    @Autowired(required = false)
-    private BuildTableMetadataIntercepter buildTableMetadataIntercepter;
-
-    @Autowired(required = false)
-    private IDataSourceHandler<?> dynamicDataSourceHandler;
-
-    @Autowired(required = false)
-    private JavaTypeToDatabaseTypeConverter javaTypeToDatabaseTypeConverter;
-
-    public AutoTableAutoConfig(SqlSessionTemplate sqlSessionTemplate, AutoTableProperties autoTableProperties) {
         this.sqlSessionTemplate = sqlSessionTemplate;
         this.autoTableProperties = autoTableProperties;
+        this.strategies = strategies.orderedStream().collect(Collectors.toList());
+        this.autoTableAnnotationFinder = autoTableAnnotationFinder.getIfAvailable();
+        this.autoTableOrmFrameAdapter = autoTableOrmFrameAdapter.getIfAvailable();
+        this.buildTableMetadataIntercepter = buildTableMetadataIntercepter.getIfAvailable();
+        this.dynamicDataSourceHandler = dynamicDataSourceHandler.getIfAvailable();
+        this.javaTypeToDatabaseTypeConverter = javaTypeToDatabaseTypeConverter.getIfAvailable();
+
+        this.run();
     }
 
-    @Override
-    public void run(ApplicationArguments args) {
+    public void run() {
 
         // 默认设置全局的SqlSessionFactory
         SqlSessionFactoryManager.setSqlSessionFactory(sqlSessionTemplate.getSqlSessionFactory());

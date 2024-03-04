@@ -9,7 +9,7 @@
         <version>1.1.0</version>
     </parent>
 
-    <artifactId>auto-table-dynamicdatasource-test</artifactId>
+    <artifactId>auto-table-test-dynamicdatasource</artifactId>
 
     <dependencies>
         <dependency>

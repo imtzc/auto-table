@@ -12,10 +12,10 @@
     <artifactId>auto-table-test</artifactId>
     <packaging>pom</packaging>
     <modules>
-        <module>auto-table-core-test</module>
-        <module>auto-table-spring-boot-test</module>
-        <module>auto-table-dynamicdatasource-test</module>
-        <module>auto-table-spring-boot-dynamicdatasource-test</module>
+        <module>auto-table-test-core</module>
+        <module>auto-table-test-spring-boot</module>
+        <module>auto-table-test-dynamicdatasource</module>
+        <module>auto-table-test-spring-boot-dynamicdatasource</module>
     </modules>
 
     <properties>
