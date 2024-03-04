@@ -7,6 +7,7 @@ import com.tangzc.autotable.annotation.TableIndexes;
 import com.tangzc.autotable.annotation.TableName;
 import com.tangzc.autotable.annotation.mysql.MysqlCharset;
 import com.tangzc.autotable.annotation.mysql.MysqlEngine;
+import com.tangzc.autotable.core.constants.Version;
 import com.tangzc.autotable.core.dynamicds.IDataSourceHandler;
 import com.tangzc.autotable.core.strategy.IStrategy;
 import com.tangzc.autotable.core.strategy.mysql.MysqlStrategy;
@@ -50,7 +51,7 @@ public class AutoTableBootstrap {
                             "   / _ \\| | | | __/ _ \\    | |/ _` | '_ \\| |/ _ \\\n" +
                             "  / ___ \\ |_| | || (_) |   | | (_| | |_) | |  __/\n" +
                             " /_/   \\_\\__,_|\\__\\___/    |_|\\__,_|_.__/|_|\\___|\n" +
-                            " Git: https://gitee.com/tangzc/auto-table\n");
+                            " :: https://autotable.tangzc.com ::      (v" + Version.VALUE + ")\n");
         }
 
         final long start = System.currentTimeMillis();

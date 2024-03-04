@@ -18,6 +18,8 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -35,8 +37,7 @@ public class AutoTableAutoConfig {
     private final IDataSourceHandler<?> dynamicDataSourceHandler;
     private final JavaTypeToDatabaseTypeConverter javaTypeToDatabaseTypeConverter;
 
-    public AutoTableAutoConfig(SqlSessionTemplate sqlSessionTemplate,
-                               AutoTableProperties autoTableProperties,
+    public AutoTableAutoConfig(SqlSessionTemplate sqlSessionTemplate, AutoTableProperties autoTableProperties,
                                ObjectProvider<IStrategy<? extends TableMetadata, ? extends CompareTableInfo, ?>> strategies,
                                ObjectProvider<AutoTableAnnotationFinder> autoTableAnnotationFinder,
                                ObjectProvider<AutoTableOrmFrameAdapter> autoTableOrmFrameAdapter,
@@ -52,10 +53,9 @@ public class AutoTableAutoConfig {
         this.buildTableMetadataIntercepter = buildTableMetadataIntercepter.getIfAvailable();
         this.dynamicDataSourceHandler = dynamicDataSourceHandler.getIfAvailable();
         this.javaTypeToDatabaseTypeConverter = javaTypeToDatabaseTypeConverter.getIfAvailable();
-
-        this.run();
     }
 
+    @EventListener(ContextRefreshedEvent.class)
     public void run() {
 
         // 默认设置全局的SqlSessionFactory
