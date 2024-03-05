@@ -4,10 +4,17 @@ import com.tangzc.autotable.core.AutoTableAnnotationFinder;
 import com.tangzc.autotable.core.AutoTableBootstrap;
 import com.tangzc.autotable.core.AutoTableGlobalConfig;
 import com.tangzc.autotable.core.AutoTableOrmFrameAdapter;
+import com.tangzc.autotable.core.callback.CreateTableFinishCallback;
+import com.tangzc.autotable.core.callback.ModifyTableFinishCallback;
+import com.tangzc.autotable.core.callback.RunFinishCallback;
+import com.tangzc.autotable.core.callback.ValidateFinishCallback;
 import com.tangzc.autotable.core.converter.JavaTypeToDatabaseTypeConverter;
 import com.tangzc.autotable.core.dynamicds.IDataSourceHandler;
 import com.tangzc.autotable.core.dynamicds.SqlSessionFactoryManager;
 import com.tangzc.autotable.core.intercepter.BuildTableMetadataIntercepter;
+import com.tangzc.autotable.core.intercepter.CollectEntitiesIntercepter;
+import com.tangzc.autotable.core.intercepter.CreateTableIntercepter;
+import com.tangzc.autotable.core.intercepter.ModifyTableIntercepter;
 import com.tangzc.autotable.core.strategy.CompareTableInfo;
 import com.tangzc.autotable.core.strategy.IStrategy;
 import com.tangzc.autotable.core.strategy.TableMetadata;
@@ -21,42 +28,30 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 @Configuration
 @AutoConfigureAfter({DataSourceAutoConfiguration.class, MybatisAutoConfiguration.class})
 public class AutoTableAutoConfig {
 
-    private final SqlSessionTemplate sqlSessionTemplate;
-    private final AutoTableProperties autoTableProperties;
-    private final List<IStrategy<? extends TableMetadata, ? extends CompareTableInfo, ?>> strategies;
-    private final AutoTableAnnotationFinder autoTableAnnotationFinder;
-    private final AutoTableOrmFrameAdapter autoTableOrmFrameAdapter;
-    private final BuildTableMetadataIntercepter buildTableMetadataIntercepter;
-    private final IDataSourceHandler<?> dynamicDataSourceHandler;
-    private final JavaTypeToDatabaseTypeConverter javaTypeToDatabaseTypeConverter;
 
-    public AutoTableAutoConfig(SqlSessionTemplate sqlSessionTemplate, AutoTableProperties autoTableProperties,
-                               ObjectProvider<IStrategy<? extends TableMetadata, ? extends CompareTableInfo, ?>> strategies,
-                               ObjectProvider<AutoTableAnnotationFinder> autoTableAnnotationFinder,
-                               ObjectProvider<AutoTableOrmFrameAdapter> autoTableOrmFrameAdapter,
-                               ObjectProvider<BuildTableMetadataIntercepter> buildTableMetadataIntercepter,
-                               ObjectProvider<IDataSourceHandler<?>> dynamicDataSourceHandler,
-                               ObjectProvider<JavaTypeToDatabaseTypeConverter> javaTypeToDatabaseTypeConverter) {
+    public AutoTableAutoConfig(
+            SqlSessionTemplate sqlSessionTemplate,
+            AutoTableProperties autoTableProperties,
+            ObjectProvider<IStrategy<? extends TableMetadata, ? extends CompareTableInfo, ?>> strategies,
+            ObjectProvider<AutoTableAnnotationFinder> autoTableAnnotationFinder,
+            ObjectProvider<AutoTableOrmFrameAdapter> autoTableOrmFrameAdapter,
+            ObjectProvider<IDataSourceHandler<?>> dynamicDataSourceHandler,
+            /* 拦截器 */
+            ObjectProvider<BuildTableMetadataIntercepter> buildTableMetadataIntercepter,
+            ObjectProvider<CollectEntitiesIntercepter> collectEntitiesIntercepters,
+            ObjectProvider<CreateTableIntercepter> createTableIntercepters,
+            ObjectProvider<ModifyTableIntercepter> modifyTableIntercepters,
+            /* 回调事件 */
+            ObjectProvider<CreateTableFinishCallback> createTableFinishCallbacks,
+            ObjectProvider<ModifyTableFinishCallback> modifyTableFinishCallbacks,
+            ObjectProvider<RunFinishCallback> runFinishCallbacks,
+            ObjectProvider<ValidateFinishCallback> validateFinishCallbacks,
 
-        this.sqlSessionTemplate = sqlSessionTemplate;
-        this.autoTableProperties = autoTableProperties;
-        this.strategies = strategies.orderedStream().collect(Collectors.toList());
-        this.autoTableAnnotationFinder = autoTableAnnotationFinder.getIfAvailable();
-        this.autoTableOrmFrameAdapter = autoTableOrmFrameAdapter.getIfAvailable();
-        this.buildTableMetadataIntercepter = buildTableMetadataIntercepter.getIfAvailable();
-        this.dynamicDataSourceHandler = dynamicDataSourceHandler.getIfAvailable();
-        this.javaTypeToDatabaseTypeConverter = javaTypeToDatabaseTypeConverter.getIfAvailable();
-    }
-
-    @EventListener(ContextRefreshedEvent.class)
-    public void run() {
+            ObjectProvider<JavaTypeToDatabaseTypeConverter> javaTypeToDatabaseTypeConverter) {
 
         // 默认设置全局的SqlSessionFactory
         SqlSessionFactoryManager.setSqlSessionFactory(sqlSessionTemplate.getSqlSessionFactory());
@@ -64,40 +59,44 @@ public class AutoTableAutoConfig {
         // 设置全局的配置
         AutoTableGlobalConfig.setAutoTableProperties(autoTableProperties.toConfig());
 
-        // 假如有自定的注解扫描器，就使用自定义的注解扫描器
-        if (autoTableAnnotationFinder != null) {
-            AutoTableGlobalConfig.setAutoTableAnnotationFinder(autoTableAnnotationFinder);
-        } else {
-            // 没有，则设置内置的注解扫描器
-            AutoTableGlobalConfig.setAutoTableAnnotationFinder(new CustomAnnotationFinder());
-        }
+        // 假如有自定的注解扫描器，就使用自定义的注解扫描器。没有，则设置内置的注解扫描器
+        AutoTableGlobalConfig.setAutoTableAnnotationFinder(autoTableAnnotationFinder.getIfAvailable(CustomAnnotationFinder::new));
 
         // 如果有自定义的数据库策略，则加载
-        if (strategies != null && !strategies.isEmpty()) {
-            for (IStrategy<? extends TableMetadata, ? extends CompareTableInfo, ?> strategy : strategies) {
-                AutoTableGlobalConfig.addStrategy(strategy);
-            }
-        }
+        strategies.stream().forEach(AutoTableGlobalConfig::addStrategy);
 
         // 假如有自定义的orm框架适配器，就使用自定义的orm框架适配器
-        if (autoTableOrmFrameAdapter != null) {
-            AutoTableGlobalConfig.setAutoTableOrmFrameAdapter(autoTableOrmFrameAdapter);
-        }
+        autoTableOrmFrameAdapter.ifAvailable(AutoTableGlobalConfig::setAutoTableOrmFrameAdapter);
 
         // 假如有自定义的动态数据源处理器，就使用自定义的动态数据源处理器
-        if (dynamicDataSourceHandler != null) {
-            AutoTableGlobalConfig.setDatasourceHandler(dynamicDataSourceHandler);
-        }
+        dynamicDataSourceHandler.ifAvailable(AutoTableGlobalConfig::setDatasourceHandler);
 
+        /* 拦截器 */
         // 假如有自定义的创建表拦截器，就使用自定义的创建表拦截器
-        if (buildTableMetadataIntercepter != null) {
-            AutoTableGlobalConfig.setBuildTableMetadataIntercepter(buildTableMetadataIntercepter);
-        }
+        buildTableMetadataIntercepter.ifAvailable(AutoTableGlobalConfig::setBuildTableMetadataIntercepter);
+        // 假如有自定义的收集实体拦截器，就使用自定义的收集实体拦截器
+        collectEntitiesIntercepters.ifAvailable(AutoTableGlobalConfig::setCollectEntitiesIntercepter);
+        // 假如有自定义的创建表拦截器，就使用自定义的创建表拦截器
+        createTableIntercepters.ifAvailable(AutoTableGlobalConfig::setCreateTableIntercepter);
+        // 假如有自定义的修改表拦截器，就使用自定义的修改表拦截器
+        modifyTableIntercepters.ifAvailable(AutoTableGlobalConfig::setModifyTableIntercepter);
+
+        /* 回调事件 */
+        // 假如有自定义的创建表回调，就使用自定义的创建表回调
+        createTableFinishCallbacks.ifAvailable(AutoTableGlobalConfig::setCreateTableFinishCallback);
+        // 假如有自定义的修改表回调，就使用自定义的修改表回调
+        modifyTableFinishCallbacks.ifAvailable(AutoTableGlobalConfig::setModifyTableFinishCallback);
+        // 假如有自定义的运行结束回调，就使用自定义的运行结束回调
+        runFinishCallbacks.ifAvailable(AutoTableGlobalConfig::setRunFinishCallback);
+        // 假如有自定义的验证表回调，就使用自定义的验证表回调
+        validateFinishCallbacks.ifAvailable(AutoTableGlobalConfig::setValidateFinishCallback);
 
         // 假如有自定义的java到数据库的转换器，就使用自定义的java到数据库的转换器
-        if (javaTypeToDatabaseTypeConverter != null) {
-            AutoTableGlobalConfig.setJavaTypeToDatabaseTypeConverter(javaTypeToDatabaseTypeConverter);
-        }
+        javaTypeToDatabaseTypeConverter.ifAvailable(AutoTableGlobalConfig::setJavaTypeToDatabaseTypeConverter);
+    }
+
+    @EventListener(ContextRefreshedEvent.class)
+    public void run() {
 
         // 启动AutoTable
         AutoTableBootstrap.start();
