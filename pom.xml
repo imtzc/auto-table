@@ -38,7 +38,6 @@
         <module>auto-table-core</module>
         <module>auto-table-annotation</module>
         <module>auto-table-spring-boot-starter</module>
-        <module>auto-table-test</module>
     </modules>
 
     <properties>
