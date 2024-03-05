@@ -6,7 +6,7 @@
 
     <groupId>com.tangzc</groupId>
     <artifactId>auto-table</artifactId>
-    <version>1.2.0</version>
+    <version>1.2.1</version>
     <name>${project.groupId}:${project.artifactId}</name>
     <description>Mybatis下，自动维护数据库表结构的框架</description>
     <url>${projectUrl}</url><!--填入开发者信息，姓名、邮箱、项目地址-->
@@ -50,7 +50,6 @@
         <mybatis.version>3.5.14</mybatis.version>
         <mybatis-spring.version>2.3.2</mybatis-spring.version>
         <lombok.version>1.18.30</lombok.version>
-        <slf4j.version>2.0.7</slf4j.version>
 
         <!--插件-->
         <maven-compiler-plugin.version>3.9.0</maven-compiler-plugin.version>
@@ -74,12 +73,6 @@
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok</artifactId>
                 <version>${lombok.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-api</artifactId>
-                <version>${slf4j.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

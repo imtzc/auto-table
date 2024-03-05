@@ -7,7 +7,6 @@ import com.tangzc.autotable.annotation.TableIndexes;
 import com.tangzc.autotable.annotation.TableName;
 import com.tangzc.autotable.annotation.mysql.MysqlCharset;
 import com.tangzc.autotable.annotation.mysql.MysqlEngine;
-import com.tangzc.autotable.core.constants.Version;
 import com.tangzc.autotable.core.dynamicds.IDataSourceHandler;
 import com.tangzc.autotable.core.strategy.IStrategy;
 import com.tangzc.autotable.core.strategy.mysql.MysqlStrategy;
@@ -45,13 +44,7 @@ public class AutoTableBootstrap {
         }
 
         if (autoTableProperties.getShowBanner()) {
-            System.out.println(
-                    "     _         _          _____     _     _      \n" +
-                            "    / \\  _   _| |_ ___   |_   _|_ _| |__ | | ___ \n" +
-                            "   / _ \\| | | | __/ _ \\    | |/ _` | '_ \\| |/ _ \\\n" +
-                            "  / ___ \\ |_| | || (_) |   | | (_| | |_) | |  __/\n" +
-                            " /_/   \\_\\__,_|\\__\\___/    |_|\\__,_|_.__/|_|\\___|\n" +
-                            " :: https://autotable.tangzc.com ::      (v" + Version.VALUE + ")\n");
+            Banner.print();
         }
 
         final long start = System.currentTimeMillis();
