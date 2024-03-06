@@ -17,13 +17,13 @@ import lombok.Getter;
 public enum MySqlDefaultTypeEnum implements DefaultTypeEnumInterface {
 
     /**
-     * 整数
+     * 整数，从8.0.17版本开始,TINYINT,SMALLINT,MEDIUMINT,INT,andBIGINT类型的显示宽度将失效
      */
-    INT(MysqlTypeConstant.INT, 10, null),
-    TINYINT(MysqlTypeConstant.TINYINT, 3, null),
-    SMALLINT(MysqlTypeConstant.SMALLINT, 5, null),
-    MEDIUMINT(MysqlTypeConstant.MEDIUMINT, 7, null),
-    BIGINT(MysqlTypeConstant.BIGINT, 19, null),
+    INT(MysqlTypeConstant.INT, null, null),
+    TINYINT(MysqlTypeConstant.TINYINT, null, null),
+    SMALLINT(MysqlTypeConstant.SMALLINT, null, null),
+    MEDIUMINT(MysqlTypeConstant.MEDIUMINT, null, null),
+    BIGINT(MysqlTypeConstant.BIGINT, null, null),
     /**
      * 小数
      */

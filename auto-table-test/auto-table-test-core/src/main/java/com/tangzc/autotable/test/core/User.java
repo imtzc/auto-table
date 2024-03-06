@@ -21,6 +21,9 @@ public class User {
     @ColumnComment("姓名")
     private String name;
 
+    @ColumnComment("年龄")
+    private Integer age;
+
     @ColumnComment("备注")
     @ColumnType(MysqlTypeConstant.TEXT)
     @ColumnDefault(type = DefaultValueEnum.NULL)

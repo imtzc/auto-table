@@ -18,6 +18,9 @@ public class User {
     @ColumnComment("电话")
     private String phone;
 
+    @ColumnComment("年龄")
+    private Integer age;
+
     @ColumnComment("备注")
     @ColumnType(MysqlTypeConstant.TEXT)
     private String mark;
