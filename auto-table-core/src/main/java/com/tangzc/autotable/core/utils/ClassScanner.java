@@ -14,7 +14,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.jar.JarEntry;
@@ -26,7 +25,7 @@ import java.util.stream.Collectors;
  */
 public class ClassScanner {
 
-    public static Set<Class<?>> scan(String[] basePackages, List<Class<? extends Annotation>> includeAnnotations, List<Class<? extends Annotation>> excludeAnnotations) {
+    public static Set<Class<?>> scan(String[] basePackages, Set<Class<? extends Annotation>> includeAnnotations, Set<Class<? extends Annotation>> excludeAnnotations) {
 
         if (basePackages == null || includeAnnotations == null) {
             return Collections.emptySet();
@@ -55,10 +54,10 @@ public class ClassScanner {
 
         while (resources.hasMoreElements()) {
             URL resource = resources.nextElement();
-            if (resource.getProtocol().equals("file")) {
+            if ("file".equals(resource.getProtocol())) {
                 String decodedPath = URLDecoder.decode(resource.getFile(), "UTF-8");
                 classes.addAll(findClassesLocal(packageName, new File(decodedPath), checker));
-            } else if (resource.getProtocol().equals("jar")) {
+            } else if ("jar".equals(resource.getProtocol())) {
                 JarURLConnection jarURLConnection = (JarURLConnection) resource.openConnection();
                 classes.addAll(findClassesJar(packageName, jarURLConnection.getJarFile(), checker));
             }

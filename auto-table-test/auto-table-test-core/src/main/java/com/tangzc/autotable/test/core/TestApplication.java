@@ -42,6 +42,11 @@ public class TestApplication {
             }
         });
 
+        AutoTableGlobalConfig.setAutoTableAnnotationIntercepter((includeAnnotations, excludeAnnotations) -> {
+            includeAnnotations.add(MyAnno.class);
+            // excludeAnnotations.add(TableName.class);
+        });
+
         // 开始
         AutoTableBootstrap.start();
     }

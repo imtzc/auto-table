@@ -11,6 +11,7 @@ import com.tangzc.autotable.core.callback.ValidateFinishCallback;
 import com.tangzc.autotable.core.converter.JavaTypeToDatabaseTypeConverter;
 import com.tangzc.autotable.core.dynamicds.IDataSourceHandler;
 import com.tangzc.autotable.core.dynamicds.SqlSessionFactoryManager;
+import com.tangzc.autotable.core.intercepter.AutoTableAnnotationIntercepter;
 import com.tangzc.autotable.core.intercepter.BuildTableMetadataIntercepter;
 import com.tangzc.autotable.core.intercepter.CollectEntitiesIntercepter;
 import com.tangzc.autotable.core.intercepter.CreateTableIntercepter;
@@ -32,7 +33,6 @@ import org.springframework.context.event.EventListener;
 @AutoConfigureAfter({DataSourceAutoConfiguration.class, MybatisAutoConfiguration.class})
 public class AutoTableAutoConfig {
 
-
     public AutoTableAutoConfig(
             SqlSessionTemplate sqlSessionTemplate,
             AutoTableProperties autoTableProperties,
@@ -41,10 +41,11 @@ public class AutoTableAutoConfig {
             ObjectProvider<AutoTableOrmFrameAdapter> autoTableOrmFrameAdapter,
             ObjectProvider<IDataSourceHandler<?>> dynamicDataSourceHandler,
             /* 拦截器 */
+            ObjectProvider<AutoTableAnnotationIntercepter> autoTableAnnotationIntercepter,
             ObjectProvider<BuildTableMetadataIntercepter> buildTableMetadataIntercepter,
-            ObjectProvider<CollectEntitiesIntercepter> collectEntitiesIntercepters,
-            ObjectProvider<CreateTableIntercepter> createTableIntercepters,
-            ObjectProvider<ModifyTableIntercepter> modifyTableIntercepters,
+            ObjectProvider<CollectEntitiesIntercepter> collectEntitiesIntercepter,
+            ObjectProvider<CreateTableIntercepter> createTableIntercepter,
+            ObjectProvider<ModifyTableIntercepter> modifyTableIntercepter,
             /* 回调事件 */
             ObjectProvider<CreateTableFinishCallback> createTableFinishCallbacks,
             ObjectProvider<ModifyTableFinishCallback> modifyTableFinishCallbacks,
@@ -72,14 +73,16 @@ public class AutoTableAutoConfig {
         dynamicDataSourceHandler.ifAvailable(AutoTableGlobalConfig::setDatasourceHandler);
 
         /* 拦截器 */
+        // 假如有自定义的注解拦截器，就使用自定义的注解拦截器
+        autoTableAnnotationIntercepter.ifAvailable(AutoTableGlobalConfig::setAutoTableAnnotationIntercepter);
         // 假如有自定义的创建表拦截器，就使用自定义的创建表拦截器
         buildTableMetadataIntercepter.ifAvailable(AutoTableGlobalConfig::setBuildTableMetadataIntercepter);
         // 假如有自定义的收集实体拦截器，就使用自定义的收集实体拦截器
-        collectEntitiesIntercepters.ifAvailable(AutoTableGlobalConfig::setCollectEntitiesIntercepter);
+        collectEntitiesIntercepter.ifAvailable(AutoTableGlobalConfig::setCollectEntitiesIntercepter);
         // 假如有自定义的创建表拦截器，就使用自定义的创建表拦截器
-        createTableIntercepters.ifAvailable(AutoTableGlobalConfig::setCreateTableIntercepter);
+        createTableIntercepter.ifAvailable(AutoTableGlobalConfig::setCreateTableIntercepter);
         // 假如有自定义的修改表拦截器，就使用自定义的修改表拦截器
-        modifyTableIntercepters.ifAvailable(AutoTableGlobalConfig::setModifyTableIntercepter);
+        modifyTableIntercepter.ifAvailable(AutoTableGlobalConfig::setModifyTableIntercepter);
 
         /* 回调事件 */
         // 假如有自定义的创建表回调，就使用自定义的创建表回调

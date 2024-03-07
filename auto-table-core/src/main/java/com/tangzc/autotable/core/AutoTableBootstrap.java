@@ -17,10 +17,9 @@ import com.tangzc.autotable.core.utils.TableBeanUtils;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.annotation.Annotation;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
@@ -58,14 +57,17 @@ public class AutoTableBootstrap {
         String[] packs = getModelPackage(autoTableProperties);
 
         // 从包package中获取所有的Class
-        List<Class<? extends Annotation>> annotations = new ArrayList<>(
+        Set<Class<? extends Annotation>> includeAnnotations = new HashSet<>(
                 Arrays.asList(TableName.class, TableComment.class, TableIndexes.class, TableIndex.class,
                         MysqlEngine.class, MysqlCharset.class)
         );
         // 添加自定义的注解
-        annotations.addAll(AutoTableGlobalConfig.getAutoTableOrmFrameAdapter().scannerAnnotations());
+        includeAnnotations.addAll(AutoTableGlobalConfig.getAutoTableOrmFrameAdapter().scannerAnnotations());
+        Set<Class<? extends Annotation>> ignoreAnnotations = new HashSet<>(Collections.singleton(Ignore.class));
+        // 经过自定义的拦截器，修改最终影响自动建表的注解
+        AutoTableGlobalConfig.getAutoTableAnnotationIntercepter().intercept(includeAnnotations, ignoreAnnotations);
         // 扫描所有的类，过滤出指定注解的实体
-        Set<Class<?>> classes = ClassScanner.scan(packs, annotations, Collections.singletonList(Ignore.class));
+        Set<Class<?>> classes = ClassScanner.scan(packs, includeAnnotations, ignoreAnnotations);
 
         // 检查重名的表
         Map<String, Long> repeatCheckMap = classes.stream().map(TableBeanUtils::getTableName).collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));

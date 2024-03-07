@@ -7,6 +7,7 @@ import com.tangzc.autotable.core.callback.ValidateFinishCallback;
 import com.tangzc.autotable.core.converter.JavaTypeToDatabaseTypeConverter;
 import com.tangzc.autotable.core.dynamicds.IDataSourceHandler;
 import com.tangzc.autotable.core.dynamicds.impl.DefaultDataSourceHandler;
+import com.tangzc.autotable.core.intercepter.AutoTableAnnotationIntercepter;
 import com.tangzc.autotable.core.intercepter.BuildTableMetadataIntercepter;
 import com.tangzc.autotable.core.intercepter.CollectEntitiesIntercepter;
 import com.tangzc.autotable.core.intercepter.CreateTableIntercepter;
@@ -23,64 +24,110 @@ import java.util.Map;
 
 public class AutoTableGlobalConfig {
 
+    /**
+     * 全局配置
+     */
     @Setter
     @Getter
     private static PropertyConfig autoTableProperties = new PropertyConfig();
 
+    /**
+     * 数据源处理器
+     */
     @Setter
     @Getter
     private static IDataSourceHandler<?> datasourceHandler = new DefaultDataSourceHandler();
 
+    /**
+     * 自定义注解查找器
+     */
     @Setter
     @Getter
     private static AutoTableAnnotationFinder autoTableAnnotationFinder = new AutoTableAnnotationFinder() {
     };
 
+    /**
+     * ORM框架适配器
+     */
     @Setter
     @Getter
     private static AutoTableOrmFrameAdapter autoTableOrmFrameAdapter = new AutoTableOrmFrameAdapter.DefaultAutoTableOrmFrameAdapter();
 
+    /**
+     * 数据库类型转换
+     */
     @Setter
     @Getter
     private static JavaTypeToDatabaseTypeConverter javaTypeToDatabaseTypeConverter = new JavaTypeToDatabaseTypeConverter() {
     };
 
+    /**
+     * 自动表注解拦截器
+     */
+    @Setter
+    @Getter
+    private static AutoTableAnnotationIntercepter autoTableAnnotationIntercepter = (includeAnnotations, excludeAnnotations) -> {
+    };
+
+    /**
+     * 创建表拦截
+     */
     @Setter
     @Getter
     private static BuildTableMetadataIntercepter buildTableMetadataIntercepter = (databaseDialect, tableMetadata) -> {
     };
 
+    /**
+     * 收集实体类拦截
+     */
     @Setter
     @Getter
     private static CollectEntitiesIntercepter collectEntitiesIntercepter = beanClasses -> {
     };
 
+    /**
+     * 创建表拦截
+     */
     @Setter
     @Getter
     private static CreateTableIntercepter createTableIntercepter = (tableClass, databaseDialect, tableMetadata) -> {
     };
 
+    /**
+     * 修改表拦截
+     */
     @Setter
     @Getter
     private static ModifyTableIntercepter modifyTableIntercepter = (tableClass, databaseDialect, tableMetadata, compareTableInfo) -> {
     };
 
+    /**
+     * 验证完成回调
+     */
     @Setter
     @Getter
     private static ValidateFinishCallback validateFinishCallback = (status, tableClass, databaseDialect, compareTableInfo) -> {
     };
 
+    /**
+     * 创建表回调
+     */
     @Setter
     @Getter
     private static CreateTableFinishCallback createTableFinishCallback = (tableClass, databaseDialect, tableMetadata) -> {
     };
 
+    /**
+     * 修改表回调
+     */
     @Setter
     @Getter
     private static ModifyTableFinishCallback modifyTableFinishCallback = (tableClass, databaseDialect, tableMetadata, compareTableInfo) -> {
 
     };
-
+    /**
+     * 执行完成回调
+     */
     @Setter
     @Getter
     private static RunFinishCallback runFinishCallback = tableClasses -> {
@@ -138,9 +185,9 @@ public class AutoTableGlobalConfig {
          */
         private MysqlConfig mysql = new MysqlConfig();
 
-        /**
-         * 记录执行的SQL
-         */
+        // /**
+        //  * 记录执行的SQL
+        //  */
         // private RecordSqlProperties recordSql = new RecordSqlProperties();
     }
 

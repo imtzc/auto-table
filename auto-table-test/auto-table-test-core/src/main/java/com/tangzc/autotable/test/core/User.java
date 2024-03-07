@@ -11,6 +11,7 @@ import com.tangzc.autotable.annotation.mysql.MysqlTypeConstant;
 import lombok.Data;
 
 @Data
+@MyAnno
 @TableName("sys_user")
 public class User {
 
