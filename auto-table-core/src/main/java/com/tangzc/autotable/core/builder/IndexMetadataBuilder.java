@@ -30,7 +30,7 @@ public class IndexMetadataBuilder {
         // 类上的索引注解
         List<TableIndex> tableIndexes = TableBeanUtils.getTableIndexes(clazz);
         List<IndexMetadata> indexMetadataList = tableIndexes.stream()
-                .map(tableIndex -> IndexMetadataBuilder.build(clazz, tableIndex, AutoTableGlobalConfig.getAutoTableProperties().getIndexPrefix()))
+                .map(tableIndex -> IndexMetadataBuilder.buildFromEntity(clazz, tableIndex, AutoTableGlobalConfig.getAutoTableProperties().getIndexPrefix()))
                 .filter(Objects::nonNull)
                 .filter(indexMetadata -> indexRepeatChecker.filter(indexMetadata.getName()))
                 .collect(Collectors.toList());
@@ -38,7 +38,7 @@ public class IndexMetadataBuilder {
         // 字段上的索引注解
         List<IndexMetadata> onFieldIndexMetadata = fields.stream()
                 .filter(field -> TableBeanUtils.isIncludeField(field, clazz))
-                .map(field -> IndexMetadataBuilder.build(clazz, field, AutoTableGlobalConfig.getAutoTableProperties().getIndexPrefix()))
+                .map(field -> IndexMetadataBuilder.buildFromField(clazz, field, AutoTableGlobalConfig.getAutoTableProperties().getIndexPrefix()))
                 .filter(Objects::nonNull)
                 .filter(indexMetadata -> indexRepeatChecker.filter(indexMetadata.getName()))
                 .collect(Collectors.toList());
@@ -46,7 +46,7 @@ public class IndexMetadataBuilder {
         return indexMetadataList;
     }
 
-    public static IndexMetadata build(Class<?> clazz, Field field, String indexPrefix) {
+    public static IndexMetadata buildFromField(Class<?> clazz, Field field, String indexPrefix) {
         // 获取当前字段的@Index注解
         Index index = TableBeanUtils.getIndex(field);
         if (null != index) {
@@ -65,7 +65,7 @@ public class IndexMetadataBuilder {
         return null;
     }
 
-    public static IndexMetadata build(Class<?> clazz, TableIndex tableIndex, String indexPrefix) {
+    public static IndexMetadata buildFromEntity(Class<?> clazz, TableIndex tableIndex, String indexPrefix) {
 
         // 获取当前字段的@Index注解
         if (null != tableIndex) {

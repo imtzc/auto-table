@@ -8,6 +8,7 @@ import com.tangzc.autotable.core.utils.TableBeanUtils;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Field;
+import java.util.function.Consumer;
 
 /**
  * 用于存放创建表的字段信息
@@ -31,6 +32,10 @@ public class ColumnMetadataBuilder {
     }
 
     public ColumnMetadata buildFromAnnotation(Class<?> clazz, Field field) {
+        return buildFromAnnotation(clazz, field, null);
+    }
+
+    public ColumnMetadata buildFromAnnotation(Class<?> clazz, Field field, Consumer<ColumnMetadata> convertor) {
 
         columnMetadata
                 .setName(TableBeanUtils.getRealColumnName(clazz, field))
@@ -50,6 +55,11 @@ public class ColumnMetadataBuilder {
             columnMetadata.setDefaultValueType(defaultValueType)
                     .setDefaultValue(defaultValue);
         }
+
+        if (convertor != null) {
+            convertor.accept(columnMetadata);
+        }
+
         return columnMetadata;
     }
 }
