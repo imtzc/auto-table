@@ -11,7 +11,7 @@ public interface BuildTableMetadataIntercepter {
     /**
      * 拦截器
      * @param databaseDialect 数据库方言：MySQL、PostgreSQL、SQLite
-     * @param tableMetadata 表元数据：MysqlTableMetadata、PgsqlTableMetadata、SqliteTableMetadata
+     * @param tableMetadata 表元数据：MysqlTableMetadata、DefaultTableMetadata、DefaultTableMetadata
      */
     void intercept(final String databaseDialect, final TableMetadata tableMetadata);
 }

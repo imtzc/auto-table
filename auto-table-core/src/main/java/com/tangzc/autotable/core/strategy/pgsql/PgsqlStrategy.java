@@ -7,6 +7,7 @@ import com.tangzc.autotable.core.AutoTableGlobalConfig;
 import com.tangzc.autotable.core.constants.DatabaseDialect;
 import com.tangzc.autotable.core.converter.DefaultTypeEnumInterface;
 import com.tangzc.autotable.core.strategy.ColumnMetadata;
+import com.tangzc.autotable.core.strategy.DefaultTableMetadata;
 import com.tangzc.autotable.core.strategy.IStrategy;
 import com.tangzc.autotable.core.strategy.IndexMetadata;
 import com.tangzc.autotable.core.strategy.pgsql.builder.CreateTableSqlBuilder;
@@ -14,7 +15,6 @@ import com.tangzc.autotable.core.strategy.pgsql.builder.ModifyTableSqlBuilder;
 import com.tangzc.autotable.core.strategy.pgsql.builder.PgsqlTableMetadataBuilder;
 import com.tangzc.autotable.core.strategy.pgsql.data.PgsqlCompareTableInfo;
 import com.tangzc.autotable.core.strategy.pgsql.data.PgsqlDefaultTypeEnum;
-import com.tangzc.autotable.core.strategy.pgsql.data.PgsqlTableMetadata;
 import com.tangzc.autotable.core.strategy.pgsql.data.PgsqlTypeHelper;
 import com.tangzc.autotable.core.strategy.pgsql.data.dbdata.PgsqlDbColumn;
 import com.tangzc.autotable.core.strategy.pgsql.data.dbdata.PgsqlDbIndex;
@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
 /**
  * @author don
  */
-public class PgsqlStrategy implements IStrategy<PgsqlTableMetadata, PgsqlCompareTableInfo, PgsqlTablesMapper> {
+public class PgsqlStrategy implements IStrategy<DefaultTableMetadata, PgsqlCompareTableInfo, PgsqlTablesMapper> {
 
     @Override
     public String databaseDialect() {
@@ -93,24 +93,24 @@ public class PgsqlStrategy implements IStrategy<PgsqlTableMetadata, PgsqlCompare
     }
 
     @Override
-    public PgsqlTableMetadata analyseClass(Class<?> beanClass) {
-        PgsqlTableMetadata pgsqlTableMetadata = PgsqlTableMetadataBuilder.build(beanClass);
-        if (pgsqlTableMetadata.getColumnMetadataList().isEmpty()) {
+    public DefaultTableMetadata analyseClass(Class<?> beanClass) {
+        DefaultTableMetadata tableMetadata = PgsqlTableMetadataBuilder.build(beanClass);
+        if (tableMetadata.getColumnMetadataList().isEmpty()) {
             log.warn("扫描发现{}没有建表字段请检查！", beanClass.getName());
             return null;
         }
-        return pgsqlTableMetadata;
+        return tableMetadata;
     }
 
     @Override
-    public void createTable(PgsqlTableMetadata tableMetadata) {
+    public void createTable(DefaultTableMetadata tableMetadata) {
         String buildSql = CreateTableSqlBuilder.buildSql(tableMetadata);
         log.info("执行SQL：{}", buildSql);
         execute(pgsqlTablesMapper -> pgsqlTablesMapper.executeSql(buildSql));
     }
 
     @Override
-    public PgsqlCompareTableInfo compareTable(PgsqlTableMetadata tableMetadata) {
+    public PgsqlCompareTableInfo compareTable(DefaultTableMetadata tableMetadata) {
 
         String tableName = tableMetadata.getTableName();
 
@@ -128,7 +128,7 @@ public class PgsqlStrategy implements IStrategy<PgsqlTableMetadata, PgsqlCompare
         return pgsqlCompareTableInfo;
     }
 
-    private void compareIndexInfo(PgsqlTableMetadata tableMetadata, String tableName, PgsqlCompareTableInfo pgsqlCompareTableInfo) {
+    private void compareIndexInfo(DefaultTableMetadata tableMetadata, String tableName, PgsqlCompareTableInfo pgsqlCompareTableInfo) {
         List<PgsqlDbIndex> pgsqlDbIndices = executeReturn(pgsqlTablesMapper -> pgsqlTablesMapper.selectTableIndexesDetail(tableName));
         Map<String, PgsqlDbIndex> pgsqlDbIndexMap = pgsqlDbIndices.stream()
                 // 仅仅处理自定义的索引
@@ -176,7 +176,7 @@ public class PgsqlStrategy implements IStrategy<PgsqlTableMetadata, PgsqlCompare
         }
     }
 
-    private void compareColumnInfo(PgsqlTableMetadata tableMetadata, String tableName, PgsqlCompareTableInfo pgsqlCompareTableInfo) {
+    private void compareColumnInfo(DefaultTableMetadata tableMetadata, String tableName, PgsqlCompareTableInfo pgsqlCompareTableInfo) {
         // 数据库字段元信息
         List<PgsqlDbColumn> pgsqlDbColumns = executeReturn(pgsqlTablesMapper -> pgsqlTablesMapper.selectTableFieldDetail(tableName));
         Map<String, PgsqlDbColumn> pgsqlFieldDetailMap = pgsqlDbColumns.stream().collect(Collectors.toMap(PgsqlDbColumn::getColumnName, Function.identity()));
@@ -279,7 +279,7 @@ public class PgsqlStrategy implements IStrategy<PgsqlTableMetadata, PgsqlCompare
         return false;
     }
 
-    private void compareTableInfo(PgsqlTableMetadata tableMetadata, String tableName, PgsqlCompareTableInfo pgsqlCompareTableInfo) {
+    private void compareTableInfo(DefaultTableMetadata tableMetadata, String tableName, PgsqlCompareTableInfo pgsqlCompareTableInfo) {
         String tableDescription = executeReturn(pgsqlTablesMapper -> pgsqlTablesMapper.selectTableDescription(tableName));
         if (!Objects.equals(tableDescription, tableMetadata.getComment())) {
             pgsqlCompareTableInfo.setComment(tableMetadata.getComment());

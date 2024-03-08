@@ -5,7 +5,6 @@ import com.tangzc.autotable.annotation.mysql.MysqlCharset;
 import com.tangzc.autotable.annotation.mysql.MysqlEngine;
 import com.tangzc.autotable.core.AutoTableGlobalConfig;
 import com.tangzc.autotable.core.builder.IndexMetadataBuilder;
-import com.tangzc.autotable.core.strategy.mysql.data.MysqlColumnMetadata;
 import com.tangzc.autotable.core.strategy.mysql.data.MysqlTableMetadata;
 import com.tangzc.autotable.core.utils.BeanClassUtil;
 import com.tangzc.autotable.core.utils.TableBeanUtils;
@@ -13,8 +12,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Field;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 /**
  * @author don
@@ -54,17 +51,9 @@ public class MysqlTableMetadataBuilder {
         }
 
         List<Field> fields = BeanClassUtil.getAllDeclaredFieldsExcludeStatic(clazz);
-        mysqlTableMetadata.setColumnMetadataList(getColumnList(clazz, fields));
-        mysqlTableMetadata.setIndexMetadataList(IndexMetadataBuilder.buildList(clazz, fields));
+        mysqlTableMetadata.setColumnMetadataList(MysqlColumnMetadataBuilder.buildList(clazz, fields));
+        mysqlTableMetadata.setIndexMetadataList(IndexMetadataBuilder.of().buildList(clazz, fields));
 
         return mysqlTableMetadata;
-    }
-
-    public static List<MysqlColumnMetadata> getColumnList(Class<?> clazz, List<Field> fields) {
-        AtomicInteger index = new AtomicInteger(1);
-        return fields.stream()
-                .filter(field -> TableBeanUtils.isIncludeField(field, clazz))
-                .map(field -> MysqlColumnMetadataBuilder.build(clazz, field, index.getAndIncrement()))
-                .collect(Collectors.toList());
     }
 }

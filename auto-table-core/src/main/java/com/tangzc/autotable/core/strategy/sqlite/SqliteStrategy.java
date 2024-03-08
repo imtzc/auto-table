@@ -2,13 +2,13 @@ package com.tangzc.autotable.core.strategy.sqlite;
 
 import com.tangzc.autotable.core.constants.DatabaseDialect;
 import com.tangzc.autotable.core.converter.DefaultTypeEnumInterface;
+import com.tangzc.autotable.core.strategy.DefaultTableMetadata;
 import com.tangzc.autotable.core.strategy.IStrategy;
 import com.tangzc.autotable.core.strategy.IndexMetadata;
 import com.tangzc.autotable.core.strategy.sqlite.builder.CreateTableSqlBuilder;
 import com.tangzc.autotable.core.strategy.sqlite.builder.SqliteTableMetadataBuilder;
 import com.tangzc.autotable.core.strategy.sqlite.data.SqliteCompareTableInfo;
 import com.tangzc.autotable.core.strategy.sqlite.data.SqliteDefaultTypeEnum;
-import com.tangzc.autotable.core.strategy.sqlite.data.SqliteTableMetadata;
 import com.tangzc.autotable.core.strategy.sqlite.data.dbdata.SqliteMaster;
 import com.tangzc.autotable.core.strategy.sqlite.mapper.SqliteTablesMapper;
 import com.tangzc.autotable.core.utils.StringUtils;
@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 /**
  * @author don
  */
-public class SqliteStrategy implements IStrategy<SqliteTableMetadata, SqliteCompareTableInfo, SqliteTablesMapper> {
+public class SqliteStrategy implements IStrategy<DefaultTableMetadata, SqliteCompareTableInfo, SqliteTablesMapper> {
 
     private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd");
 
@@ -86,17 +86,17 @@ public class SqliteStrategy implements IStrategy<SqliteTableMetadata, SqliteComp
     }
 
     @Override
-    public SqliteTableMetadata analyseClass(Class<?> beanClass) {
-        SqliteTableMetadata sqliteTableMetadata = SqliteTableMetadataBuilder.build(beanClass);
-        if (sqliteTableMetadata.getColumnMetadataList().isEmpty()) {
+    public DefaultTableMetadata analyseClass(Class<?> beanClass) {
+        DefaultTableMetadata tableMetadata = SqliteTableMetadataBuilder.build(beanClass);
+        if (tableMetadata.getColumnMetadataList().isEmpty()) {
             log.warn("扫描发现{}没有建表字段请检查！", beanClass.getName());
             return null;
         }
-        return sqliteTableMetadata;
+        return tableMetadata;
     }
 
     @Override
-    public void createTable(SqliteTableMetadata tableMetadata) {
+    public void createTable(DefaultTableMetadata tableMetadata) {
         String createTableSql = CreateTableSqlBuilder.buildTableSql(tableMetadata.getTableName(), tableMetadata.getComment(), tableMetadata.getColumnMetadataList());
         execute(sqliteTablesMapper -> sqliteTablesMapper.executeSql(createTableSql));
         List<String> createIndexSqlList = CreateTableSqlBuilder.buildIndexSql(tableMetadata.getTableName(), tableMetadata.getIndexMetadataList());
@@ -106,7 +106,7 @@ public class SqliteStrategy implements IStrategy<SqliteTableMetadata, SqliteComp
     }
 
     @Override
-    public SqliteCompareTableInfo compareTable(SqliteTableMetadata tableMetadata) {
+    public SqliteCompareTableInfo compareTable(DefaultTableMetadata tableMetadata) {
 
         String tableName = tableMetadata.getTableName();
         SqliteCompareTableInfo sqliteCompareTableInfo = new SqliteCompareTableInfo(tableName);

@@ -1,21 +1,13 @@
 package com.tangzc.autotable.core.strategy.pgsql.builder;
 
-import com.tangzc.autotable.annotation.TableComment;
-import com.tangzc.autotable.core.builder.ColumnMetadataBuilder;
-import com.tangzc.autotable.core.builder.IndexMetadataBuilder;
+import com.tangzc.autotable.core.builder.TableMetadataBuilder;
 import com.tangzc.autotable.core.constants.DatabaseDialect;
 import com.tangzc.autotable.core.converter.DatabaseTypeAndLength;
 import com.tangzc.autotable.core.strategy.ColumnMetadata;
-import com.tangzc.autotable.core.strategy.pgsql.data.PgsqlTableMetadata;
+import com.tangzc.autotable.core.strategy.DefaultTableMetadata;
 import com.tangzc.autotable.core.strategy.pgsql.data.PgsqlTypeHelper;
-import com.tangzc.autotable.core.utils.BeanClassUtil;
 import com.tangzc.autotable.core.utils.StringUtils;
-import com.tangzc.autotable.core.utils.TableBeanUtils;
 import lombok.extern.slf4j.Slf4j;
-
-import java.lang.reflect.Field;
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * @author don
@@ -23,32 +15,15 @@ import java.util.stream.Collectors;
 @Slf4j
 public class PgsqlTableMetadataBuilder {
 
-    public static PgsqlTableMetadata build(Class<?> clazz) {
+    public static DefaultTableMetadata build(Class<?> clazz) {
 
-        String tableName = TableBeanUtils.getTableName(clazz);
+        // 获取默认表元数据
+        DefaultTableMetadata defaultTableMetadata = TableMetadataBuilder.build(DatabaseDialect.PostgreSQL, clazz);
 
-        PgsqlTableMetadata pgsqlTableMetadata = new PgsqlTableMetadata(tableName);
+        // 修正默认值
+        defaultTableMetadata.getColumnMetadataList().forEach(PgsqlTableMetadataBuilder::fixDefaultValue);
 
-        TableComment tableComment = TableBeanUtils.getTableComment(clazz);
-        if (tableComment != null) {
-            // 获取表注释
-            pgsqlTableMetadata.setComment(tableComment.value());
-        }
-
-        List<Field> fields = BeanClassUtil.getAllDeclaredFieldsExcludeStatic(clazz);
-        pgsqlTableMetadata.setColumnMetadataList(getColumnList(clazz, fields));
-        pgsqlTableMetadata.setIndexMetadataList(IndexMetadataBuilder.buildList(clazz, fields));
-
-        return pgsqlTableMetadata;
-    }
-
-    public static List<ColumnMetadata> getColumnList(Class<?> clazz, List<Field> fields) {
-        return fields.stream()
-                .filter(field -> TableBeanUtils.isIncludeField(field, clazz))
-                .map(field -> ColumnMetadataBuilder.of(DatabaseDialect.PostgreSQL, new ColumnMetadata())
-                        .buildFromAnnotation(clazz, field, PgsqlTableMetadataBuilder::fixDefaultValue)
-                )
-                .collect(Collectors.toList());
+        return defaultTableMetadata;
     }
 
     private static void fixDefaultValue(ColumnMetadata columnMetadata) {

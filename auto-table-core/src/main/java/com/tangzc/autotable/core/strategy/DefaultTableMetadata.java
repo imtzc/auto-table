@@ -1,8 +1,5 @@
-package com.tangzc.autotable.core.strategy.pgsql.data;
+package com.tangzc.autotable.core.strategy;
 
-import com.tangzc.autotable.core.strategy.ColumnMetadata;
-import com.tangzc.autotable.core.strategy.IndexMetadata;
-import com.tangzc.autotable.core.strategy.TableMetadata;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -15,7 +12,7 @@ import java.util.List;
 @Getter
 @Setter
 @Accessors(chain = true)
-public class PgsqlTableMetadata extends TableMetadata {
+public class DefaultTableMetadata extends TableMetadata {
 
     /**
      * 所有列信息
@@ -27,7 +24,7 @@ public class PgsqlTableMetadata extends TableMetadata {
      */
     private List<IndexMetadata> indexMetadataList;
 
-    public PgsqlTableMetadata(String tableName) {
+    public DefaultTableMetadata(String tableName) {
         super(tableName);
     }
 }

@@ -1,21 +1,13 @@
 package com.tangzc.autotable.core.strategy.sqlite.builder;
 
-import com.tangzc.autotable.annotation.TableComment;
-import com.tangzc.autotable.core.builder.ColumnMetadataBuilder;
-import com.tangzc.autotable.core.builder.IndexMetadataBuilder;
+import com.tangzc.autotable.core.builder.TableMetadataBuilder;
 import com.tangzc.autotable.core.constants.DatabaseDialect;
 import com.tangzc.autotable.core.converter.DatabaseTypeAndLength;
 import com.tangzc.autotable.core.strategy.ColumnMetadata;
+import com.tangzc.autotable.core.strategy.DefaultTableMetadata;
 import com.tangzc.autotable.core.strategy.sqlite.SqliteTypeHelper;
-import com.tangzc.autotable.core.strategy.sqlite.data.SqliteTableMetadata;
-import com.tangzc.autotable.core.utils.BeanClassUtil;
 import com.tangzc.autotable.core.utils.StringUtils;
-import com.tangzc.autotable.core.utils.TableBeanUtils;
 import lombok.extern.slf4j.Slf4j;
-
-import java.lang.reflect.Field;
-import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * @author don
@@ -23,45 +15,28 @@ import java.util.stream.Collectors;
 @Slf4j
 public class SqliteTableMetadataBuilder {
 
-    public static SqliteTableMetadata build(Class<?> clazz) {
+    public static DefaultTableMetadata build(Class<?> clazz) {
 
-        String tableName = TableBeanUtils.getTableName(clazz);
+        // 获取默认表元数据
+        DefaultTableMetadata defaultTableMetadata = TableMetadataBuilder.build(DatabaseDialect.PostgreSQL, clazz);
 
-        SqliteTableMetadata mysqlTableMetadata = new SqliteTableMetadata(tableName);
+        defaultTableMetadata.getColumnMetadataList().forEach(columnMetadata -> {
+            // 修正默认值
+            fixDefaultValue(columnMetadata);
+            // 修正类型和长度
+            fixTypeAndLength(columnMetadata.getType());
+        });
 
-        TableComment tableComment = TableBeanUtils.getTableComment(clazz);
-        assert tableComment != null;
-        // 获取表注释
-        mysqlTableMetadata.setComment(tableComment.value());
-
-        List<Field> fields = BeanClassUtil.getAllDeclaredFieldsExcludeStatic(clazz);
-        mysqlTableMetadata.setColumnMetadataList(getColumnList(clazz, fields));
-        mysqlTableMetadata.setIndexMetadataList(IndexMetadataBuilder.buildList(clazz, fields));
-
-        return mysqlTableMetadata;
+        return defaultTableMetadata;
     }
 
-    public static List<ColumnMetadata> getColumnList(Class<?> clazz, List<Field> fields) {
-        return fields.stream()
-                .filter(field -> TableBeanUtils.isIncludeField(field, clazz))
-                .map(field -> ColumnMetadataBuilder.of(DatabaseDialect.SQLite, new ColumnMetadata())
-                        .buildFromAnnotation(clazz, field, columnMetadata -> {
-                            // 修正类型和长度
-                            fixTypeAndLength(columnMetadata.getType());
-
-                            // 修正默认值
-                            fixDefaultValue(field, columnMetadata);
-                        }))
-                .collect(Collectors.toList());
-    }
-
-    private static void fixDefaultValue(Field field, ColumnMetadata columnMetadata) {
+    private static void fixDefaultValue(ColumnMetadata columnMetadata) {
         String defaultValue = columnMetadata.getDefaultValue();
         if (StringUtils.hasText(defaultValue)) {
-            Class<?> fieldType = field.getType();
             // 补偿逻辑：类型为Boolean的时候(实际数据库为bit数字类型)，兼容 true、false
-            boolean isBooleanType = (fieldType == Boolean.class || fieldType == boolean.class) && SqliteTypeHelper.isInteger(columnMetadata.getType());
-            if (isBooleanType && !"1".equals(defaultValue) && !"0".equals(defaultValue)) {
+            boolean isBooleanType = SqliteTypeHelper.isInteger(columnMetadata.getType()) &&
+                    ("true".equalsIgnoreCase(defaultValue) || "false".equalsIgnoreCase(defaultValue));
+            if (isBooleanType) {
                 if (Boolean.parseBoolean(defaultValue)) {
                     defaultValue = "1";
                 } else {

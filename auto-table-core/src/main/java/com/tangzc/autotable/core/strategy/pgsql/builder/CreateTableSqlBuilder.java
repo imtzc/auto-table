@@ -2,8 +2,8 @@ package com.tangzc.autotable.core.strategy.pgsql.builder;
 
 import com.tangzc.autotable.annotation.enums.IndexTypeEnum;
 import com.tangzc.autotable.core.strategy.ColumnMetadata;
+import com.tangzc.autotable.core.strategy.DefaultTableMetadata;
 import com.tangzc.autotable.core.strategy.IndexMetadata;
-import com.tangzc.autotable.core.strategy.pgsql.data.PgsqlTableMetadata;
 import com.tangzc.autotable.core.utils.StringConnectHelper;
 import com.tangzc.autotable.core.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -22,22 +22,22 @@ public class CreateTableSqlBuilder {
     /**
      * 构建创建新表的SQL
      *
-     * @param pgsqlTableMetadata 参数
+     * @param tableMetadata 参数
      * @return sql
      */
-    public static String buildSql(PgsqlTableMetadata pgsqlTableMetadata) {
+    public static String buildSql(DefaultTableMetadata tableMetadata) {
 
-        String tableName = pgsqlTableMetadata.getTableName();
+        String tableName = tableMetadata.getTableName();
 
         // 建表语句
-        String createTableSql = getCreateTableSql(pgsqlTableMetadata);
+        String createTableSql = getCreateTableSql(tableMetadata);
 
         // 创建索引语句
-        List<IndexMetadata> indexMetadataList = pgsqlTableMetadata.getIndexMetadataList();
+        List<IndexMetadata> indexMetadataList = tableMetadata.getIndexMetadataList();
         String createIndexSql = getCreateIndexSql(tableName, indexMetadataList);
 
         // 为 表、字段、索引 添加注释
-        String addCommentSql = getAddColumnCommentSql(pgsqlTableMetadata);
+        String addCommentSql = getAddColumnCommentSql(tableMetadata);
 
         // 组合最终建表语句
         return createTableSql + "\n" + createIndexSql + "\n" + addCommentSql;
@@ -68,12 +68,12 @@ public class CreateTableSqlBuilder {
                 ).collect(Collectors.joining("\n"));
     }
 
-    private static String getAddColumnCommentSql(PgsqlTableMetadata pgsqlTableMetadata) {
+    private static String getAddColumnCommentSql(DefaultTableMetadata tableMetadata) {
 
-        String tableName = pgsqlTableMetadata.getTableName();
-        String comment = pgsqlTableMetadata.getComment();
-        List<ColumnMetadata> columnMetadataList = pgsqlTableMetadata.getColumnMetadataList();
-        List<IndexMetadata> indexMetadataList = pgsqlTableMetadata.getIndexMetadataList();
+        String tableName = tableMetadata.getTableName();
+        String comment = tableMetadata.getComment();
+        List<ColumnMetadata> columnMetadataList = tableMetadata.getColumnMetadataList();
+        List<IndexMetadata> indexMetadataList = tableMetadata.getIndexMetadataList();
 
         return getAddColumnCommentSql(tableName, comment,
                 columnMetadataList.stream().collect(Collectors.toMap(ColumnMetadata::getName, ColumnMetadata::getComment)),
@@ -110,10 +110,10 @@ public class CreateTableSqlBuilder {
         return String.join("\n", commentList);
     }
 
-    private static String getCreateTableSql(PgsqlTableMetadata pgsqlTableMetadata) {
+    private static String getCreateTableSql(DefaultTableMetadata tableMetadata) {
 
-        String name = pgsqlTableMetadata.getTableName();
-        List<ColumnMetadata> columnMetadataList = pgsqlTableMetadata.getColumnMetadataList();
+        String name = tableMetadata.getTableName();
+        List<ColumnMetadata> columnMetadataList = tableMetadata.getColumnMetadataList();
 
         // 记录所有修改项，（利用数组结构，便于添加,分割）
         List<String> columnList = new ArrayList<>();
