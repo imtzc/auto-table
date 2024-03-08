@@ -2,6 +2,7 @@ package com.tangzc.autotable.core.strategy.pgsql.data;
 
 import com.tangzc.autotable.core.strategy.ColumnMetadata;
 import com.tangzc.autotable.core.strategy.CompareTableInfo;
+import com.tangzc.autotable.core.strategy.IndexMetadata;
 import com.tangzc.autotable.core.utils.StringUtils;
 import lombok.Getter;
 import lombok.NonNull;
@@ -68,7 +69,7 @@ public class PgsqlCompareTableInfo extends CompareTableInfo {
     /**
      * 新添加的索引
      */
-    private List<PgsqlIndexMetadata> indexMetadataList = new ArrayList<>();
+    private List<IndexMetadata> indexMetadataList = new ArrayList<>();
 
     public PgsqlCompareTableInfo(@NonNull String name) {
         super(name);
@@ -119,7 +120,7 @@ public class PgsqlCompareTableInfo extends CompareTableInfo {
             errorMsg.append("删除索引: ").append(String.join(",", dropIndexList)).append("\n");
         }
         if (!indexMetadataList.isEmpty()) {
-            errorMsg.append("新增索引: ").append(indexMetadataList.stream().map(PgsqlIndexMetadata::getName).collect(Collectors.joining(","))).append("\n");
+            errorMsg.append("新增索引: ").append(indexMetadataList.stream().map(IndexMetadata::getName).collect(Collectors.joining(","))).append("\n");
         }
         return errorMsg.toString();
     }
@@ -140,13 +141,13 @@ public class PgsqlCompareTableInfo extends CompareTableInfo {
         this.dropColumnList.addAll(dropColumnList);
     }
 
-    public void addNewIndex(PgsqlIndexMetadata pgsqlIndexMetadata) {
-        this.indexMetadataList.add(pgsqlIndexMetadata);
+    public void addNewIndex(IndexMetadata indexMetadata) {
+        this.indexMetadataList.add(indexMetadata);
     }
 
-    public void addModifyIndex(PgsqlIndexMetadata pgsqlIndexMetadata) {
-        this.dropIndexList.add(pgsqlIndexMetadata.getName());
-        this.indexMetadataList.add(pgsqlIndexMetadata);
+    public void addModifyIndex(IndexMetadata indexMetadata) {
+        this.dropIndexList.add(indexMetadata.getName());
+        this.indexMetadataList.add(indexMetadata);
     }
 
     public void addIndexComment(@NonNull String indexName, String newComment) {

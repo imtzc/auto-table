@@ -1,12 +1,12 @@
 package com.tangzc.autotable.core.strategy.mysql.builder;
 
 import com.tangzc.autotable.annotation.enums.IndexTypeEnum;
+import com.tangzc.autotable.core.strategy.IndexMetadata;
 import com.tangzc.autotable.core.strategy.mysql.data.MysqlColumnMetadata;
-import com.tangzc.autotable.core.strategy.mysql.data.MysqlIndexMetadata;
 import com.tangzc.autotable.core.strategy.mysql.data.MysqlTableMetadata;
 import com.tangzc.autotable.core.utils.StringConnectHelper;
-import lombok.extern.slf4j.Slf4j;
 import com.tangzc.autotable.core.utils.StringUtils;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +30,7 @@ public class CreateTableSqlBuilder {
 
         String name = mysqlTableMetadata.getTableName();
         List<MysqlColumnMetadata> mysqlColumnMetadataList = mysqlTableMetadata.getColumnMetadataList();
-        List<MysqlIndexMetadata> mysqlIndexMetadataList = mysqlTableMetadata.getIndexMetadataList();
+        List<IndexMetadata> indexMetadataList = mysqlTableMetadata.getIndexMetadataList();
         String collate = mysqlTableMetadata.getCollate();
         String engine = mysqlTableMetadata.getEngine();
         String characterSet = mysqlTableMetadata.getCharacterSet();
@@ -66,7 +66,7 @@ public class CreateTableSqlBuilder {
 
         // 索引
         addItems.add(
-                mysqlIndexMetadataList.stream()
+                indexMetadataList.stream()
                         // 例子： UNIQUE INDEX `unique_name_age`(`name` ASC, `age` DESC) COMMENT '姓名、年龄索引' USING BTREE
                         .map(CreateTableSqlBuilder::getIndexSql)
                         // 同类型的索引，排在一起，SQL美化
@@ -109,13 +109,13 @@ public class CreateTableSqlBuilder {
                 .replace("{tableProperties}", propertiesSql);
     }
 
-    public static String getIndexSql(MysqlIndexMetadata mysqlIndexMetadata) {
+    public static String getIndexSql(IndexMetadata indexMetadata) {
         // 例子： UNIQUE INDEX `unique_name_age`(`name` ASC, `age` DESC) COMMENT '姓名、年龄索引',
         return StringConnectHelper.newInstance("{indexType} INDEX `{indexName}`({columns}) {indexComment}")
-                .replace("{indexType}", mysqlIndexMetadata.getType() == IndexTypeEnum.UNIQUE ? "UNIQUE" : "")
-                .replace("{indexName}", mysqlIndexMetadata.getName())
+                .replace("{indexType}", indexMetadata.getType() == IndexTypeEnum.UNIQUE ? "UNIQUE" : "")
+                .replace("{indexName}", indexMetadata.getName())
                 .replace("{columns}", (key) -> {
-                    List<MysqlIndexMetadata.IndexColumnParam> columnParams = mysqlIndexMetadata.getColumns();
+                    List<IndexMetadata.IndexColumnParam> columnParams = indexMetadata.getColumns();
                     return columnParams.stream().map(column ->
                             // 例：`name` ASC
                             "`{column}` {sortMode}"
@@ -123,7 +123,7 @@ public class CreateTableSqlBuilder {
                                     .replace("{sortMode}", column.getSort() != null ? column.getSort().name() : "")
                     ).collect(Collectors.joining(","));
                 })
-                .replace("{indexComment}", StringUtils.hasText(mysqlIndexMetadata.getComment()) ? "COMMENT '" + mysqlIndexMetadata.getComment() + "'" : "")
+                .replace("{indexComment}", StringUtils.hasText(indexMetadata.getComment()) ? "COMMENT '" + indexMetadata.getComment() + "'" : "")
                 .toString();
     }
 

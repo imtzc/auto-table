@@ -8,12 +8,12 @@ import com.tangzc.autotable.core.constants.DatabaseDialect;
 import com.tangzc.autotable.core.converter.DefaultTypeEnumInterface;
 import com.tangzc.autotable.core.strategy.ColumnMetadata;
 import com.tangzc.autotable.core.strategy.IStrategy;
+import com.tangzc.autotable.core.strategy.IndexMetadata;
 import com.tangzc.autotable.core.strategy.pgsql.builder.CreateTableSqlBuilder;
 import com.tangzc.autotable.core.strategy.pgsql.builder.ModifyTableSqlBuilder;
 import com.tangzc.autotable.core.strategy.pgsql.builder.PgsqlTableMetadataBuilder;
 import com.tangzc.autotable.core.strategy.pgsql.data.PgsqlCompareTableInfo;
 import com.tangzc.autotable.core.strategy.pgsql.data.PgsqlDefaultTypeEnum;
-import com.tangzc.autotable.core.strategy.pgsql.data.PgsqlIndexMetadata;
 import com.tangzc.autotable.core.strategy.pgsql.data.PgsqlTableMetadata;
 import com.tangzc.autotable.core.strategy.pgsql.data.PgsqlTypeHelper;
 import com.tangzc.autotable.core.strategy.pgsql.data.dbdata.PgsqlDbColumn;
@@ -135,20 +135,20 @@ public class PgsqlStrategy implements IStrategy<PgsqlTableMetadata, PgsqlCompare
                 .filter(idx -> idx.getIndexName().startsWith(AutoTableGlobalConfig.getAutoTableProperties().getIndexPrefix()))
                 .collect(Collectors.toMap(PgsqlDbIndex::getIndexName, Function.identity()));
 
-        List<PgsqlIndexMetadata> indexMetadataList = tableMetadata.getIndexMetadataList();
-        for (PgsqlIndexMetadata pgsqlIndexMetadata : indexMetadataList) {
-            String indexName = pgsqlIndexMetadata.getName();
+        List<IndexMetadata> indexMetadataList = tableMetadata.getIndexMetadataList();
+        for (IndexMetadata indexMetadata : indexMetadataList) {
+            String indexName = indexMetadata.getName();
             PgsqlDbIndex dbIndex = pgsqlDbIndexMap.remove(indexName);
             // 新增索引
-            String comment = pgsqlIndexMetadata.getComment();
+            String comment = indexMetadata.getComment();
             comment = StringUtils.hasText(comment) ? comment : null;
             if (dbIndex == null) {
                 // 标记注释
                 if (StringUtils.hasText(comment)) {
-                    pgsqlCompareTableInfo.addIndexComment(pgsqlIndexMetadata.getName(), comment);
+                    pgsqlCompareTableInfo.addIndexComment(indexMetadata.getName(), comment);
                 }
                 // 标记索引信息
-                pgsqlCompareTableInfo.addNewIndex(pgsqlIndexMetadata);
+                pgsqlCompareTableInfo.addNewIndex(indexMetadata);
                 continue;
             }
             // 修改索引注释
@@ -158,11 +158,11 @@ public class PgsqlStrategy implements IStrategy<PgsqlTableMetadata, PgsqlCompare
 
             // 获取索引定义语句，进行比较  CREATE UNIQUE INDEX mpe_idx_phone_index ON public.my_pgsql_table USING btree (phone DESC)
             String indexdef = dbIndex.getIndexdef().replace("\"", "");
-            boolean isUniqueIndex = pgsqlIndexMetadata.getType() == IndexTypeEnum.UNIQUE;
+            boolean isUniqueIndex = indexMetadata.getType() == IndexTypeEnum.UNIQUE;
             // 索引改变
-            String indexColumnParams = pgsqlIndexMetadata.getColumns().stream().map(col -> col.getColumn() + (col.getSort() == IndexSortTypeEnum.DESC ? " DESC" : "")).collect(Collectors.joining(", "));
+            String indexColumnParams = indexMetadata.getColumns().stream().map(col -> col.getColumn() + (col.getSort() == IndexSortTypeEnum.DESC ? " DESC" : "")).collect(Collectors.joining(", "));
             if (!indexdef.matches("^CREATE " + (isUniqueIndex ? "UNIQUE INDEX" : "INDEX") + " " + indexName + " ON public\\." + tableName + " USING btree \\(" + indexColumnParams + "\\)$")) {
-                pgsqlCompareTableInfo.addModifyIndex(pgsqlIndexMetadata);
+                pgsqlCompareTableInfo.addModifyIndex(indexMetadata);
             }
         }
 

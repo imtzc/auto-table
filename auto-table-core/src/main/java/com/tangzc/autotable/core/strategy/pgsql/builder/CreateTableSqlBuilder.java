@@ -2,7 +2,7 @@ package com.tangzc.autotable.core.strategy.pgsql.builder;
 
 import com.tangzc.autotable.annotation.enums.IndexTypeEnum;
 import com.tangzc.autotable.core.strategy.ColumnMetadata;
-import com.tangzc.autotable.core.strategy.pgsql.data.PgsqlIndexMetadata;
+import com.tangzc.autotable.core.strategy.IndexMetadata;
 import com.tangzc.autotable.core.strategy.pgsql.data.PgsqlTableMetadata;
 import com.tangzc.autotable.core.utils.StringConnectHelper;
 import com.tangzc.autotable.core.utils.StringUtils;
@@ -33,7 +33,7 @@ public class CreateTableSqlBuilder {
         String createTableSql = getCreateTableSql(pgsqlTableMetadata);
 
         // 创建索引语句
-        List<PgsqlIndexMetadata> indexMetadataList = pgsqlTableMetadata.getIndexMetadataList();
+        List<IndexMetadata> indexMetadataList = pgsqlTableMetadata.getIndexMetadataList();
         String createIndexSql = getCreateIndexSql(tableName, indexMetadataList);
 
         // 为 表、字段、索引 添加注释
@@ -48,7 +48,7 @@ public class CreateTableSqlBuilder {
      * "name"
      * );
      */
-    public static String getCreateIndexSql(String tableName, List<PgsqlIndexMetadata> indexMetadataList) {
+    public static String getCreateIndexSql(String tableName, List<IndexMetadata> indexMetadataList) {
 
         return indexMetadataList.stream()
                 .map(pgsqlIndexMetadata -> StringConnectHelper.newInstance("CREATE {indexType} INDEX \"{indexName}\" ON \"{tableName}\" ({columns});")
@@ -56,7 +56,7 @@ public class CreateTableSqlBuilder {
                         .replace("{indexName}", pgsqlIndexMetadata.getName())
                         .replace("{tableName}", tableName)
                         .replace("{columns}", (key) -> {
-                            List<PgsqlIndexMetadata.IndexColumnParam> columnParams = pgsqlIndexMetadata.getColumns();
+                            List<IndexMetadata.IndexColumnParam> columnParams = pgsqlIndexMetadata.getColumns();
                             return columnParams.stream().map(column ->
                                     // 例："name" ASC
                                     "\"{column}\" {sortMode}"
@@ -73,11 +73,11 @@ public class CreateTableSqlBuilder {
         String tableName = pgsqlTableMetadata.getTableName();
         String comment = pgsqlTableMetadata.getComment();
         List<ColumnMetadata> columnMetadataList = pgsqlTableMetadata.getColumnMetadataList();
-        List<PgsqlIndexMetadata> indexMetadataList = pgsqlTableMetadata.getIndexMetadataList();
+        List<IndexMetadata> indexMetadataList = pgsqlTableMetadata.getIndexMetadataList();
 
         return getAddColumnCommentSql(tableName, comment,
                 columnMetadataList.stream().collect(Collectors.toMap(ColumnMetadata::getName, ColumnMetadata::getComment)),
-                indexMetadataList.stream().collect(Collectors.toMap(PgsqlIndexMetadata::getName, PgsqlIndexMetadata::getComment)));
+                indexMetadataList.stream().collect(Collectors.toMap(IndexMetadata::getName, IndexMetadata::getComment)));
     }
 
     public static String getAddColumnCommentSql(String tableName, String tableComment, Map<String, String> columnCommentMap, Map<String, String> indexCommentMap) {

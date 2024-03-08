@@ -2,7 +2,7 @@ package com.tangzc.autotable.core.strategy.sqlite.builder;
 
 import com.tangzc.autotable.annotation.enums.IndexTypeEnum;
 import com.tangzc.autotable.core.strategy.ColumnMetadata;
-import com.tangzc.autotable.core.strategy.sqlite.data.SqliteIndexMetadata;
+import com.tangzc.autotable.core.strategy.IndexMetadata;
 import com.tangzc.autotable.core.utils.StringConnectHelper;
 import com.tangzc.autotable.core.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -84,7 +84,7 @@ public class CreateTableSqlBuilder {
      * "card_id" ASC
      * );
      */
-    public static List<String> buildIndexSql(String name, List<SqliteIndexMetadata> indexMetadataList) {
+    public static List<String> buildIndexSql(String name, List<IndexMetadata> indexMetadataList) {
         // sqlite索引特殊处理
         // 索引
         return indexMetadataList.stream()
@@ -101,16 +101,16 @@ public class CreateTableSqlBuilder {
      * "address" ASC
      * );
      *
-     * @param sqliteIndexMetadata
+     * @param indexMetadata
      * @return
      */
-    public static String getIndexSql(String tableName, SqliteIndexMetadata sqliteIndexMetadata) {
+    public static String getIndexSql(String tableName, IndexMetadata indexMetadata) {
         return StringConnectHelper.newInstance("CREATE{indexType} INDEX \"{indexName}\" ON {tableName} ({columns}) {indexComment};")
-                .replace("{indexType}", sqliteIndexMetadata.getType() == IndexTypeEnum.NORMAL ? "" : " " + sqliteIndexMetadata.getType().name())
-                .replace("{indexName}", sqliteIndexMetadata.getName())
+                .replace("{indexType}", indexMetadata.getType() == IndexTypeEnum.NORMAL ? "" : " " + indexMetadata.getType().name())
+                .replace("{indexName}", indexMetadata.getName())
                 .replace("{tableName}", tableName)
                 .replace("{columns}", (key) -> {
-                    List<SqliteIndexMetadata.IndexColumnParam> columnParams = sqliteIndexMetadata.getColumns();
+                    List<IndexMetadata.IndexColumnParam> columnParams = indexMetadata.getColumns();
                     return columnParams.stream().map(column ->
                             // 例："name" ASC
                             "\"{column}\" {sortMode}"
@@ -118,7 +118,7 @@ public class CreateTableSqlBuilder {
                                     .replace("{sortMode}", column.getSort() != null ? column.getSort().name() : "")
                     ).collect(Collectors.joining(","));
                 })
-                .replace("{indexComment}", StringUtils.hasText(sqliteIndexMetadata.getComment()) ? "-- " + sqliteIndexMetadata.getComment() : "")
+                .replace("{indexComment}", StringUtils.hasText(indexMetadata.getComment()) ? "-- " + indexMetadata.getComment() : "")
                 .toString();
     }
 

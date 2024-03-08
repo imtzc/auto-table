@@ -6,14 +6,14 @@ import com.tangzc.autotable.core.AutoTableGlobalConfig;
 import com.tangzc.autotable.core.constants.DatabaseDialect;
 import com.tangzc.autotable.core.converter.DatabaseTypeAndLength;
 import com.tangzc.autotable.core.converter.DefaultTypeEnumInterface;
-import com.tangzc.autotable.core.strategy.mysql.data.MySqlDefaultTypeEnum;
 import com.tangzc.autotable.core.strategy.IStrategy;
+import com.tangzc.autotable.core.strategy.IndexMetadata;
 import com.tangzc.autotable.core.strategy.mysql.builder.CreateTableSqlBuilder;
 import com.tangzc.autotable.core.strategy.mysql.builder.ModifyTableSqlBuilder;
 import com.tangzc.autotable.core.strategy.mysql.builder.MysqlTableMetadataBuilder;
+import com.tangzc.autotable.core.strategy.mysql.data.MySqlDefaultTypeEnum;
 import com.tangzc.autotable.core.strategy.mysql.data.MysqlColumnMetadata;
 import com.tangzc.autotable.core.strategy.mysql.data.MysqlCompareTableInfo;
-import com.tangzc.autotable.core.strategy.mysql.data.MysqlIndexMetadata;
 import com.tangzc.autotable.core.strategy.mysql.data.MysqlTableMetadata;
 import com.tangzc.autotable.core.strategy.mysql.data.MysqlTypeHelper;
 import com.tangzc.autotable.core.strategy.mysql.data.dbdata.InformationSchemaColumn;
@@ -158,34 +158,34 @@ public class MysqlStrategy implements IStrategy<MysqlTableMetadata, MysqlCompare
 
     private void compareIndexes(MysqlTableMetadata mysqlTableMetadata, MysqlCompareTableInfo mysqlCompareTableInfo, Map<String, List<InformationSchemaStatistics>> tableIndexs) {
         // Bean上所有的索引
-        List<MysqlIndexMetadata> mysqlIndexMetadataList = mysqlTableMetadata.getIndexMetadataList();
+        List<IndexMetadata> indexMetadataList = mysqlTableMetadata.getIndexMetadataList();
         // 以Bean上的索引开启循环，逐个匹配表上的索引
-        for (MysqlIndexMetadata mysqlIndexMetadata : mysqlIndexMetadataList) {
+        for (IndexMetadata indexMetadata : indexMetadataList) {
             // 根据Bean上的索引名称获取表上的索引
-            String indexName = mysqlIndexMetadata.getName();
+            String indexName = indexMetadata.getName();
             // 获取表上对应索引名称的所有列
             List<InformationSchemaStatistics> theIndexColumns = tableIndexs.remove(indexName);
             if (theIndexColumns == null) {
                 // 表上不存在该索引，新增
-                mysqlCompareTableInfo.getMysqlIndexMetadataList().add(mysqlIndexMetadata);
+                mysqlCompareTableInfo.getIndexMetadataList().add(indexMetadata);
             } else {
                 // 先把表上的该索引的所有字段，按照顺序排列
                 theIndexColumns = theIndexColumns.stream()
                         .sorted(Comparator.comparing(InformationSchemaStatistics::getSeqInIndex))
                         .collect(Collectors.toList());
                 // 获取Bean上该索引涉及的所有字段（按照字段顺序自然排序）
-                List<MysqlIndexMetadata.IndexColumnParam> columns = mysqlIndexMetadata.getColumns();
+                List<IndexMetadata.IndexColumnParam> columns = indexMetadata.getColumns();
                 // 先初步按照索引牵扯的字段数量一不一样判断是不是需要更新索引
                 if (theIndexColumns.size() != columns.size()) {
                     // 同名的索引，但是表上的字段数量跟Bean上指定的不一致，需要修改（先删除，再新增）
                     mysqlCompareTableInfo.getDropIndexList().add(indexName);
-                    mysqlCompareTableInfo.getMysqlIndexMetadataList().add(mysqlIndexMetadata);
+                    mysqlCompareTableInfo.getIndexMetadataList().add(indexMetadata);
                 } else {
                     // 牵扯的字段数目一致，再按顺序逐个比较每个位置的列名及其排序方式是否相同
                     for (int i = 0; i < theIndexColumns.size(); i++) {
                         InformationSchemaStatistics informationSchemaStatistics = theIndexColumns.get(i);
                         IndexSortTypeEnum indexSort = IndexSortTypeEnum.parseFromMysql(informationSchemaStatistics.getCollation());
-                        MysqlIndexMetadata.IndexColumnParam indexColumnParam = columns.get(i);
+                        IndexMetadata.IndexColumnParam indexColumnParam = columns.get(i);
                         IndexSortTypeEnum indexColumnParamSort = indexColumnParam.getSort();
 
                         // 名字不同即不同
@@ -195,7 +195,7 @@ public class MysqlStrategy implements IStrategy<MysqlTableMetadata, MysqlCompare
                         if (nameIsDiff || sortTypeIsDiff) {
                             // 同名的索引，但是表上的字段数量跟Bean上指定的不一致，需要修改（先删除，再新增）
                             mysqlCompareTableInfo.getDropIndexList().add(indexName);
-                            mysqlCompareTableInfo.getMysqlIndexMetadataList().add(mysqlIndexMetadata);
+                            mysqlCompareTableInfo.getIndexMetadataList().add(indexMetadata);
                             break;
                         }
                     }

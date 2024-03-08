@@ -1,7 +1,7 @@
 package com.tangzc.autotable.core.strategy.mysql.data;
 
+import com.tangzc.autotable.core.strategy.IndexMetadata;
 import com.tangzc.autotable.core.strategy.TableMetadata;
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -36,7 +36,7 @@ public class MysqlTableMetadata extends TableMetadata {
     /**
      * 索引
      */
-    private List<MysqlIndexMetadata> indexMetadataList = new ArrayList<>();
+    private List<IndexMetadata> indexMetadataList = new ArrayList<>();
 
     public MysqlTableMetadata(String tableName) {
         super(tableName);

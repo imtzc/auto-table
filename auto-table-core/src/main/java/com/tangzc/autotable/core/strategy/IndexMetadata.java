@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * 索引的元信息描述
  * @author don
  */
 @Data

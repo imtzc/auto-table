@@ -1,10 +1,10 @@
 package com.tangzc.autotable.core.strategy.mysql.builder;
 
+import com.tangzc.autotable.core.strategy.IndexMetadata;
 import com.tangzc.autotable.core.strategy.mysql.data.MysqlColumnMetadata;
 import com.tangzc.autotable.core.strategy.mysql.data.MysqlCompareTableInfo;
-import com.tangzc.autotable.core.strategy.mysql.data.MysqlIndexMetadata;
-import lombok.extern.slf4j.Slf4j;
 import com.tangzc.autotable.core.utils.StringUtils;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -35,7 +35,7 @@ public class ModifyTableSqlBuilder {
         List<String> dropColumnList = mysqlCompareTableInfo.getDropColumnList();
         List<MysqlCompareTableInfo.MysqlModifyColumnMetadata> modifyMysqlColumnMetadataList = mysqlCompareTableInfo.getModifyMysqlColumnMetadataList();
         List<String> dropIndexList = mysqlCompareTableInfo.getDropIndexList();
-        List<MysqlIndexMetadata> mysqlIndexMetadataList = mysqlCompareTableInfo.getMysqlIndexMetadataList();
+        List<IndexMetadata> mysqlIndexMetadataList = mysqlCompareTableInfo.getIndexMetadataList();
 
         // 记录所有修改项，（利用数组结构，便于添加,分割）
         List<String> modifyItems = new ArrayList<>();

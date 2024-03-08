@@ -2,12 +2,12 @@ package com.tangzc.autotable.core.strategy.sqlite;
 
 import com.tangzc.autotable.core.constants.DatabaseDialect;
 import com.tangzc.autotable.core.converter.DefaultTypeEnumInterface;
-import com.tangzc.autotable.core.strategy.sqlite.data.SqliteDefaultTypeEnum;
 import com.tangzc.autotable.core.strategy.IStrategy;
+import com.tangzc.autotable.core.strategy.IndexMetadata;
 import com.tangzc.autotable.core.strategy.sqlite.builder.CreateTableSqlBuilder;
 import com.tangzc.autotable.core.strategy.sqlite.builder.SqliteTableMetadataBuilder;
 import com.tangzc.autotable.core.strategy.sqlite.data.SqliteCompareTableInfo;
-import com.tangzc.autotable.core.strategy.sqlite.data.SqliteIndexMetadata;
+import com.tangzc.autotable.core.strategy.sqlite.data.SqliteDefaultTypeEnum;
 import com.tangzc.autotable.core.strategy.sqlite.data.SqliteTableMetadata;
 import com.tangzc.autotable.core.strategy.sqlite.data.dbdata.SqliteMaster;
 import com.tangzc.autotable.core.strategy.sqlite.mapper.SqliteTablesMapper;
@@ -133,7 +133,7 @@ public class SqliteStrategy implements IStrategy<SqliteTableMetadata, SqliteComp
             // 判断索引是否需要重建 <索引name，索引sql>
             Map<String, String> rebuildIndexMap = tableMetadata.getIndexMetadataList().stream()
                     .collect(Collectors.toMap(
-                            SqliteIndexMetadata::getName,
+                            IndexMetadata::getName,
                             indexMetadata -> CreateTableSqlBuilder.getIndexSql(tableName, indexMetadata)
                     ));
             // 遍历所有数据库存在的索引，判断有没有变化

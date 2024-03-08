@@ -1,6 +1,7 @@
 package com.tangzc.autotable.core.strategy.mysql.data;
 
 import com.tangzc.autotable.core.strategy.CompareTableInfo;
+import com.tangzc.autotable.core.strategy.IndexMetadata;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
@@ -57,7 +58,7 @@ public class MysqlCompareTableInfo extends CompareTableInfo {
     /**
      * 索引
      */
-    private final List<MysqlIndexMetadata> mysqlIndexMetadataList = new ArrayList<>();
+    private final List<IndexMetadata> indexMetadataList = new ArrayList<>();
 
     public MysqlCompareTableInfo(@NonNull String name) {
         super(name);
@@ -77,7 +78,7 @@ public class MysqlCompareTableInfo extends CompareTableInfo {
                 !dropColumnList.isEmpty() ||
                 !modifyMysqlColumnMetadataList.isEmpty() ||
                 !dropIndexList.isEmpty() ||
-                !mysqlIndexMetadataList.isEmpty();
+                !indexMetadataList.isEmpty();
     }
 
     @Override
@@ -125,8 +126,8 @@ public class MysqlCompareTableInfo extends CompareTableInfo {
         if (!dropIndexList.isEmpty()) {
             errorMsg.append("删除索引：").append(String.join(",", dropIndexList)).append("\n");
         }
-        if (!mysqlIndexMetadataList.isEmpty()) {
-            errorMsg.append("新增索引：").append(mysqlIndexMetadataList.stream().map(MysqlIndexMetadata::getName).collect(Collectors.joining(","))).append("\n");
+        if (!indexMetadataList.isEmpty()) {
+            errorMsg.append("新增索引：").append(indexMetadataList.stream().map(IndexMetadata::getName).collect(Collectors.joining(","))).append("\n");
         }
         return errorMsg.toString();
     }

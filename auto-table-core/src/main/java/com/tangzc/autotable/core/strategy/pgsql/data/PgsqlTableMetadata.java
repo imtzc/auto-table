@@ -1,6 +1,7 @@
 package com.tangzc.autotable.core.strategy.pgsql.data;
 
 import com.tangzc.autotable.core.strategy.ColumnMetadata;
+import com.tangzc.autotable.core.strategy.IndexMetadata;
 import com.tangzc.autotable.core.strategy.TableMetadata;
 import lombok.Getter;
 import lombok.Setter;
@@ -24,7 +25,7 @@ public class PgsqlTableMetadata extends TableMetadata {
     /**
      * 所有索引信息
      */
-    private List<PgsqlIndexMetadata> indexMetadataList;
+    private List<IndexMetadata> indexMetadataList;
 
     public PgsqlTableMetadata(String tableName) {
         super(tableName);

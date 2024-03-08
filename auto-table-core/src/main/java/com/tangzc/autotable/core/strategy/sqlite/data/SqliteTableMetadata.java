@@ -1,6 +1,7 @@
 package com.tangzc.autotable.core.strategy.sqlite.data;
 
 import com.tangzc.autotable.core.strategy.ColumnMetadata;
+import com.tangzc.autotable.core.strategy.IndexMetadata;
 import com.tangzc.autotable.core.strategy.TableMetadata;
 import lombok.Getter;
 import lombok.Setter;
@@ -25,7 +26,7 @@ public class SqliteTableMetadata extends TableMetadata {
     /**
      * 索引
      */
-    private List<SqliteIndexMetadata> indexMetadataList = new ArrayList<>();
+    private List<IndexMetadata> indexMetadataList = new ArrayList<>();
 
     public SqliteTableMetadata(String tableName) {
         super(tableName);
