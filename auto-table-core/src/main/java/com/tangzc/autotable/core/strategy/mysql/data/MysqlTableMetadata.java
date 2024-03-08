@@ -30,10 +30,6 @@ public class MysqlTableMetadata extends TableMetadata {
      */
     private String collate;
     /**
-     * 注释
-     */
-    private String comment;
-    /**
      * 所有列
      */
     private List<MysqlColumnMetadata> columnMetadataList = new ArrayList<>();

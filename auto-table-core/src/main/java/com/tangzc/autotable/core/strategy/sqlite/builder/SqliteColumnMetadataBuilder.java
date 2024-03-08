@@ -1,12 +1,11 @@
 package com.tangzc.autotable.core.strategy.sqlite.builder;
 
-import com.tangzc.autotable.annotation.ColumnDefault;
-import com.tangzc.autotable.core.AutoTableGlobalConfig;
+import com.tangzc.autotable.core.builder.ColumnMetadataBuilder;
 import com.tangzc.autotable.core.constants.DatabaseDialect;
 import com.tangzc.autotable.core.converter.DatabaseTypeAndLength;
-import com.tangzc.autotable.core.strategy.sqlite.data.SqliteColumnMetadata;
+import com.tangzc.autotable.core.strategy.ColumnMetadata;
 import com.tangzc.autotable.core.strategy.sqlite.SqliteTypeHelper;
-import com.tangzc.autotable.core.utils.TableBeanUtils;
+import com.tangzc.autotable.core.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Field;
@@ -19,20 +18,26 @@ import java.lang.reflect.Field;
 @Slf4j
 public class SqliteColumnMetadataBuilder {
 
-    public static SqliteColumnMetadata build(Class<?> clazz, Field field) {
-        SqliteColumnMetadata sqliteColumnMetadata = new SqliteColumnMetadata();
-        sqliteColumnMetadata.setName(TableBeanUtils.getRealColumnName(clazz, field));
-        sqliteColumnMetadata.setType(getAndLength(clazz, field));
-        sqliteColumnMetadata.setNotNull(TableBeanUtils.isNotNull(field, clazz));
-        sqliteColumnMetadata.setPrimary(TableBeanUtils.isPrimary(field, clazz));
-        sqliteColumnMetadata.setAutoIncrement(TableBeanUtils.isAutoIncrement(field, clazz));
-        ColumnDefault columnDefault = TableBeanUtils.getDefaultValue(field);
-        if (columnDefault != null) {
-            sqliteColumnMetadata.setDefaultValueType(columnDefault.type());
-            String defaultValue = columnDefault.value();
+    public static ColumnMetadata build(Class<?> clazz, Field field) {
+
+        ColumnMetadata columnMetadata = ColumnMetadataBuilder.of(DatabaseDialect.SQLite, new ColumnMetadata())
+                .buildFromAnnotation(clazz, field);
+
+        // 修正类型和长度
+        fixTypeAndLength(columnMetadata.getType());
+
+        // 修正默认值
+        fixDefaultValue(field, columnMetadata);
+
+        return columnMetadata;
+    }
+
+    private static void fixDefaultValue(Field field, ColumnMetadata columnMetadata) {
+        String defaultValue = columnMetadata.getDefaultValue();
+        if(StringUtils.hasText(defaultValue)) {
             Class<?> fieldType = field.getType();
             // 补偿逻辑：类型为Boolean的时候(实际数据库为bit数字类型)，兼容 true、false
-            boolean isBooleanType = (fieldType == Boolean.class || fieldType == boolean.class) && SqliteTypeHelper.isInteger(sqliteColumnMetadata.getType());
+            boolean isBooleanType = (fieldType == Boolean.class || fieldType == boolean.class) && SqliteTypeHelper.isInteger(columnMetadata.getType());
             if (isBooleanType && !"1".equals(defaultValue) && !"0".equals(defaultValue)) {
                 if (Boolean.parseBoolean(defaultValue)) {
                     defaultValue = "1";
@@ -41,18 +46,14 @@ public class SqliteColumnMetadataBuilder {
                 }
             }
             // 补偿逻辑：字符串类型，前后自动添加'
-            if (SqliteTypeHelper.isText(sqliteColumnMetadata.getType()) && !defaultValue.isEmpty() && !defaultValue.startsWith("'") && !defaultValue.endsWith("'")) {
+            if (SqliteTypeHelper.isText(columnMetadata.getType()) && !defaultValue.isEmpty() && !defaultValue.startsWith("'") && !defaultValue.endsWith("'")) {
                 defaultValue = "'" + defaultValue + "'";
             }
-            sqliteColumnMetadata.setDefaultValue(defaultValue);
+            columnMetadata.setDefaultValue(defaultValue);
         }
-        sqliteColumnMetadata.setComment(TableBeanUtils.getComment(field));
-
-        return sqliteColumnMetadata;
     }
 
-    private static DatabaseTypeAndLength getAndLength(Class<?> clazz, Field field) {
-        DatabaseTypeAndLength typeAndLength = AutoTableGlobalConfig.getJavaTypeToDatabaseTypeConverter().convert(DatabaseDialect.SQLite, clazz, field);
+    private static void fixTypeAndLength(DatabaseTypeAndLength typeAndLength) {
         // 纠正类型的写法为正规方式
         String type = typeAndLength.getType().toLowerCase();
         if (type.contains("int")) {
@@ -68,6 +69,5 @@ public class SqliteColumnMetadataBuilder {
             type = "real";
         }
         typeAndLength.setType(type);
-        return typeAndLength;
     }
 }

@@ -58,7 +58,7 @@ public class ModifyTableSqlBuilder {
                             if (columnMetadata.isPrimary()) {
                                 columnMetadata.setNotNull(true);
                             }
-                            String columnSql = columnMetadata.toColumnSql();
+                            String columnSql = ColumnSqlBuilder.buildSql(columnMetadata);
 
                             if (modifyColumn.getType() == MysqlCompareTableInfo.ModifyType.MODIFY) {
                                 // 修改表字段处理

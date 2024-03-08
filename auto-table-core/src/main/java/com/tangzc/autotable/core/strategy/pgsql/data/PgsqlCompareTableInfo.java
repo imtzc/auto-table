@@ -1,5 +1,6 @@
 package com.tangzc.autotable.core.strategy.pgsql.data;
 
+import com.tangzc.autotable.core.strategy.ColumnMetadata;
 import com.tangzc.autotable.core.strategy.CompareTableInfo;
 import com.tangzc.autotable.core.utils.StringUtils;
 import lombok.Getter;
@@ -28,7 +29,7 @@ public class PgsqlCompareTableInfo extends CompareTableInfo {
     /**
      * 新的主键
      */
-    private List<PgsqlColumnMetadata> newPrimaries = new ArrayList<>();
+    private List<ColumnMetadata> newPrimaries = new ArrayList<>();
     /**
      * 不为空删除主键
      */
@@ -52,12 +53,12 @@ public class PgsqlCompareTableInfo extends CompareTableInfo {
     /**
      * 需要修改的列
      */
-    private List<PgsqlColumnMetadata> modifyColumnMetadataList = new ArrayList<>();
+    private List<ColumnMetadata> modifyColumnMetadataList = new ArrayList<>();
 
     /**
      * 需要新增的列
      */
-    private List<PgsqlColumnMetadata> newColumnMetadataList = new ArrayList<>();
+    private List<ColumnMetadata> newColumnMetadataList = new ArrayList<>();
 
     /**
      * 需要删除的索引
@@ -109,10 +110,10 @@ public class PgsqlCompareTableInfo extends CompareTableInfo {
             errorMsg.append("删除列: ").append(String.join(",", dropColumnList)).append("\n");
         }
         if (!modifyColumnMetadataList.isEmpty()) {
-            errorMsg.append("修改列: ").append(modifyColumnMetadataList.stream().map(PgsqlColumnMetadata::getName).collect(Collectors.joining(","))).append("\n");
+            errorMsg.append("修改列: ").append(modifyColumnMetadataList.stream().map(ColumnMetadata::getName).collect(Collectors.joining(","))).append("\n");
         }
         if (!newColumnMetadataList.isEmpty()) {
-            errorMsg.append("新增列: ").append(newColumnMetadataList.stream().map(PgsqlColumnMetadata::getName).collect(Collectors.joining(","))).append("\n");
+            errorMsg.append("新增列: ").append(newColumnMetadataList.stream().map(ColumnMetadata::getName).collect(Collectors.joining(","))).append("\n");
         }
         if (!dropIndexList.isEmpty()) {
             errorMsg.append("删除索引: ").append(String.join(",", dropIndexList)).append("\n");
@@ -127,11 +128,11 @@ public class PgsqlCompareTableInfo extends CompareTableInfo {
         this.columnComment.put(columnName, newComment);
     }
 
-    public void addNewColumn(PgsqlColumnMetadata columnMetadata) {
+    public void addNewColumn(ColumnMetadata columnMetadata) {
         this.newColumnMetadataList.add(columnMetadata);
     }
 
-    public void addModifyColumn(PgsqlColumnMetadata columnMetadata) {
+    public void addModifyColumn(ColumnMetadata columnMetadata) {
         this.modifyColumnMetadataList.add(columnMetadata);
     }
 
@@ -156,7 +157,7 @@ public class PgsqlCompareTableInfo extends CompareTableInfo {
         this.dropIndexList.addAll(indexNameList);
     }
 
-    public void addNewPrimary(List<PgsqlColumnMetadata> pgsqlColumnMetadata) {
-        this.newPrimaries.addAll(pgsqlColumnMetadata);
+    public void addNewPrimary(List<ColumnMetadata> columnMetadata) {
+        this.newPrimaries.addAll(columnMetadata);
     }
 }

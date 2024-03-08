@@ -1,7 +1,7 @@
 package com.tangzc.autotable.core.strategy.sqlite.data;
 
+import com.tangzc.autotable.core.strategy.ColumnMetadata;
 import com.tangzc.autotable.core.strategy.TableMetadata;
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -18,13 +18,10 @@ import java.util.List;
 public class SqliteTableMetadata extends TableMetadata {
 
     /**
-     * 注释
-     */
-    private String comment;
-    /**
      * 所有列
      */
-    private List<SqliteColumnMetadata> columnMetadataList = new ArrayList<>();
+    private List<ColumnMetadata> columnMetadataList = new ArrayList<>();
+
     /**
      * 索引
      */

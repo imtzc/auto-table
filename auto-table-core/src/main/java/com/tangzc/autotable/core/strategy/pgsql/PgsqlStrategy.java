@@ -6,13 +6,13 @@ import com.tangzc.autotable.annotation.enums.IndexTypeEnum;
 import com.tangzc.autotable.core.AutoTableGlobalConfig;
 import com.tangzc.autotable.core.constants.DatabaseDialect;
 import com.tangzc.autotable.core.converter.DefaultTypeEnumInterface;
-import com.tangzc.autotable.core.strategy.pgsql.data.PgsqlDefaultTypeEnum;
+import com.tangzc.autotable.core.strategy.ColumnMetadata;
 import com.tangzc.autotable.core.strategy.IStrategy;
 import com.tangzc.autotable.core.strategy.pgsql.builder.CreateTableSqlBuilder;
 import com.tangzc.autotable.core.strategy.pgsql.builder.ModifyTableSqlBuilder;
 import com.tangzc.autotable.core.strategy.pgsql.builder.PgsqlTableMetadataBuilder;
-import com.tangzc.autotable.core.strategy.pgsql.data.PgsqlColumnMetadata;
 import com.tangzc.autotable.core.strategy.pgsql.data.PgsqlCompareTableInfo;
+import com.tangzc.autotable.core.strategy.pgsql.data.PgsqlDefaultTypeEnum;
 import com.tangzc.autotable.core.strategy.pgsql.data.PgsqlIndexMetadata;
 import com.tangzc.autotable.core.strategy.pgsql.data.PgsqlTableMetadata;
 import com.tangzc.autotable.core.strategy.pgsql.data.PgsqlTypeHelper;
@@ -181,36 +181,36 @@ public class PgsqlStrategy implements IStrategy<PgsqlTableMetadata, PgsqlCompare
         List<PgsqlDbColumn> pgsqlDbColumns = executeReturn(pgsqlTablesMapper -> pgsqlTablesMapper.selectTableFieldDetail(tableName));
         Map<String, PgsqlDbColumn> pgsqlFieldDetailMap = pgsqlDbColumns.stream().collect(Collectors.toMap(PgsqlDbColumn::getColumnName, Function.identity()));
         // 当前字段信息
-        List<PgsqlColumnMetadata> columnMetadataList = tableMetadata.getColumnMetadataList();
+        List<ColumnMetadata> columnMetadataList = tableMetadata.getColumnMetadataList();
 
-        for (PgsqlColumnMetadata pgsqlColumnMetadata : columnMetadataList) {
-            String columnName = pgsqlColumnMetadata.getName();
+        for (ColumnMetadata columnMetadata : columnMetadataList) {
+            String columnName = columnMetadata.getName();
             PgsqlDbColumn pgsqlDbColumn = pgsqlFieldDetailMap.remove(columnName);
             // 新增字段
             if (pgsqlDbColumn == null) {
                 // 标记注释
-                pgsqlCompareTableInfo.addColumnComment(pgsqlColumnMetadata.getName(), pgsqlColumnMetadata.getComment());
+                pgsqlCompareTableInfo.addColumnComment(columnMetadata.getName(), columnMetadata.getComment());
                 // 标记字段信息
-                pgsqlCompareTableInfo.addNewColumn(pgsqlColumnMetadata);
+                pgsqlCompareTableInfo.addNewColumn(columnMetadata);
                 continue;
             }
             // 修改了字段注释
-            if (!Objects.equals(pgsqlDbColumn.getDescription(), pgsqlColumnMetadata.getComment())) {
-                pgsqlCompareTableInfo.addColumnComment(columnName, pgsqlColumnMetadata.getComment());
+            if (!Objects.equals(pgsqlDbColumn.getDescription(), columnMetadata.getComment())) {
+                pgsqlCompareTableInfo.addColumnComment(columnName, columnMetadata.getComment());
             }
             /* 修改的字段 */
             String columnDefault = pgsqlDbColumn.getColumnDefault();
 
             // 主键忽略判断，单独处理
-            if (!pgsqlColumnMetadata.isPrimary()) {
+            if (!columnMetadata.isPrimary()) {
                 // 字段类型不同
-                boolean isTypeDiff = isTypeDiff(pgsqlColumnMetadata, pgsqlDbColumn);
+                boolean isTypeDiff = isTypeDiff(columnMetadata, pgsqlDbColumn);
                 // 非null不同
-                boolean isNotnullDiff = pgsqlColumnMetadata.isNotNull() != Objects.equals(pgsqlDbColumn.getIsNullable(), "NO");
+                boolean isNotnullDiff = columnMetadata.isNotNull() != Objects.equals(pgsqlDbColumn.getIsNullable(), "NO");
                 // 默认值不同
-                boolean isDefaultDiff = isDefaultDiff(pgsqlColumnMetadata, columnDefault);
+                boolean isDefaultDiff = isDefaultDiff(columnMetadata, columnDefault);
                 if (isTypeDiff || isNotnullDiff || isDefaultDiff) {
-                    pgsqlCompareTableInfo.addModifyColumn(pgsqlColumnMetadata);
+                    pgsqlCompareTableInfo.addModifyColumn(columnMetadata);
                 }
             }
         }
@@ -225,12 +225,12 @@ public class PgsqlStrategy implements IStrategy<PgsqlTableMetadata, PgsqlCompare
 
         /* 处理主键 */
         // 获取所有主键
-        List<PgsqlColumnMetadata> primaryColumnList = columnMetadataList.stream().filter(PgsqlColumnMetadata::isPrimary).collect(Collectors.toList());
+        List<ColumnMetadata> primaryColumnList = columnMetadataList.stream().filter(ColumnMetadata::isPrimary).collect(Collectors.toList());
         // 查询数据库主键信息
         PgsqlDbPrimary pgsqlDbPrimary = executeReturn(pgsqlTablesMapper -> pgsqlTablesMapper.selectPrimaryKeyName(tableName));
 
         boolean removePrimary = primaryColumnList.isEmpty() && pgsqlDbPrimary != null;
-        String newPrimaryColumns = primaryColumnList.stream().map(PgsqlColumnMetadata::getName).collect(Collectors.joining(","));
+        String newPrimaryColumns = primaryColumnList.stream().map(ColumnMetadata::getName).collect(Collectors.joining(","));
         boolean primaryChange = pgsqlDbPrimary != null && !Objects.equals(pgsqlDbPrimary.getColumns(), newPrimaryColumns);
         if (removePrimary || primaryChange) {
             // 标记待删除的主键
@@ -243,9 +243,9 @@ public class PgsqlStrategy implements IStrategy<PgsqlTableMetadata, PgsqlCompare
         }
     }
 
-    private static boolean isTypeDiff(PgsqlColumnMetadata pgsqlColumnMetadata, PgsqlDbColumn pgsqlDbColumn) {
+    private static boolean isTypeDiff(ColumnMetadata columnMetadata, PgsqlDbColumn pgsqlDbColumn) {
         String dataTypeFormat = pgsqlDbColumn.getDataTypeFormat();
-        String fullType = PgsqlTypeHelper.getFullType(pgsqlColumnMetadata.getType()).toLowerCase();
+        String fullType = PgsqlTypeHelper.getFullType(columnMetadata.getType()).toLowerCase();
         // 数字类型的，默认没有长度，但是数据库查询出来的有长度。 "int4(32)".startWith("int4")
         if (dataTypeFormat.startsWith("int")) {
             return !dataTypeFormat.startsWith(fullType);
@@ -253,7 +253,7 @@ public class PgsqlStrategy implements IStrategy<PgsqlTableMetadata, PgsqlCompare
         return !Objects.equals(fullType, dataTypeFormat);
     }
 
-    private static boolean isDefaultDiff(PgsqlColumnMetadata pgsqlColumnMetadata, String columnDefault) {
+    private static boolean isDefaultDiff(ColumnMetadata columnMetadata, String columnDefault) {
 
         // 纠正default值，去掉类型转换
         if(columnDefault != null) {
@@ -263,7 +263,7 @@ public class PgsqlStrategy implements IStrategy<PgsqlTableMetadata, PgsqlCompare
             }
         }
 
-        DefaultValueEnum defaultValueType = pgsqlColumnMetadata.getDefaultValueType();
+        DefaultValueEnum defaultValueType = columnMetadata.getDefaultValueType();
 
         if (DefaultValueEnum.isValid(defaultValueType)) {
             if (defaultValueType == DefaultValueEnum.EMPTY_STRING) {
@@ -273,7 +273,7 @@ public class PgsqlStrategy implements IStrategy<PgsqlTableMetadata, PgsqlCompare
                 return columnDefault != null && !"NULL".equalsIgnoreCase(columnDefault);
             }
         } else {
-            String defaultValue = pgsqlColumnMetadata.getDefaultValue();
+            String defaultValue = columnMetadata.getDefaultValue();
             return !Objects.equals(defaultValue, columnDefault);
         }
         return false;

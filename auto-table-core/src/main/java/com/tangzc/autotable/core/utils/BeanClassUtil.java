@@ -40,7 +40,7 @@ public class BeanClassUtil {
         }
 
         if (field == null) {
-            throw new RuntimeException(clazz.getName() + "上没有找到字段：" + fieldName);
+            throw new RuntimeException(clazz.getName() + "上没有找到字段：" + fieldName + "（友情提示：请配置java字段名，而不是数据库列名）");
         }
 
         return field;

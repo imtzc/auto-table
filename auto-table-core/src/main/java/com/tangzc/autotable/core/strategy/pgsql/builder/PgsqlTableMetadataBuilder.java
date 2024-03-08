@@ -3,7 +3,7 @@ package com.tangzc.autotable.core.strategy.pgsql.builder;
 import com.tangzc.autotable.annotation.TableComment;
 import com.tangzc.autotable.annotation.TableIndex;
 import com.tangzc.autotable.core.AutoTableGlobalConfig;
-import com.tangzc.autotable.core.strategy.pgsql.data.PgsqlColumnMetadata;
+import com.tangzc.autotable.core.strategy.ColumnMetadata;
 import com.tangzc.autotable.core.strategy.pgsql.data.PgsqlIndexMetadata;
 import com.tangzc.autotable.core.strategy.pgsql.data.PgsqlTableMetadata;
 import com.tangzc.autotable.core.utils.BeanClassUtil;
@@ -40,7 +40,7 @@ public class PgsqlTableMetadataBuilder {
         return pgsqlTableMetadata;
     }
 
-    public static List<PgsqlColumnMetadata> getColumnList(Class<?> clazz, List<Field> fields) {
+    public static List<ColumnMetadata> getColumnList(Class<?> clazz, List<Field> fields) {
         return fields.stream()
                 .filter(field -> TableBeanUtils.isIncludeField(field, clazz))
                 .map(field -> PgsqlColumnMetadataBuilder.build(clazz, field))

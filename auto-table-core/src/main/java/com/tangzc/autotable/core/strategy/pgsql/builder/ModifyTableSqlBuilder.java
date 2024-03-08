@@ -1,7 +1,7 @@
 package com.tangzc.autotable.core.strategy.pgsql.builder;
 
 import com.tangzc.autotable.annotation.enums.DefaultValueEnum;
-import com.tangzc.autotable.core.strategy.pgsql.data.PgsqlColumnMetadata;
+import com.tangzc.autotable.core.strategy.ColumnMetadata;
 import com.tangzc.autotable.core.strategy.pgsql.data.PgsqlCompareTableInfo;
 import com.tangzc.autotable.core.strategy.pgsql.data.PgsqlTypeHelper;
 import com.tangzc.autotable.core.utils.StringUtils;
@@ -46,13 +46,13 @@ public class ModifyTableSqlBuilder {
                 .map(columnName -> "  DROP COLUMN \"" + columnName + "\"")
                 .forEach(alterTableSqlList::add);
         // 新增列
-        List<PgsqlColumnMetadata> newColumnList = pgsqlCompareTableInfo.getNewColumnMetadataList();
+        List<ColumnMetadata> newColumnList = pgsqlCompareTableInfo.getNewColumnMetadataList();
         newColumnList.stream()
-                .map(column -> "  ADD COLUMN " + column.toColumnSql())
+                .map(column -> "  ADD COLUMN " + ColumnSqlBuilder.buildSql(column))
                 .forEach(alterTableSqlList::add);
         // 修改列
-        List<PgsqlColumnMetadata> modifyColumnList = pgsqlCompareTableInfo.getModifyColumnMetadataList();
-        for (PgsqlColumnMetadata columnMetadata : modifyColumnList) {
+        List<ColumnMetadata> modifyColumnList = pgsqlCompareTableInfo.getModifyColumnMetadataList();
+        for (ColumnMetadata columnMetadata : modifyColumnList) {
             // 修改字段
             String columnName = columnMetadata.getName();
             // 类型
@@ -72,7 +72,7 @@ public class ModifyTableSqlBuilder {
                     defaultVal = defaultValue;
                 }
             }
-            if(StringUtils.hasText(defaultVal)) {
+            if (StringUtils.hasText(defaultVal)) {
                 // 设置默认值
                 alterTableSqlList.add("  ALTER COLUMN \"" + columnName + "\" SET DEFAULT " + defaultVal);
             } else {
@@ -81,7 +81,7 @@ public class ModifyTableSqlBuilder {
             }
         }
         // 添加主键
-        List<PgsqlColumnMetadata> newPrimaries = pgsqlCompareTableInfo.getNewPrimaries();
+        List<ColumnMetadata> newPrimaries = pgsqlCompareTableInfo.getNewPrimaries();
         if (!newPrimaries.isEmpty()) {
             String primaryColumns = newPrimaries.stream().map(col -> "\"" + col.getName() + "\"").collect(Collectors.joining(", "));
             if (StringUtils.hasText(primaryKeyName)) {

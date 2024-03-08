@@ -3,7 +3,7 @@ package com.tangzc.autotable.core.strategy.sqlite.builder;
 import com.tangzc.autotable.annotation.TableComment;
 import com.tangzc.autotable.annotation.TableIndex;
 import com.tangzc.autotable.core.AutoTableGlobalConfig;
-import com.tangzc.autotable.core.strategy.sqlite.data.SqliteColumnMetadata;
+import com.tangzc.autotable.core.strategy.ColumnMetadata;
 import com.tangzc.autotable.core.strategy.sqlite.data.SqliteIndexMetadata;
 import com.tangzc.autotable.core.strategy.sqlite.data.SqliteTableMetadata;
 import com.tangzc.autotable.core.utils.BeanClassUtil;
@@ -40,7 +40,7 @@ public class SqliteTableMetadataBuilder {
         return mysqlTableMetadata;
     }
 
-    public static List<SqliteColumnMetadata> getColumnList(Class<?> clazz, List<Field> fields) {
+    public static List<ColumnMetadata> getColumnList(Class<?> clazz, List<Field> fields) {
         return fields.stream()
                 .filter(field -> TableBeanUtils.isIncludeField(field, clazz))
                 .map(field -> SqliteColumnMetadataBuilder.build(clazz, field))

@@ -1,10 +1,10 @@
 package com.tangzc.autotable.core.strategy.mysql.builder;
 
-import com.tangzc.autotable.annotation.ColumnDefault;
 import com.tangzc.autotable.annotation.ColumnType;
 import com.tangzc.autotable.annotation.mysql.MysqlColumnCharset;
 import com.tangzc.autotable.core.AutoTableGlobalConfig;
 import com.tangzc.autotable.core.AutoTableOrmFrameAdapter;
+import com.tangzc.autotable.core.builder.ColumnMetadataBuilder;
 import com.tangzc.autotable.core.constants.DatabaseDialect;
 import com.tangzc.autotable.core.converter.DatabaseTypeAndLength;
 import com.tangzc.autotable.core.converter.JavaTypeToDatabaseTypeConverter;
@@ -12,7 +12,6 @@ import com.tangzc.autotable.core.strategy.mysql.ParamValidChecker;
 import com.tangzc.autotable.core.strategy.mysql.data.MysqlColumnMetadata;
 import com.tangzc.autotable.core.strategy.mysql.data.MysqlTypeHelper;
 import com.tangzc.autotable.core.utils.StringUtils;
-import com.tangzc.autotable.core.utils.TableBeanUtils;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Field;
@@ -27,13 +26,50 @@ import java.util.List;
 public class MysqlColumnMetadataBuilder {
 
     public static MysqlColumnMetadata build(Class<?> clazz, Field field, int position) {
-        MysqlColumnMetadata mysqlColumnMetadata = new MysqlColumnMetadata();
-        mysqlColumnMetadata.setName(TableBeanUtils.getRealColumnName(clazz, field));
-        mysqlColumnMetadata.setType(getTypeAndLength(field, clazz));
-        mysqlColumnMetadata.setNotNull(TableBeanUtils.isNotNull(field, clazz));
-        mysqlColumnMetadata.setPrimary(TableBeanUtils.isPrimary(field, clazz));
-        mysqlColumnMetadata.setAutoIncrement(TableBeanUtils.isAutoIncrement(field, clazz));
+
+        MysqlColumnMetadata mysqlColumnMetadata = (MysqlColumnMetadata) ColumnMetadataBuilder.of(DatabaseDialect.MySQL, new MysqlColumnMetadata())
+                .buildFromAnnotation(clazz, field);
+
+        // 列顺序位置
         mysqlColumnMetadata.setPosition(position);
+
+        // 设置字符集和排序规则
+        setCharsetAndCollate(field, mysqlColumnMetadata);
+
+        // 修正默认值
+        fixDefaultValue(mysqlColumnMetadata);
+
+        /* 基础的校验逻辑 */
+        ParamValidChecker.checkColumnParam(clazz, field, mysqlColumnMetadata);
+
+        return mysqlColumnMetadata;
+    }
+
+    private static void fixDefaultValue(MysqlColumnMetadata mysqlColumnMetadata) {
+        String defaultValue = mysqlColumnMetadata.getDefaultValue();
+        if (StringUtils.hasText(defaultValue)) {
+            DatabaseTypeAndLength type = mysqlColumnMetadata.getType();
+            // 补偿逻辑：类型为Boolean的时候(实际数据库为bit数字类型)，兼容 true、false
+            if (MysqlTypeHelper.isBoolean(type) && !"1".equals(defaultValue) && !"0".equals(defaultValue)) {
+                if (Boolean.parseBoolean(defaultValue)) {
+                    defaultValue = "1";
+                } else {
+                    defaultValue = "0";
+                }
+            }
+            // 补偿逻辑：需要兼容字符串的类型，前后自动添加'
+            if (MysqlTypeHelper.isCharString(type) && !defaultValue.isEmpty() && !defaultValue.startsWith("'") && !defaultValue.endsWith("'")) {
+                defaultValue = "'" + defaultValue + "'";
+            }
+            // 补偿逻辑：时间类型，非函数的值，前后自动添加'
+            if (MysqlTypeHelper.isDateTime(type) && defaultValue.matches("(\\d+.?)+") && !defaultValue.startsWith("'") && !defaultValue.endsWith("'")) {
+                defaultValue = "'" + defaultValue + "'";
+            }
+            mysqlColumnMetadata.setDefaultValue(defaultValue);
+        }
+    }
+
+    private static void setCharsetAndCollate(Field field, MysqlColumnMetadata mysqlColumnMetadata) {
 
         String charset = null;
         String collate = null;
@@ -56,38 +92,6 @@ public class MysqlColumnMetadataBuilder {
         mysqlColumnMetadata.setCharacterSet(charset);
         // 字符排序
         mysqlColumnMetadata.setCollate(collate);
-
-        ColumnDefault columnDefault = TableBeanUtils.getDefaultValue(field);
-        if (columnDefault != null) {
-            mysqlColumnMetadata.setDefaultValueType(columnDefault.type());
-            String defaultValue = columnDefault.value();
-            if (StringUtils.hasText(defaultValue)) {
-                DatabaseTypeAndLength type = mysqlColumnMetadata.getType();
-                // 补偿逻辑：类型为Boolean的时候(实际数据库为bit数字类型)，兼容 true、false
-                if (MysqlTypeHelper.isBoolean(type) && !"1".equals(defaultValue) && !"0".equals(defaultValue)) {
-                    if (Boolean.parseBoolean(defaultValue)) {
-                        defaultValue = "1";
-                    } else {
-                        defaultValue = "0";
-                    }
-                }
-                // 补偿逻辑：需要兼容字符串的类型，前后自动添加'
-                if (MysqlTypeHelper.isCharString(type) && !defaultValue.isEmpty() && !defaultValue.startsWith("'") && !defaultValue.endsWith("'")) {
-                    defaultValue = "'" + defaultValue + "'";
-                }
-                // 补偿逻辑：时间类型，非函数的值，前后自动添加'
-                if (MysqlTypeHelper.isDateTime(type) && defaultValue.matches("(\\d+.?)+") && !defaultValue.startsWith("'") && !defaultValue.endsWith("'")) {
-                    defaultValue = "'" + defaultValue + "'";
-                }
-                mysqlColumnMetadata.setDefaultValue(defaultValue);
-            }
-        }
-        mysqlColumnMetadata.setComment(TableBeanUtils.getComment(field));
-
-        /* 基础的校验逻辑 */
-        ParamValidChecker.checkColumnParam(clazz, field, mysqlColumnMetadata);
-
-        return mysqlColumnMetadata;
     }
 
     private static DatabaseTypeAndLength getTypeAndLength(Field field, Class<?> clazz) {

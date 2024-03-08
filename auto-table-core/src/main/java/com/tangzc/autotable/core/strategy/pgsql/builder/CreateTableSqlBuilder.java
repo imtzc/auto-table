@@ -1,12 +1,12 @@
 package com.tangzc.autotable.core.strategy.pgsql.builder;
 
 import com.tangzc.autotable.annotation.enums.IndexTypeEnum;
-import com.tangzc.autotable.core.strategy.pgsql.data.PgsqlColumnMetadata;
+import com.tangzc.autotable.core.strategy.ColumnMetadata;
 import com.tangzc.autotable.core.strategy.pgsql.data.PgsqlIndexMetadata;
 import com.tangzc.autotable.core.strategy.pgsql.data.PgsqlTableMetadata;
 import com.tangzc.autotable.core.utils.StringConnectHelper;
-import lombok.extern.slf4j.Slf4j;
 import com.tangzc.autotable.core.utils.StringUtils;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -72,11 +72,11 @@ public class CreateTableSqlBuilder {
 
         String tableName = pgsqlTableMetadata.getTableName();
         String comment = pgsqlTableMetadata.getComment();
-        List<PgsqlColumnMetadata> columnMetadataList = pgsqlTableMetadata.getColumnMetadataList();
+        List<ColumnMetadata> columnMetadataList = pgsqlTableMetadata.getColumnMetadataList();
         List<PgsqlIndexMetadata> indexMetadataList = pgsqlTableMetadata.getIndexMetadataList();
 
         return getAddColumnCommentSql(tableName, comment,
-                columnMetadataList.stream().collect(Collectors.toMap(PgsqlColumnMetadata::getName, PgsqlColumnMetadata::getComment)),
+                columnMetadataList.stream().collect(Collectors.toMap(ColumnMetadata::getName, ColumnMetadata::getComment)),
                 indexMetadataList.stream().collect(Collectors.toMap(PgsqlIndexMetadata::getName, PgsqlIndexMetadata::getComment)));
     }
 
@@ -113,7 +113,7 @@ public class CreateTableSqlBuilder {
     private static String getCreateTableSql(PgsqlTableMetadata pgsqlTableMetadata) {
 
         String name = pgsqlTableMetadata.getTableName();
-        List<PgsqlColumnMetadata> columnMetadataList = pgsqlTableMetadata.getColumnMetadataList();
+        List<ColumnMetadata> columnMetadataList = pgsqlTableMetadata.getColumnMetadataList();
 
         // 记录所有修改项，（利用数组结构，便于添加,分割）
         List<String> columnList = new ArrayList<>();
@@ -132,7 +132,7 @@ public class CreateTableSqlBuilder {
         columnList.add(
                 columnMetadataList.stream()
                         // 拼接每个字段的sql片段
-                        .map(PgsqlColumnMetadata::toColumnSql)
+                        .map(ColumnSqlBuilder::buildSql)
                         .collect(Collectors.joining(","))
         );
 

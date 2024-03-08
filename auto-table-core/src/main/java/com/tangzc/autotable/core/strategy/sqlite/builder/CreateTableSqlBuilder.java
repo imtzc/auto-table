@@ -1,11 +1,11 @@
 package com.tangzc.autotable.core.strategy.sqlite.builder;
 
 import com.tangzc.autotable.annotation.enums.IndexTypeEnum;
-import com.tangzc.autotable.core.strategy.sqlite.data.SqliteColumnMetadata;
+import com.tangzc.autotable.core.strategy.ColumnMetadata;
 import com.tangzc.autotable.core.strategy.sqlite.data.SqliteIndexMetadata;
 import com.tangzc.autotable.core.utils.StringConnectHelper;
-import lombok.extern.slf4j.Slf4j;
 import com.tangzc.autotable.core.utils.StringUtils;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +31,7 @@ public class CreateTableSqlBuilder {
      * PRIMARY KEY ("id", "card_id")
      * );
      */
-    public static String buildTableSql(String name, String comment, List<SqliteColumnMetadata> columnMetadataList) {
+    public static String buildTableSql(String name, String comment, List<ColumnMetadata> columnMetadataList) {
         // 获取所有主键
         List<String> primaries = new ArrayList<>();
         columnMetadataList.forEach(columnData -> {
@@ -55,7 +55,7 @@ public class CreateTableSqlBuilder {
                     // 拼接每个字段的sql片段,
                     // 不是最后一个字段，或者后面还有主键需要添加，加逗号
                     boolean isNotLastItem = count.incrementAndGet() < columnMetadataList.size();
-                    return columnData.toColumnSql(isSinglePrimaryKey, isNotLastItem || hasPrimaries);
+                    return ColumnSqlBuilder.buildSql(columnData, isSinglePrimaryKey, isNotLastItem || hasPrimaries);
                 }).collect(Collectors.joining("\n"))
         );
 

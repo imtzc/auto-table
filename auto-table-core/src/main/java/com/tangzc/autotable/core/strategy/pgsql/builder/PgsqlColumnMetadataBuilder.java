@@ -1,14 +1,11 @@
 package com.tangzc.autotable.core.strategy.pgsql.builder;
 
-import com.tangzc.autotable.annotation.ColumnDefault;
-import com.tangzc.autotable.core.AutoTableGlobalConfig;
+import com.tangzc.autotable.core.builder.ColumnMetadataBuilder;
 import com.tangzc.autotable.core.constants.DatabaseDialect;
 import com.tangzc.autotable.core.converter.DatabaseTypeAndLength;
-import com.tangzc.autotable.core.converter.JavaTypeToDatabaseTypeConverter;
-import com.tangzc.autotable.core.strategy.pgsql.data.PgsqlColumnMetadata;
+import com.tangzc.autotable.core.strategy.ColumnMetadata;
 import com.tangzc.autotable.core.strategy.pgsql.data.PgsqlTypeHelper;
 import com.tangzc.autotable.core.utils.StringUtils;
-import com.tangzc.autotable.core.utils.TableBeanUtils;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Field;
@@ -21,30 +18,39 @@ import java.lang.reflect.Field;
 @Slf4j
 public class PgsqlColumnMetadataBuilder {
 
-    public static PgsqlColumnMetadata build(Class<?> clazz, Field field) {
+    public static ColumnMetadata build(Class<?> clazz, Field field) {
 
-        JavaTypeToDatabaseTypeConverter javaTypeToDatabaseTypeConverter = AutoTableGlobalConfig.getJavaTypeToDatabaseTypeConverter();
-        PgsqlColumnMetadata pgsqlColumnMetadata = new PgsqlColumnMetadata();
-        pgsqlColumnMetadata.setName(TableBeanUtils.getRealColumnName(clazz, field));
-        pgsqlColumnMetadata.setType(javaTypeToDatabaseTypeConverter.convert(DatabaseDialect.PostgreSQL, clazz, field));
-        pgsqlColumnMetadata.setNotNull(TableBeanUtils.isNotNull(field, clazz));
-        pgsqlColumnMetadata.setPrimary(TableBeanUtils.isPrimary(field, clazz));
-        pgsqlColumnMetadata.setAutoIncrement(TableBeanUtils.isAutoIncrement(field, clazz));
-        ColumnDefault columnDefault = TableBeanUtils.getDefaultValue(field);
-        if (columnDefault != null) {
-            pgsqlColumnMetadata.setDefaultValueType(columnDefault.type());
-            String defaultValue = columnDefault.value();
-            if(StringUtils.hasText(defaultValue)) {
-                DatabaseTypeAndLength type = pgsqlColumnMetadata.getType();
-                // 补偿逻辑：字符串类型，前后自动添加'
-                if (PgsqlTypeHelper.isCharString(type) && !defaultValue.isEmpty() && !defaultValue.startsWith("'") && !defaultValue.endsWith("'")) {
-                    defaultValue = "'" + defaultValue + "'";
+        ColumnMetadata columnMetadata = ColumnMetadataBuilder.of(DatabaseDialect.PostgreSQL, new ColumnMetadata())
+                .buildFromAnnotation(clazz, field);
+
+        // 修正默认值
+        fixDefaultValue(columnMetadata);
+
+        return columnMetadata;
+    }
+
+    private static void fixDefaultValue(ColumnMetadata columnMetadata) {
+
+        String defaultValue = columnMetadata.getDefaultValue();
+        if(StringUtils.hasText(defaultValue)) {
+            DatabaseTypeAndLength type = columnMetadata.getType();
+            // 布尔值，自动转化
+            if (PgsqlTypeHelper.isBoolean(type)) {
+                if ("1".equals(defaultValue)) {
+                    defaultValue = "true";
+                } else if ("0".equals(defaultValue)) {
+                    defaultValue = "false";
                 }
-                pgsqlColumnMetadata.setDefaultValue(defaultValue);
             }
+            // 兼容逻辑：如果是字符串的类型，自动包一层''（如果没有的话）
+            if (PgsqlTypeHelper.isCharString(type) && !defaultValue.startsWith("'") && !defaultValue.endsWith("'")) {
+                defaultValue = "'" + defaultValue + "'";
+            }
+            // 兼容逻辑：如果是日期，且非函数，自动包一层''（如果没有的话）
+            if (PgsqlTypeHelper.isTime(type) && defaultValue.matches("(\\d+.?)+") && !defaultValue.startsWith("'") && !defaultValue.endsWith("'")) {
+                defaultValue = "'" + defaultValue + "'";
+            }
+            columnMetadata.setDefaultValue(defaultValue);
         }
-        pgsqlColumnMetadata.setComment(TableBeanUtils.getComment(field));
-
-        return pgsqlColumnMetadata;
     }
 }

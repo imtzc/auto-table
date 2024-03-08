@@ -53,7 +53,7 @@ public class CreateTableSqlBuilder {
         addItems.add(
                 mysqlColumnMetadataList.stream()
                         // 拼接每个字段的sql片段
-                        .map(MysqlColumnMetadata::toColumnSql)
+                        .map(ColumnSqlBuilder::buildSql)
                         .collect(Collectors.joining(","))
         );
 
