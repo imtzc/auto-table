@@ -143,6 +143,7 @@ public class TableBeanUtils {
      *
      * @param beanClazz bean class
      * @param fieldName 字段名
+     * @return 字段名
      */
     public static String getRealColumnName(Class<?> beanClazz, String fieldName) {
 

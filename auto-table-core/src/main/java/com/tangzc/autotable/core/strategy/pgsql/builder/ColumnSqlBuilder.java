@@ -10,6 +10,8 @@ public class ColumnSqlBuilder {
 
     /**
      * 生成字段相关的SQL片段
+     * @param columnMetadata 列元数据
+     * @return 列相关的sql
      */
     public static String buildSql(ColumnMetadata columnMetadata) {
         // 例子："name" varchar(100) NULL DEFAULT '张三' COMMENT '名称'

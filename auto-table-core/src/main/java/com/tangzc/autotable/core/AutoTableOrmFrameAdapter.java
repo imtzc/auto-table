@@ -18,21 +18,33 @@ public interface AutoTableOrmFrameAdapter {
 
     /**
      * 拓展判断是否是忽略的字段
+     * @param field 字段
+     * @param clazz 类
+     * @return 是否忽略
      */
     boolean isIgnoreField(Field field, Class<?> clazz);
 
     /**
      * 判断是否是主键
+     * @param field 字段
+     * @param clazz 类
+     * @return 是否是主键
      */
     boolean isPrimary(Field field, Class<?> clazz);
 
     /**
      * 判断是否是自增的主键
+     * @param field 字段
+     * @param clazz 类
+     * @return 是否是自增的主键
      */
     boolean isAutoIncrement(Field field, Class<?> clazz);
 
     /**
      * 三方框架定义的字段类型，通常是某些特殊注解或者枚举，定义为字符串类型
+     * @param field 字段
+     * @param clazz 类
+     * @return 该字段的类型
      */
     default Class<?> customFieldTypeHandler(Class<?> clazz, Field field) {
         return field.getType();

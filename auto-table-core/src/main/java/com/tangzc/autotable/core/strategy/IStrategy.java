@@ -46,6 +46,7 @@ public interface IStrategy<TABLE_META extends TableMetadata, COMPARE_TABLE_INFO 
 
     /**
      * 从接口泛型上读取MapperClass
+     * @return MapperClass
      */
     default Class<MAPPER> getMapperClass() {
 
@@ -87,7 +88,7 @@ public interface IStrategy<TABLE_META extends TableMetadata, COMPARE_TABLE_INFO 
     /**
      * 开始分析实体
      *
-     * @param beanClass 待处理的实体
+     * @param tableMetadata 表元数据
      */
     default void start(TABLE_META tableMetadata) {
         // 拦截表信息，供用户自定义修改
