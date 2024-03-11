@@ -156,7 +156,7 @@ public class PgsqlStrategy implements IStrategy<DefaultTableMetadata, PgsqlCompa
                 pgsqlCompareTableInfo.addIndexComment(indexName, comment);
             }
 
-            // 获取索引定义语句，进行比较  CREATE UNIQUE INDEX mpe_idx_phone_index ON public.my_pgsql_table USING btree (phone DESC)
+            // 获取索引定义语句，进行比较  CREATE UNIQUE INDEX mpe_idx_phone_index ON "public".my_pgsql_table USING btree (phone DESC)
             String indexdef = dbIndex.getIndexdef().replace("\"", "");
             boolean isUniqueIndex = indexMetadata.getType() == IndexTypeEnum.UNIQUE;
             // 索引改变

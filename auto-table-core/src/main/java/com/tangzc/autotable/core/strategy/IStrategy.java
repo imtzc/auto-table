@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.ParameterizedType;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -65,38 +64,45 @@ public interface IStrategy<TABLE_META extends TableMetadata, COMPARE_TABLE_INFO 
     }
 
     /**
-     * 开始分析bean class
+     * 开始分析实体集合
      *
-     * @param entityClass 待处理的类
+     * @param entityClass 待处理的实体
      */
-    default void start(Set<Class<?>> entityClass) {
+    default void start(Class<?> entityClass) {
+
+        AutoTableGlobalConfig.getRunStateCallback().before(entityClass);
+
+        TABLE_META tableMetadata = this.analyseClass(entityClass);
+
+        // 没有可构建的数据模型，跳过
+        if (tableMetadata == null) {
+            return;
+        }
+
+        start(tableMetadata);
+
+        AutoTableGlobalConfig.getRunStateCallback().after(entityClass);
+    }
+
+    /**
+     * 开始分析实体
+     *
+     * @param beanClass 待处理的实体
+     */
+    default void start(TABLE_META tableMetadata) {
+        // 拦截表信息，供用户自定义修改
+        AutoTableGlobalConfig.getBuildTableMetadataIntercepter().intercept(this.databaseDialect(), tableMetadata);
 
         RunMode runMode = AutoTableGlobalConfig.getAutoTableProperties().getMode();
         boolean validateMode = runMode == RunMode.validate;
-
-        AutoTableGlobalConfig.getCollectEntitiesIntercepter().intercept(entityClass);
-        for (Class<?> beanClass : entityClass) {
-
-            TABLE_META tableMetadata = this.analyseClass(beanClass);
-
-            // 没有可构建的数据模型，跳过
-            if (tableMetadata == null) {
-                continue;
-            }
-
-            // 拦截表信息，供用户自定义修改
-            AutoTableGlobalConfig.getBuildTableMetadataIntercepter().intercept(this.databaseDialect(), tableMetadata);
-
-            if (validateMode) {
-                validateTable(beanClass, tableMetadata);
-            } else {
-                compareAndModifyTable(beanClass, tableMetadata);
-            }
+        if (validateMode) {
+            validateTable(tableMetadata);
+        } else {
+            compareAndModifyTable(tableMetadata);
         }
-        AutoTableGlobalConfig.getRunFinishCallback().finish(entityClass);
     }
 
-    default void compareAndModifyTable(Class<?> beanClass, TABLE_META tableMetadata) {
+    default void compareAndModifyTable(TABLE_META tableMetadata) {
         String tableName = tableMetadata.getTableName();
 
         // 表是否存在的标记
@@ -116,9 +122,9 @@ public interface IStrategy<TABLE_META extends TableMetadata, COMPARE_TABLE_INFO 
         if (!tableIsExist) {
             log.info("创建表：{}", tableName);
             // 建表
-            AutoTableGlobalConfig.getCreateTableIntercepter().beforeCreateTable(beanClass, this.databaseDialect(), tableMetadata);
+            AutoTableGlobalConfig.getCreateTableIntercepter().beforeCreateTable(this.databaseDialect(), tableMetadata);
             this.createTable(tableMetadata);
-            AutoTableGlobalConfig.getCreateTableFinishCallback().afterCreateTable(beanClass, this.databaseDialect(), tableMetadata);
+            AutoTableGlobalConfig.getCreateTableFinishCallback().afterCreateTable(this.databaseDialect(), tableMetadata);
         }
 
         // update模型，且表存在，更新表信息
@@ -128,14 +134,14 @@ public interface IStrategy<TABLE_META extends TableMetadata, COMPARE_TABLE_INFO 
             if (compareTableInfo.needModify()) {
                 log.info("修改表：{}", tableName);
                 // 修改表信息
-                AutoTableGlobalConfig.getModifyTableIntercepter().beforeModifyTable(beanClass, this.databaseDialect(), tableMetadata, compareTableInfo);
+                AutoTableGlobalConfig.getModifyTableIntercepter().beforeModifyTable(this.databaseDialect(), tableMetadata, compareTableInfo);
                 this.modifyTable(compareTableInfo);
-                AutoTableGlobalConfig.getModifyTableFinishCallback().afterModifyTable(beanClass, this.databaseDialect(), tableMetadata, compareTableInfo);
+                AutoTableGlobalConfig.getModifyTableFinishCallback().afterModifyTable(this.databaseDialect(), tableMetadata, compareTableInfo);
             }
         }
     }
 
-    default void validateTable(Class<?> beanClass, TABLE_META tableMetadata) {
+    default void validateTable(TABLE_META tableMetadata) {
         String tableName = tableMetadata.getTableName();
         // 检查数据库数据模型与实体是否一致
         boolean tableIsExist = this.checkTableExist(tableName);
@@ -145,15 +151,15 @@ public interface IStrategy<TABLE_META extends TableMetadata, COMPARE_TABLE_INFO 
         }
 
         if (compareTableInfo == null) {
-            AutoTableGlobalConfig.getValidateFinishCallback().validateFinish(false, beanClass, this.databaseDialect(), null);
+            AutoTableGlobalConfig.getValidateFinishCallback().validateFinish(false, this.databaseDialect(), null);
             throw new RuntimeException("启动失败，" + this.databaseDialect() + "数据表" + tableMetadata.getTableName() + "不存在");
         }
         if (compareTableInfo.needModify()) {
             log.warn(compareTableInfo.validateFailedMessage());
-            AutoTableGlobalConfig.getValidateFinishCallback().validateFinish(false, beanClass, this.databaseDialect(), compareTableInfo);
-            throw new RuntimeException("启动失败，" + this.databaseDialect() + "数据表" + tableMetadata.getTableName() + "与实体" + beanClass.getName() + "不匹配");
+            AutoTableGlobalConfig.getValidateFinishCallback().validateFinish(false, this.databaseDialect(), compareTableInfo);
+            throw new RuntimeException("启动失败，" + this.databaseDialect() + "数据表" + tableMetadata.getTableName() + "与实体不匹配");
         }
-        AutoTableGlobalConfig.getValidateFinishCallback().validateFinish(true, beanClass, this.databaseDialect(), compareTableInfo);
+        AutoTableGlobalConfig.getValidateFinishCallback().validateFinish(true, this.databaseDialect(), compareTableInfo);
     }
 
     /**

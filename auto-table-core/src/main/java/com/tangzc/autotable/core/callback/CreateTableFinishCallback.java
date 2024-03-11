@@ -11,9 +11,8 @@ public interface CreateTableFinishCallback {
     /**
      * 建表后回调
      *
-     * @param tableClass      实体模型class
      * @param databaseDialect 数据库方言
      * @param tableMetadata   表元数据
      */
-    void afterCreateTable(Class<?> tableClass, String databaseDialect, final TableMetadata tableMetadata);
+    void afterCreateTable(String databaseDialect, final TableMetadata tableMetadata);
 }

@@ -12,10 +12,9 @@ public interface ModifyTableFinishCallback {
     /**
      * 修改表后回调
      *
-     * @param tableClass       实体模型class
      * @param databaseDialect  数据库方言
      * @param tableMetadata    表元数据
      * @param compareTableInfo 对比表信息
      */
-    void afterModifyTable(Class<?> tableClass, String databaseDialect, final TableMetadata tableMetadata, final CompareTableInfo compareTableInfo);
+    void afterModifyTable(String databaseDialect, final TableMetadata tableMetadata, final CompareTableInfo compareTableInfo);
 }

@@ -2,14 +2,13 @@ package com.tangzc.autotable.core;
 
 import com.tangzc.autotable.core.callback.CreateTableFinishCallback;
 import com.tangzc.autotable.core.callback.ModifyTableFinishCallback;
-import com.tangzc.autotable.core.callback.RunFinishCallback;
+import com.tangzc.autotable.core.callback.RunStateCallback;
 import com.tangzc.autotable.core.callback.ValidateFinishCallback;
 import com.tangzc.autotable.core.converter.JavaTypeToDatabaseTypeConverter;
 import com.tangzc.autotable.core.dynamicds.IDataSourceHandler;
 import com.tangzc.autotable.core.dynamicds.impl.DefaultDataSourceHandler;
 import com.tangzc.autotable.core.intercepter.AutoTableAnnotationIntercepter;
 import com.tangzc.autotable.core.intercepter.BuildTableMetadataIntercepter;
-import com.tangzc.autotable.core.intercepter.CollectEntitiesIntercepter;
 import com.tangzc.autotable.core.intercepter.CreateTableIntercepter;
 import com.tangzc.autotable.core.intercepter.ModifyTableIntercepter;
 import com.tangzc.autotable.core.strategy.CompareTableInfo;
@@ -78,19 +77,11 @@ public class AutoTableGlobalConfig {
     };
 
     /**
-     * 收集实体类拦截
-     */
-    @Setter
-    @Getter
-    private static CollectEntitiesIntercepter collectEntitiesIntercepter = beanClasses -> {
-    };
-
-    /**
      * 创建表拦截
      */
     @Setter
     @Getter
-    private static CreateTableIntercepter createTableIntercepter = (tableClass, databaseDialect, tableMetadata) -> {
+    private static CreateTableIntercepter createTableIntercepter = (databaseDialect, tableMetadata) -> {
     };
 
     /**
@@ -98,7 +89,7 @@ public class AutoTableGlobalConfig {
      */
     @Setter
     @Getter
-    private static ModifyTableIntercepter modifyTableIntercepter = (tableClass, databaseDialect, tableMetadata, compareTableInfo) -> {
+    private static ModifyTableIntercepter modifyTableIntercepter = (databaseDialect, tableMetadata, compareTableInfo) -> {
     };
 
     /**
@@ -106,7 +97,7 @@ public class AutoTableGlobalConfig {
      */
     @Setter
     @Getter
-    private static ValidateFinishCallback validateFinishCallback = (status, tableClass, databaseDialect, compareTableInfo) -> {
+    private static ValidateFinishCallback validateFinishCallback = (status, databaseDialect, compareTableInfo) -> {
     };
 
     /**
@@ -114,7 +105,7 @@ public class AutoTableGlobalConfig {
      */
     @Setter
     @Getter
-    private static CreateTableFinishCallback createTableFinishCallback = (tableClass, databaseDialect, tableMetadata) -> {
+    private static CreateTableFinishCallback createTableFinishCallback = (databaseDialect, tableMetadata) -> {
     };
 
     /**
@@ -122,15 +113,22 @@ public class AutoTableGlobalConfig {
      */
     @Setter
     @Getter
-    private static ModifyTableFinishCallback modifyTableFinishCallback = (tableClass, databaseDialect, tableMetadata, compareTableInfo) -> {
+    private static ModifyTableFinishCallback modifyTableFinishCallback = (databaseDialect, tableMetadata, compareTableInfo) -> {
 
     };
     /**
-     * 执行完成回调
+     * 单个表执行前后回调
      */
     @Setter
     @Getter
-    private static RunFinishCallback runFinishCallback = tableClasses -> {
+    private static RunStateCallback runStateCallback = new RunStateCallback() {
+        @Override
+        public void before(Class<?> tableClass) {
+        }
+
+        @Override
+        public void after(Class<?> tableClass) {
+        }
     };
 
     private final static Map<String, IStrategy<? extends TableMetadata, ? extends CompareTableInfo, ?>> strategyMap = new HashMap<>();

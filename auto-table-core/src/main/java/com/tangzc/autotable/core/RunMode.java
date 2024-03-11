@@ -3,7 +3,7 @@ package com.tangzc.autotable.core;
 import lombok.Getter;
 
 /**
- * 运行模式
+ * 执行模式
  * @author don
  */
 @Getter

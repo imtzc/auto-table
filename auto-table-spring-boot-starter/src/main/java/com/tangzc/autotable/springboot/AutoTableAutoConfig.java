@@ -6,14 +6,13 @@ import com.tangzc.autotable.core.AutoTableGlobalConfig;
 import com.tangzc.autotable.core.AutoTableOrmFrameAdapter;
 import com.tangzc.autotable.core.callback.CreateTableFinishCallback;
 import com.tangzc.autotable.core.callback.ModifyTableFinishCallback;
-import com.tangzc.autotable.core.callback.RunFinishCallback;
+import com.tangzc.autotable.core.callback.RunStateCallback;
 import com.tangzc.autotable.core.callback.ValidateFinishCallback;
 import com.tangzc.autotable.core.converter.JavaTypeToDatabaseTypeConverter;
 import com.tangzc.autotable.core.dynamicds.IDataSourceHandler;
 import com.tangzc.autotable.core.dynamicds.SqlSessionFactoryManager;
 import com.tangzc.autotable.core.intercepter.AutoTableAnnotationIntercepter;
 import com.tangzc.autotable.core.intercepter.BuildTableMetadataIntercepter;
-import com.tangzc.autotable.core.intercepter.CollectEntitiesIntercepter;
 import com.tangzc.autotable.core.intercepter.CreateTableIntercepter;
 import com.tangzc.autotable.core.intercepter.ModifyTableIntercepter;
 import com.tangzc.autotable.core.strategy.CompareTableInfo;
@@ -43,14 +42,13 @@ public class AutoTableAutoConfig {
             /* 拦截器 */
             ObjectProvider<AutoTableAnnotationIntercepter> autoTableAnnotationIntercepter,
             ObjectProvider<BuildTableMetadataIntercepter> buildTableMetadataIntercepter,
-            ObjectProvider<CollectEntitiesIntercepter> collectEntitiesIntercepter,
             ObjectProvider<CreateTableIntercepter> createTableIntercepter,
             ObjectProvider<ModifyTableIntercepter> modifyTableIntercepter,
             /* 回调事件 */
-            ObjectProvider<CreateTableFinishCallback> createTableFinishCallbacks,
-            ObjectProvider<ModifyTableFinishCallback> modifyTableFinishCallbacks,
-            ObjectProvider<RunFinishCallback> runFinishCallbacks,
-            ObjectProvider<ValidateFinishCallback> validateFinishCallbacks,
+            ObjectProvider<CreateTableFinishCallback> createTableFinishCallback,
+            ObjectProvider<ModifyTableFinishCallback> modifyTableFinishCallback,
+            ObjectProvider<RunStateCallback> runStateCallback,
+            ObjectProvider<ValidateFinishCallback> validateFinishCallback,
 
             ObjectProvider<JavaTypeToDatabaseTypeConverter> javaTypeToDatabaseTypeConverter) {
 
@@ -77,8 +75,6 @@ public class AutoTableAutoConfig {
         autoTableAnnotationIntercepter.ifAvailable(AutoTableGlobalConfig::setAutoTableAnnotationIntercepter);
         // 假如有自定义的创建表拦截器，就使用自定义的创建表拦截器
         buildTableMetadataIntercepter.ifAvailable(AutoTableGlobalConfig::setBuildTableMetadataIntercepter);
-        // 假如有自定义的收集实体拦截器，就使用自定义的收集实体拦截器
-        collectEntitiesIntercepter.ifAvailable(AutoTableGlobalConfig::setCollectEntitiesIntercepter);
         // 假如有自定义的创建表拦截器，就使用自定义的创建表拦截器
         createTableIntercepter.ifAvailable(AutoTableGlobalConfig::setCreateTableIntercepter);
         // 假如有自定义的修改表拦截器，就使用自定义的修改表拦截器
@@ -86,13 +82,13 @@ public class AutoTableAutoConfig {
 
         /* 回调事件 */
         // 假如有自定义的创建表回调，就使用自定义的创建表回调
-        createTableFinishCallbacks.ifAvailable(AutoTableGlobalConfig::setCreateTableFinishCallback);
+        createTableFinishCallback.ifAvailable(AutoTableGlobalConfig::setCreateTableFinishCallback);
         // 假如有自定义的修改表回调，就使用自定义的修改表回调
-        modifyTableFinishCallbacks.ifAvailable(AutoTableGlobalConfig::setModifyTableFinishCallback);
-        // 假如有自定义的运行结束回调，就使用自定义的运行结束回调
-        runFinishCallbacks.ifAvailable(AutoTableGlobalConfig::setRunFinishCallback);
+        modifyTableFinishCallback.ifAvailable(AutoTableGlobalConfig::setModifyTableFinishCallback);
+        // 假如有自定义的单个表执行前后回调，就使用自定义的单个表执行前后回调
+        runStateCallback.ifAvailable(AutoTableGlobalConfig::setRunStateCallback);
         // 假如有自定义的验证表回调，就使用自定义的验证表回调
-        validateFinishCallbacks.ifAvailable(AutoTableGlobalConfig::setValidateFinishCallback);
+        validateFinishCallback.ifAvailable(AutoTableGlobalConfig::setValidateFinishCallback);
 
         // 假如有自定义的java到数据库的转换器，就使用自定义的java到数据库的转换器
         javaTypeToDatabaseTypeConverter.ifAvailable(AutoTableGlobalConfig::setJavaTypeToDatabaseTypeConverter);

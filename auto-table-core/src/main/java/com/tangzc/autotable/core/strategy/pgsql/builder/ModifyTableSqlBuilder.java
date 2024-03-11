@@ -93,7 +93,10 @@ public class ModifyTableSqlBuilder {
             }
         }
         // 组合sql
-        String alterTableSql = alterTableSqlList.isEmpty() ? "" : ("ALTER TABLE \"" + tableName + "\" \n" + String.join(",\n", alterTableSqlList) + ";");
+        String alterTableSql = "";
+        if (!alterTableSqlList.isEmpty()) {
+            alterTableSql = "ALTER TABLE \"public\".\"" + tableName + "\" \n" + String.join(",\n", alterTableSqlList) + ";";
+        }
 
         /* 为 表、字段、索引 添加注释 */
         String addColumnCommentSql = CreateTableSqlBuilder.getAddColumnCommentSql(tableName, tableComment, columnComment, indexComment);

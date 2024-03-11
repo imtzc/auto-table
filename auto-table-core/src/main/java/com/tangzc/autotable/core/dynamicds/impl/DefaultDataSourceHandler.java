@@ -1,8 +1,7 @@
 package com.tangzc.autotable.core.dynamicds.impl;
 
 import com.tangzc.autotable.core.dynamicds.IDataSourceHandler;
-import com.tangzc.autotable.core.dynamicds.SqlSessionFactoryManager;
-import org.apache.ibatis.session.SqlSessionFactory;
+import lombok.NonNull;
 
 /**
  * @author don
@@ -21,7 +20,7 @@ public class DefaultDataSourceHandler implements IDataSourceHandler<String> {
     }
 
     @Override
-    public String getDataSourceName(Class<?> clazz) {
+    public @NonNull String getDataSourceName(Class<?> clazz) {
         return "";
     }
 }

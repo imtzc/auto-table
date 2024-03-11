@@ -11,8 +11,8 @@ import com.tangzc.autotable.annotation.mysql.MysqlTypeConstant;
 import lombok.Data;
 
 @Data
-@Ds("test")
-@TableName("sys_user2")
+@Ds("pgsql")
+@TableName("pg_sys_user")
 public class User2 {
 
     @PrimaryKey(true)

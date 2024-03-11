@@ -3,6 +3,7 @@ package com.tangzc.autotable.test.springboot.dynamicdatasource.autotableconfig;
 import com.tangzc.autotable.core.dynamicds.IDataSourceHandler;
 import com.tangzc.autotable.test.springboot.dynamicdatasource.dynamicdatasourceframe.Ds;
 import com.tangzc.autotable.test.springboot.dynamicdatasource.dynamicdatasourceframe.DynamicDataSourceContextHolder;
+import lombok.NonNull;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -21,7 +22,7 @@ public class DynamicDataSourceHandler implements IDataSourceHandler<String> {
     }
 
     @Override
-    public String getDataSourceName(Class<?> clazz) {
+    public @NonNull String getDataSourceName(Class<?> clazz) {
         // 根据实体类获取对应的数据源名称，假定自定义的多数据源，有一个注解Ds
         Ds ds = clazz.getAnnotation(Ds.class);
         if (ds != null) {

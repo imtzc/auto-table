@@ -31,10 +31,14 @@ public class MysqlColumnMetadataBuilder {
     public static List<MysqlColumnMetadata> buildList(Class<?> clazz, List<Field> fields) {
 
         AtomicInteger index = new AtomicInteger(1);
-        return fields.stream()
+        List<MysqlColumnMetadata> columnMetadata = fields.stream()
                 .filter(field -> TableBeanUtils.isIncludeField(field, clazz))
                 .map(field -> build(clazz, field, index.getAndIncrement()))
                 .collect(Collectors.toList());
+        if(columnMetadata.isEmpty()) {
+            log.warn("扫描发现{}没有建表字段请检查！", clazz.getName());
+        }
+        return columnMetadata;
     }
 
     public static MysqlColumnMetadata build(Class<?> clazz, Field field, int position) {

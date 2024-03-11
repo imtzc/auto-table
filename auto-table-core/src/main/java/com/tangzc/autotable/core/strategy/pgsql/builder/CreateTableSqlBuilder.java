@@ -51,7 +51,7 @@ public class CreateTableSqlBuilder {
     public static String getCreateIndexSql(String tableName, List<IndexMetadata> indexMetadataList) {
 
         return indexMetadataList.stream()
-                .map(pgsqlIndexMetadata -> StringConnectHelper.newInstance("CREATE {indexType} INDEX \"{indexName}\" ON \"{tableName}\" ({columns});")
+                .map(pgsqlIndexMetadata -> StringConnectHelper.newInstance("CREATE {indexType} INDEX \"{indexName}\" ON \"public\".\"{tableName}\" ({columns});")
                         .replace("{indexType}", pgsqlIndexMetadata.getType() == IndexTypeEnum.UNIQUE ? "UNIQUE" : "")
                         .replace("{indexName}", pgsqlIndexMetadata.getName())
                         .replace("{tableName}", tableName)
@@ -86,7 +86,7 @@ public class CreateTableSqlBuilder {
 
         // 表备注
         if (StringUtils.hasText(tableComment)) {
-            String addTableComment = "COMMENT ON TABLE \"{tableName}\" IS '{comment}';"
+            String addTableComment = "COMMENT ON TABLE \"public\".\"{tableName}\" IS '{comment}';"
                     .replace("{tableName}", tableName)
                     .replace("{comment}", tableComment);
             commentList.add(addTableComment);
@@ -94,7 +94,7 @@ public class CreateTableSqlBuilder {
 
         // 字段备注
         columnCommentMap.entrySet().stream()
-                .map(columnComment -> "COMMENT ON COLUMN \"{tableName}\".\"{name}\" IS '{comment}';"
+                .map(columnComment -> "COMMENT ON COLUMN \"public\".\"{tableName}\".\"{name}\" IS '{comment}';"
                         .replace("{tableName}", tableName)
                         .replace("{name}", columnComment.getKey())
                         .replace("{comment}", columnComment.getValue()))
@@ -147,7 +147,7 @@ public class CreateTableSqlBuilder {
                 .filter(StringUtils::hasText)
                 .collect(Collectors.joining(","));
 
-        return "CREATE TABLE \"{tableName}\" ({columnList});"
+        return "CREATE TABLE \"public\".\"{tableName}\" ({columnList});"
                 .replace("{tableName}", name)
                 .replace("{columnList}", addSql);
     }

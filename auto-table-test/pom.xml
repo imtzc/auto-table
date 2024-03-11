@@ -21,20 +21,10 @@
     <properties>
         <spring-boot.version>2.7.11</spring-boot.version>
         <mysql.version>8.0.33</mysql.version>
+        <postgresql.version>42.3.8</postgresql.version>
         <HikariCP.version>4.0.3</HikariCP.version>
         <junit.version>4.13.2</junit.version>
         <maven.deploy.skip>true</maven.deploy.skip>
     </properties>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-deploy-plugin</artifactId>
-                <configuration>
-                    <skip>${maven.deploy.skip}</skip>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
 </project>

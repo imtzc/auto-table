@@ -11,9 +11,8 @@ public interface CreateTableIntercepter {
     /**
      * 建表前拦截
      *
-     * @param tableClass      实体模型class
      * @param databaseDialect 数据库方言
      * @param tableMetadata   表元数据
      */
-    void beforeCreateTable(Class<?> tableClass, String databaseDialect, final TableMetadata tableMetadata);
+    void beforeCreateTable(String databaseDialect, final TableMetadata tableMetadata);
 }

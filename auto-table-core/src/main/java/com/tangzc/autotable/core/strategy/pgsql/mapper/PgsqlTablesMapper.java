@@ -31,7 +31,7 @@ public interface PgsqlTablesMapper {
      *
      * @param tableName 表名
      */
-    @Delete("DROP TABLE IF EXISTS ${tableName}")
+    @Delete("DROP TABLE IF EXISTS \"public\".\"${tableName}\"")
     void dropTableByName(String tableName);
 
     /**
