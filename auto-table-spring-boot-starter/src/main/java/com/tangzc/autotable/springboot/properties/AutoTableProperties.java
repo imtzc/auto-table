@@ -82,18 +82,18 @@ public class AutoTableProperties {
         /**
          * 表默认字符集
          */
-        private String tableDefaultCharset = "utf8mb4";
+        private String tableDefaultCharset;
         /**
          * 表默认排序规则
          */
-        private String tableDefaultCollation = "utf8mb4_0900_ai_ci";
+        private String tableDefaultCollation;
         /**
          * 列默认字符集
          */
-        private String columnDefaultCharset = "utf8mb4";
+        private String columnDefaultCharset;
         /**
          * 列默认排序规则
          */
-        private String columnDefaultCollation = "utf8mb4_0900_ai_ci";
+        private String columnDefaultCollation;
     }
 }

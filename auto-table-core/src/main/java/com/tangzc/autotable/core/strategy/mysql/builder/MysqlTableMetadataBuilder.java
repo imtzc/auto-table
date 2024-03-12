@@ -7,6 +7,7 @@ import com.tangzc.autotable.core.AutoTableGlobalConfig;
 import com.tangzc.autotable.core.builder.IndexMetadataBuilder;
 import com.tangzc.autotable.core.strategy.mysql.data.MysqlTableMetadata;
 import com.tangzc.autotable.core.utils.BeanClassUtil;
+import com.tangzc.autotable.core.utils.StringUtils;
 import com.tangzc.autotable.core.utils.TableBeanUtils;
 import lombok.extern.slf4j.Slf4j;
 
@@ -25,24 +26,31 @@ public class MysqlTableMetadataBuilder {
 
         MysqlTableMetadata mysqlTableMetadata = new MysqlTableMetadata(tableName);
 
+        // 设置表注释
         TableComment tableComment = TableBeanUtils.getTableComment(clazz);
-        if(tableComment != null) {
+        if (tableComment != null) {
             // 获取表注释
             mysqlTableMetadata.setComment(tableComment.value());
         }
 
-        AutoTableGlobalConfig.PropertyConfig autoTableProperties = AutoTableGlobalConfig.getAutoTableProperties();
-        String charset = autoTableProperties.getMysql().getTableDefaultCharset();
-        String collate = autoTableProperties.getMysql().getTableDefaultCollation();
+        // 设置表字符集
+        String charset;
+        String collate;
         MysqlCharset mysqlCharsetAnno = AutoTableGlobalConfig.getAutoTableAnnotationFinder().find(clazz, MysqlCharset.class);
-        if(mysqlCharsetAnno != null) {
+        if (mysqlCharsetAnno != null) {
             charset = mysqlCharsetAnno.charset();
             collate = mysqlCharsetAnno.collate();
+        } else {
+            AutoTableGlobalConfig.PropertyConfig autoTableProperties = AutoTableGlobalConfig.getAutoTableProperties();
+            charset = autoTableProperties.getMysql().getTableDefaultCharset();
+            collate = autoTableProperties.getMysql().getTableDefaultCollation();
         }
-        // 获取表字符集
-        mysqlTableMetadata.setCharacterSet(charset);
-        // 字符排序
-        mysqlTableMetadata.setCollate(collate);
+        if (StringUtils.hasText(charset) && StringUtils.hasText(collate)) {
+            // 获取表字符集
+            mysqlTableMetadata.setCharacterSet(charset);
+            // 字符排序
+            mysqlTableMetadata.setCollate(collate);
+        }
 
         // 获取表引擎
         MysqlEngine mysqlEngine = AutoTableGlobalConfig.getAutoTableAnnotationFinder().find(clazz, MysqlEngine.class);

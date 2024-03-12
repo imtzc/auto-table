@@ -17,7 +17,6 @@ import lombok.extern.slf4j.Slf4j;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 /**
@@ -35,7 +34,7 @@ public class MysqlColumnMetadataBuilder {
                 .filter(field -> TableBeanUtils.isIncludeField(field, clazz))
                 .map(field -> build(clazz, field, index.getAndIncrement()))
                 .collect(Collectors.toList());
-        if(columnMetadata.isEmpty()) {
+        if (columnMetadata.isEmpty()) {
             log.warn("扫描发现{}没有建表字段请检查！", clazz.getName());
         }
         return columnMetadata;
@@ -57,13 +56,7 @@ public class MysqlColumnMetadataBuilder {
         mysqlColumnMetadata.setPosition(position);
 
         // 提取并设置字符集和排序规则
-        DatabaseTypeAndLength type = mysqlColumnMetadata.getType();
-        extractCharsetAndCollate(field, type, (charset, collate) -> {
-            // 字符集
-            mysqlColumnMetadata.setCharacterSet(charset);
-            // 字符排序
-            mysqlColumnMetadata.setCollate(collate);
-        });
+        extractCharsetAndCollate(field, mysqlColumnMetadata);
 
         /* 基础的校验逻辑 */
         ParamValidChecker.checkColumnParam(clazz, field, mysqlColumnMetadata);
@@ -71,7 +64,7 @@ public class MysqlColumnMetadataBuilder {
         return mysqlColumnMetadata;
     }
 
-    private static void extractCharsetAndCollate(Field field, DatabaseTypeAndLength type, BiConsumer<String, String> charsetConsumer) {
+    private static void extractCharsetAndCollate(Field field, MysqlColumnMetadata mysqlColumnMetadata) {
 
         String charset = null;
         String collate = null;
@@ -83,13 +76,20 @@ public class MysqlColumnMetadataBuilder {
             }
         } else {
             // 字符类型的添加默认的字符集和排序规则
+            DatabaseTypeAndLength type = mysqlColumnMetadata.getType();
             if (MysqlTypeHelper.isCharString(type)) {
                 AutoTableGlobalConfig.PropertyConfig autoTableProperties = AutoTableGlobalConfig.getAutoTableProperties();
                 charset = autoTableProperties.getMysql().getColumnDefaultCharset();
                 collate = autoTableProperties.getMysql().getColumnDefaultCollation();
             }
         }
-        charsetConsumer.accept(charset, collate);
+
+        if (StringUtils.hasText(charset) && StringUtils.hasText(collate)) {
+            // 字符集
+            mysqlColumnMetadata.setCharacterSet(charset);
+            // 字符排序
+            mysqlColumnMetadata.setCollate(collate);
+        }
     }
 
     /**

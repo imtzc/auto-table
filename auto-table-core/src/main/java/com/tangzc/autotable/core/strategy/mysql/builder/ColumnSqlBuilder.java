@@ -23,14 +23,16 @@ public class ColumnSqlBuilder {
                 .replace("{columnName}", columnMetadata.getName())
                 .replace("{typeAndLength}", MysqlTypeHelper.getFullType(columnMetadata.getType()))
                 .replace("{character}", $ -> {
-                    if (StringUtils.hasText(columnMetadata.getCharacterSet())) {
-                        return "CHARACTER SET " + columnMetadata.getCharacterSet();
+                    String characterSet = columnMetadata.getCharacterSet();
+                    if (StringUtils.hasText(characterSet)) {
+                        return "CHARACTER SET " + characterSet;
                     }
                     return "";
                 })
                 .replace("{collate}", $ -> {
-                    if (StringUtils.hasText(columnMetadata.getCollate())) {
-                        return "COLLATE " + columnMetadata.getCollate();
+                    String collate = columnMetadata.getCollate();
+                    if (StringUtils.hasText(collate)) {
+                        return "COLLATE " + collate;
                     }
                     return "";
                 })
