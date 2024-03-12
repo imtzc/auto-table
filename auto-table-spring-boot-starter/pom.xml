@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.tangzc</groupId>
         <artifactId>auto-table</artifactId>
-        <version>1.2.5</version>
+        <version>1.2.6</version>
     </parent>
 
     <artifactId>auto-table-spring-boot-starter</artifactId>
