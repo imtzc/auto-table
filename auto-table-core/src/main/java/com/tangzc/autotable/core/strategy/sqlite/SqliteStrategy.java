@@ -98,9 +98,11 @@ public class SqliteStrategy implements IStrategy<DefaultTableMetadata, SqliteCom
     @Override
     public void createTable(DefaultTableMetadata tableMetadata) {
         String createTableSql = CreateTableSqlBuilder.buildTableSql(tableMetadata.getTableName(), tableMetadata.getComment(), tableMetadata.getColumnMetadataList());
+        log.info("执行SQL：{}", createTableSql);
         execute(sqliteTablesMapper -> sqliteTablesMapper.executeSql(createTableSql));
         List<String> createIndexSqlList = CreateTableSqlBuilder.buildIndexSql(tableMetadata.getTableName(), tableMetadata.getIndexMetadataList());
         for (String createIndexSql : createIndexSqlList) {
+            log.info("执行SQL：{}", createIndexSql);
             execute(sqliteTablesMapper -> sqliteTablesMapper.executeSql(createIndexSql));
         }
     }
@@ -199,15 +201,18 @@ public class SqliteStrategy implements IStrategy<DefaultTableMetadata, SqliteCom
     private String getBackupTableName(String orgTableName) {
 
         int offset = 0;
-        String backupName = "_" + orgTableName + "_old_" + LocalDateTime.now().format(dateTimeFormatter);
+        String name = "_{orgTableName}_old_{datetime}"
+                .replace("{orgTableName}", orgTableName)
+                .replace("{datetime}", LocalDateTime.now().format(dateTimeFormatter));
+        StringBuilder backupName = new StringBuilder(name);
         while (true) {
             if (offset > 0) {
-                backupName += "_" + offset;
+                backupName.append("_").append(offset);
             }
-            String finalBackupName = backupName;
+            String finalBackupName = backupName.toString();
             int count = executeReturn(sqliteTablesMapper -> sqliteTablesMapper.checkTableExist(finalBackupName));
             if (count == 0) {
-                return backupName;
+                return backupName.toString();
             } else {
                 offset++;
             }

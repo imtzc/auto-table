@@ -12,7 +12,7 @@ import lombok.Data;
 
 @Data
 @Ds("pgsql")
-@TableName("pg_sys_user")
+@TableName("sys_user")
 public class User2 {
 
     @PrimaryKey(true)

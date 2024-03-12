@@ -11,14 +11,16 @@ import com.tangzc.autotable.annotation.mysql.MysqlTypeConstant;
 import lombok.Data;
 
 @Data
+@Ds("sqlite")
 @TableName("sys_user")
-public class User {
+public class User3 {
 
     @PrimaryKey(true)
     @ColumnComment("用户id")
     private Long id;
 
     @ColumnComment("姓名")
+    @ColumnType(value = "text", length = 100)
     private String name;
 
     @ColumnComment("备注")

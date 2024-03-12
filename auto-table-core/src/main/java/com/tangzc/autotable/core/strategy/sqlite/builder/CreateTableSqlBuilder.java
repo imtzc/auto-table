@@ -20,16 +20,16 @@ public class CreateTableSqlBuilder {
 
     /**
      * 构建创建新表的SQL
-     * CREATE TABLE "main"."无标题" -- 测试表
-     * (
-     * "id" INTEGER NOT NULL AUTOINCREMENT, -- 主键
-     * "name" TEXT(200) NOT NULL DEFAULT '', -- 姓名
-     * "age" INTEGER(2), -- 年龄
-     * "address" TEXT(500) DEFAULT 济南市, -- 地址
-     * "card_id" INTEGER(11) NOT NULL, -- 身份证id
-     * "card_number" text(30) NOT NULL, -- 身份证号码
-     * PRIMARY KEY ("id", "card_id")
-     * );
+     * <p>CREATE TABLE "main"."无标题" -- 测试表
+     * <p>(
+     * <p>"id" INTEGER NOT NULL AUTOINCREMENT, -- 主键
+     * <p>"name" TEXT(200) NOT NULL DEFAULT '', -- 姓名
+     * <p>"age" INTEGER(2), -- 年龄
+     * <p>"address" TEXT(500) DEFAULT 济南市, -- 地址
+     * <p>"card_id" INTEGER(11) NOT NULL, -- 身份证id
+     * <p>"card_number" text(30) NOT NULL, -- 身份证号码
+     * <p>PRIMARY KEY ("id", "card_id")
+     * <p>);
      */
     public static String buildTableSql(String name, String comment, List<ColumnMetadata> columnMetadataList) {
         // 获取所有主键
@@ -70,11 +70,11 @@ public class CreateTableSqlBuilder {
                 .filter(StringUtils::hasText)
                 .collect(Collectors.joining(","));
 
-        return ("CREATE TABLE `{tableName}` -- {comment} \n" +
+        return ("CREATE TABLE `{tableName}`{comment} \n" +
                 "(\n{addItems}\n" +
                 ");")
                 .replace("{tableName}", name)
-                .replace("{comment}", comment)
+                .replace("{comment}", StringUtils.hasText(comment) ? " -- "  + comment : "")
                 .replace("{addItems}", addSql);
     }
 

@@ -21,10 +21,10 @@ public class SqliteTableMetadataBuilder {
         DefaultTableMetadata defaultTableMetadata = TableMetadataBuilder.build(DatabaseDialect.PostgreSQL, clazz);
 
         defaultTableMetadata.getColumnMetadataList().forEach(columnMetadata -> {
-            // 修正默认值
-            fixDefaultValue(columnMetadata);
             // 修正类型和长度
             fixTypeAndLength(columnMetadata.getType());
+            // 注意：先修正类型和长度，再修正默认值，默认值修正依赖类型
+            fixDefaultValue(columnMetadata);
         });
 
         return defaultTableMetadata;

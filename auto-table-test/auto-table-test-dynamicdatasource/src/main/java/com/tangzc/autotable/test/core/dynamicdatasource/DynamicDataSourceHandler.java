@@ -12,9 +12,10 @@ import java.util.Map;
 
 public class DynamicDataSourceHandler implements IDataSourceHandler<String> {
 
-    private static final Map<String, String> CONFIG_MAP = new HashMap<String, String>(){{
+    private static final Map<String, String> CONFIG_MAP = new HashMap<String, String>() {{
         put("mysql", "mybatis-config.xml");
-        put("pgsql", "mybatis-config2.xml");
+        put("pgsql", "mybatis-config-pgsql.xml");
+        put("sqlite", "mybatis-config-sqlite.xml");
     }};
     private static final Map<String, SqlSessionFactory> STRING_SQL_SESSION_FACTORY_MAP = new HashMap<>();
 
@@ -47,6 +48,7 @@ public class DynamicDataSourceHandler implements IDataSourceHandler<String> {
         if (annotation != null) {
             return annotation.value();
         }
-        return "";
+        // 默认mysql
+        return "mysql";
     }
 }
