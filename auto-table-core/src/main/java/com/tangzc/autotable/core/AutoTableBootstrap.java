@@ -42,8 +42,8 @@ public class AutoTableBootstrap {
 
         AutoTableGlobalConfig.PropertyConfig autoTableProperties = AutoTableGlobalConfig.getAutoTableProperties();
 
-        // 判断模式，非none，才执行逻辑
-        if (autoTableProperties.getMode() == RunMode.none) {
+        // 判断模式，none或者禁用，不启动
+        if (autoTableProperties.getMode() == RunMode.none || !autoTableProperties.getEnable()) {
             return;
         }
 
