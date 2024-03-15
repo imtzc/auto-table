@@ -44,7 +44,7 @@ public interface JavaTypeToDatabaseTypeConverter {
      * 添加类型映射
      *
      * @param databaseDialect 数据库类型，参考{@link DatabaseDialect}中的常量
-     * @param typeEnumMap        字段类型-》数据库类型 映射
+     * @param typeEnumMap     字段类型-》数据库类型 映射
      */
     static void addTypeMapping(String databaseDialect, Map<Class<?>, DefaultTypeEnumInterface> typeEnumMap) {
         JAVA_TO_DB_TYPE_MAPPING.computeIfAbsent(databaseDialect, k -> new HashMap<>()).putAll(typeEnumMap);
@@ -52,14 +52,13 @@ public interface JavaTypeToDatabaseTypeConverter {
 
     /**
      * java转数据库类型
+     *
      * @param databaseDialect 数据库类型，参考{@link DatabaseDialect}中的常量
-     * @param clazz 实体类
-     * @param field 字段
+     * @param clazz           实体类
+     * @param field           字段
      * @return 数据库类型
      */
     default DatabaseTypeAndLength convert(String databaseDialect, Class<?> clazz, Field field) {
-
-        DatabaseTypeAndLength typeAndLength = getDatabaseTypeAndLength(databaseDialect, clazz, field);
 
         ColumnType column = TableBeanUtils.getColumnType(field);
         // 设置了类型
@@ -69,18 +68,19 @@ public interface JavaTypeToDatabaseTypeConverter {
             Integer decimalLength = column.decimalLength() > -1 ? column.decimalLength() : null;
             List<String> values = Arrays.asList(column.values());
             // 如果明确指定了类型名，直接替换
-            if(StringUtils.hasText(type)) {
-                typeAndLength = new DatabaseTypeAndLength(type, length, decimalLength, values);
-            } else {
-                // 如果没有指定明确的类型名，但是却指定了长度，使用指定长度
-                if (length != null || decimalLength != null) {
-                    typeAndLength.setLength(length);
-                    typeAndLength.setDecimalLength(decimalLength);
-                }
+            if (StringUtils.hasText(type)) {
+                return new DatabaseTypeAndLength(type, length, decimalLength, values);
+            }
+            // 如果没有指定明确的类型名，但是却指定了长度。那么使用默认类型+指定长度
+            if (length != null || decimalLength != null) {
+                DatabaseTypeAndLength typeAndLength = getDatabaseTypeAndLength(databaseDialect, clazz, field);
+                typeAndLength.setLength(length);
+                typeAndLength.setDecimalLength(decimalLength);
+                return typeAndLength;
             }
         }
-
-        return typeAndLength;
+        // 其他情况，使用默认类型
+        return getDatabaseTypeAndLength(databaseDialect, clazz, field);
     }
 
     default DatabaseTypeAndLength getDatabaseTypeAndLength(String databaseDialect, Class<?> clazz, Field field) {

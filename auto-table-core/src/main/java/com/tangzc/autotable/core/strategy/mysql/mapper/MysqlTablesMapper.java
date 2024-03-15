@@ -124,6 +124,6 @@ public interface MysqlTablesMapper {
      *
      * @param tableName 表名
      */
-    @Delete("DROP TABLE IF EXISTS `${tableName}`")
+    @Select("DROP TABLE IF EXISTS `${tableName}`")
     void dropTableByName(String tableName);
 }

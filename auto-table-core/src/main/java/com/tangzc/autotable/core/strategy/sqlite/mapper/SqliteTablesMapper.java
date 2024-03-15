@@ -28,7 +28,7 @@ public interface SqliteTablesMapper {
      *
      * @param tableName 表名
      */
-    @Delete("drop table if exists `${tableName}`;")
+    @Select("drop table if exists `${tableName}`;")
     void dropTableByName(String tableName);
 
     /**
