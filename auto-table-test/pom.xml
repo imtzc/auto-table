@@ -19,7 +19,6 @@
     </modules>
 
     <properties>
-        <spring-boot.version>2.7.11</spring-boot.version>
         <mysql.version>8.0.33</mysql.version>
         <postgresql.version>42.3.8</postgresql.version>
         <HikariCP.version>4.0.3</HikariCP.version>

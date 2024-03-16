@@ -48,6 +48,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <mybatis.version>3.5.14</mybatis.version>
+        <spring-boot.version>2.7.18</spring-boot.version>
         <mybatis-spring.version>2.3.2</mybatis-spring.version>
         <lombok.version>1.18.30</lombok.version>
 
