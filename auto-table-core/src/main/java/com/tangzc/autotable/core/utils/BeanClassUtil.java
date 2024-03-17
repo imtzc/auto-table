@@ -1,5 +1,7 @@
 package com.tangzc.autotable.core.utils;
 
+import com.tangzc.autotable.core.AutoTableGlobalConfig;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -46,31 +48,41 @@ public class BeanClassUtil {
         return field;
     }
 
-    public static List<Field> getAllDeclaredFieldsExcludeStatic(Class<?> beanClass) {
+    /**
+     * 查询所有的列的字段
+     */
+    public static List<Field> listAllFieldForColumn(Class<?> beanClass) {
+
+        // 获取父类追加到子类位置的配置
+        AutoTableGlobalConfig.SuperInsertPosition superInsertPosition = AutoTableGlobalConfig.getAutoTableProperties().getSuperInsertPosition();
 
         List<Field> fieldList = new ArrayList<>();
-        getFieldList(fieldList, beanClass);
+        getFieldList(fieldList, beanClass, superInsertPosition == AutoTableGlobalConfig.SuperInsertPosition.after);
         return fieldList.stream()
                 .filter(field -> !Modifier.isStatic(field.getModifiers()))
                 .collect(Collectors.toList());
     }
 
-    private static void getFieldList(List<Field> fields, Class<?> beanClass) {
+    private static void getFieldList(List<Field> fields, Class<?> beanClass, boolean insertBack) {
 
         Field[] declaredFields = beanClass.getDeclaredFields();
         // 获取当前class的所有fields的name列表
         Set<String> fieldNames = fields.stream().map(Field::getName).collect(Collectors.toSet());
-        for (Field field : declaredFields) {
-            // 避免重载属性
-            if (fieldNames.contains(field.getName())) {
-                continue;
-            }
-            fields.add(field);
+
+        Set<Field> newFields = Arrays.stream(declaredFields)
+                // 避免重载属性
+                .filter(field -> !fieldNames.contains(field.getName()))
+                .collect(Collectors.toSet());
+
+        if (insertBack) {
+            fields.addAll(newFields);
+        } else {
+            fields.addAll(0, newFields);
         }
 
         Class<?> superclass = beanClass.getSuperclass();
         if (superclass != null) {
-            getFieldList(fields, superclass);
+            getFieldList(fields, superclass, insertBack);
         }
     }
 }

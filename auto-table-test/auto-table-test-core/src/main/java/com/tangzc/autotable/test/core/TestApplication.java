@@ -2,6 +2,7 @@ package com.tangzc.autotable.test.core;
 
 import com.tangzc.autotable.core.AutoTableBootstrap;
 import com.tangzc.autotable.core.AutoTableGlobalConfig;
+import com.tangzc.autotable.core.RunMode;
 import com.tangzc.autotable.core.constants.DatabaseDialect;
 import com.tangzc.autotable.core.dynamicds.SqlSessionFactoryManager;
 import com.tangzc.autotable.core.strategy.mysql.data.MysqlTableMetadata;
@@ -30,21 +31,25 @@ public class TestApplication {
 
         // 配置信息
         AutoTableGlobalConfig.PropertyConfig autoTableProperties = new AutoTableGlobalConfig.PropertyConfig();
+        autoTableProperties.setMode(RunMode.create);
         // 开启 删除不存在的列
         autoTableProperties.setAutoDropColumn(true);
+        // 父类字段加到子类的前面
+        autoTableProperties.setSuperInsertPosition(AutoTableGlobalConfig.SuperInsertPosition.before);
         AutoTableGlobalConfig.setAutoTableProperties(autoTableProperties);
 
-        // 修改表注释
-        AutoTableGlobalConfig.setBuildTableMetadataIntercepter((databaseDialect, tableMetadata) -> {
+        // 修改表信息
+        AutoTableGlobalConfig.setBuildTableMetadataInterceptor((databaseDialect, tableMetadata) -> {
+
+            // 修改表注释
+            tableMetadata.setComment(tableMetadata.getComment() + "-我是表注释的小尾巴～");
+
+            // 修改mysql特殊的表属性
             if (DatabaseDialect.MySQL.equals(databaseDialect)) {
                 MysqlTableMetadata mysqlTableMetadata = (MysqlTableMetadata) tableMetadata;
-                mysqlTableMetadata.setComment(mysqlTableMetadata.getComment() + "-我是表注释的小尾巴～");
+                mysqlTableMetadata.setCharacterSet("utf8mb4");
+                mysqlTableMetadata.setCollate("utf8mb4_0900_ai_ci");
             }
-        });
-
-        AutoTableGlobalConfig.setAutoTableAnnotationIntercepter((includeAnnotations, excludeAnnotations) -> {
-            includeAnnotations.add(MyAnno.class);
-            // excludeAnnotations.add(TableName.class);
         });
 
         // 开始

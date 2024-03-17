@@ -1,4 +1,4 @@
-package com.tangzc.autotable.core.intercepter;
+package com.tangzc.autotable.core.interceptor;
 
 import com.tangzc.autotable.core.strategy.TableMetadata;
 
@@ -7,7 +7,7 @@ import com.tangzc.autotable.core.strategy.TableMetadata;
  * 注解构建完表元信息后，执行拦截器
  */
 @FunctionalInterface
-public interface BuildTableMetadataIntercepter {
+public interface BuildTableMetadataInterceptor {
 
     /**
      * 拦截器

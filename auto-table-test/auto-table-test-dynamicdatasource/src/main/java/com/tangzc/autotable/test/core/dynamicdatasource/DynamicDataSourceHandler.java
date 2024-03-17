@@ -40,6 +40,7 @@ public class DynamicDataSourceHandler implements IDataSourceHandler<String> {
 
     @Override
     public void clearDataSource(String dataSourceName) {
+        SqlSessionFactoryManager.cleanSqlSessionFactory();
     }
 
     @Override

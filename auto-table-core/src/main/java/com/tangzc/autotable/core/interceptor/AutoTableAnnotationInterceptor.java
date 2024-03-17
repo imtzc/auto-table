@@ -1,4 +1,4 @@
-package com.tangzc.autotable.core.intercepter;
+package com.tangzc.autotable.core.interceptor;
 
 import java.lang.annotation.Annotation;
 import java.util.Set;
@@ -9,7 +9,7 @@ import java.util.Set;
  * <p>因此，这里可以最终决定扫描哪些注解，排除哪些注解
  */
 @FunctionalInterface
-public interface AutoTableAnnotationIntercepter {
+public interface AutoTableAnnotationInterceptor {
 
     /**
      * 拦截器，包含和排斥取交集，即：如果既包含又排斥，则会排除

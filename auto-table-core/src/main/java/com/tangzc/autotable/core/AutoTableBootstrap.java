@@ -70,7 +70,7 @@ public class AutoTableBootstrap {
         includeAnnotations.addAll(AutoTableGlobalConfig.getAutoTableOrmFrameAdapter().scannerAnnotations());
         Set<Class<? extends Annotation>> ignoreAnnotations = new HashSet<>(Collections.singleton(Ignore.class));
         // 经过自定义的拦截器，修改最终影响自动建表的注解
-        AutoTableGlobalConfig.getAutoTableAnnotationIntercepter().intercept(includeAnnotations, ignoreAnnotations);
+        AutoTableGlobalConfig.getAutoTableAnnotationInterceptor().intercept(includeAnnotations, ignoreAnnotations);
         // 扫描所有的类，过滤出指定注解的实体
         Set<Class<?>> classes = ClassScanner.scan(packs, includeAnnotations, ignoreAnnotations);
 

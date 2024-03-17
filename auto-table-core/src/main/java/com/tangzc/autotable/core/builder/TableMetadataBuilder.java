@@ -27,7 +27,7 @@ public class TableMetadataBuilder {
             pgsqlTableMetadata.setComment(tableComment.value());
         }
 
-        List<Field> fields = BeanClassUtil.getAllDeclaredFieldsExcludeStatic(clazz);
+        List<Field> fields = BeanClassUtil.listAllFieldForColumn(clazz);
         pgsqlTableMetadata.setColumnMetadataList(ColumnMetadataBuilder.of(databaseDialect).buildList(clazz, fields));
         pgsqlTableMetadata.setIndexMetadataList(IndexMetadataBuilder.of().buildList(clazz, fields));
 

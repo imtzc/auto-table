@@ -7,10 +7,10 @@ import com.tangzc.autotable.core.callback.ValidateFinishCallback;
 import com.tangzc.autotable.core.converter.JavaTypeToDatabaseTypeConverter;
 import com.tangzc.autotable.core.dynamicds.IDataSourceHandler;
 import com.tangzc.autotable.core.dynamicds.impl.DefaultDataSourceHandler;
-import com.tangzc.autotable.core.intercepter.AutoTableAnnotationIntercepter;
-import com.tangzc.autotable.core.intercepter.BuildTableMetadataIntercepter;
-import com.tangzc.autotable.core.intercepter.CreateTableIntercepter;
-import com.tangzc.autotable.core.intercepter.ModifyTableIntercepter;
+import com.tangzc.autotable.core.interceptor.AutoTableAnnotationInterceptor;
+import com.tangzc.autotable.core.interceptor.BuildTableMetadataInterceptor;
+import com.tangzc.autotable.core.interceptor.CreateTableInterceptor;
+import com.tangzc.autotable.core.interceptor.ModifyTableInterceptor;
 import com.tangzc.autotable.core.strategy.CompareTableInfo;
 import com.tangzc.autotable.core.strategy.IStrategy;
 import com.tangzc.autotable.core.strategy.TableMetadata;
@@ -65,7 +65,7 @@ public class AutoTableGlobalConfig {
      */
     @Setter
     @Getter
-    private static AutoTableAnnotationIntercepter autoTableAnnotationIntercepter = (includeAnnotations, excludeAnnotations) -> {
+    private static AutoTableAnnotationInterceptor autoTableAnnotationInterceptor = (includeAnnotations, excludeAnnotations) -> {
     };
 
     /**
@@ -73,7 +73,7 @@ public class AutoTableGlobalConfig {
      */
     @Setter
     @Getter
-    private static BuildTableMetadataIntercepter buildTableMetadataIntercepter = (databaseDialect, tableMetadata) -> {
+    private static BuildTableMetadataInterceptor buildTableMetadataInterceptor = (databaseDialect, tableMetadata) -> {
     };
 
     /**
@@ -81,7 +81,7 @@ public class AutoTableGlobalConfig {
      */
     @Setter
     @Getter
-    private static CreateTableIntercepter createTableIntercepter = (databaseDialect, tableMetadata) -> {
+    private static CreateTableInterceptor createTableInterceptor = (databaseDialect, tableMetadata) -> {
     };
 
     /**
@@ -89,7 +89,7 @@ public class AutoTableGlobalConfig {
      */
     @Setter
     @Getter
-    private static ModifyTableIntercepter modifyTableIntercepter = (databaseDialect, tableMetadata, compareTableInfo) -> {
+    private static ModifyTableInterceptor modifyTableInterceptor = (databaseDialect, tableMetadata, compareTableInfo) -> {
     };
 
     /**
@@ -177,6 +177,11 @@ public class AutoTableGlobalConfig {
          * 是否自动删除名称不匹配的索引
          */
         private Boolean autoDropIndex = true;
+        /**
+         * <p>建表的时候，父类的字段排序是在子类后面还是前面
+         * <p>默认为after，跟在子类的后面
+         */
+        private SuperInsertPosition superInsertPosition = SuperInsertPosition.after;
 
         /**
          * mysql配置
@@ -187,6 +192,17 @@ public class AutoTableGlobalConfig {
         //  * 记录执行的SQL
         //  */
         // private RecordSqlProperties recordSql = new RecordSqlProperties();
+    }
+
+    public static enum SuperInsertPosition {
+        /**
+         * 在子类的后面
+         */
+        after,
+        /**
+         * 在子类的前面
+         */
+        before
     }
 
     @Data

@@ -9,6 +9,7 @@ import com.tangzc.autotable.core.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,8 +26,6 @@ public class CreateTableSqlBuilder {
      * @return sql
      */
     public static String buildSql(MysqlTableMetadata mysqlTableMetadata) {
-
-        // List<String> primaries = new ArrayList<>();
 
         String name = mysqlTableMetadata.getTableName();
         List<MysqlColumnMetadata> mysqlColumnMetadataList = mysqlTableMetadata.getColumnMetadataList();
@@ -52,6 +51,7 @@ public class CreateTableSqlBuilder {
         // 表字段处理
         addItems.add(
                 mysqlColumnMetadataList.stream()
+                        .sorted(Comparator.comparingInt(MysqlColumnMetadata::getPosition))
                         // 拼接每个字段的sql片段
                         .map(ColumnSqlBuilder::buildSql)
                         .collect(Collectors.joining(","))

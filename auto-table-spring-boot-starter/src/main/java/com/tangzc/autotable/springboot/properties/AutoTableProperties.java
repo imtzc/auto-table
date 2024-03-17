@@ -47,6 +47,11 @@ public class AutoTableProperties {
      * 是否自动删除名称不匹配的索引
      */
     private Boolean autoDropIndex = true;
+    /**
+     * <p>建表的时候，父类的字段排序是在子类后面还是前面
+     * <p>默认为after，跟在子类的后面
+     */
+    private SuperInsertPosition superInsertPosition = SuperInsertPosition.after;
 
     /**
      * mysql配置
@@ -63,6 +68,10 @@ public class AutoTableProperties {
         propertyConfig.setAutoDropColumn(this.autoDropColumn);
         propertyConfig.setAutoDropIndex(this.autoDropIndex);
 
+        AutoTableGlobalConfig.SuperInsertPosition superInsertPosition =
+                AutoTableGlobalConfig.SuperInsertPosition.valueOf(this.superInsertPosition.name());
+        propertyConfig.setSuperInsertPosition(superInsertPosition);
+
         AutoTableGlobalConfig.MysqlConfig mysqlConfig = new AutoTableGlobalConfig.MysqlConfig();
         mysqlConfig.setTableDefaultCharset(this.mysql.getTableDefaultCharset());
         mysqlConfig.setTableDefaultCharset(this.mysql.getTableDefaultCharset());
@@ -70,6 +79,17 @@ public class AutoTableProperties {
         mysqlConfig.setTableDefaultCharset(this.mysql.getTableDefaultCharset());
         propertyConfig.setMysql(mysqlConfig);
         return propertyConfig;
+    }
+
+    public static enum SuperInsertPosition {
+        /**
+         * 在子类的后面
+         */
+        after,
+        /**
+         * 在子类的前面
+         */
+        before
     }
 
     /**

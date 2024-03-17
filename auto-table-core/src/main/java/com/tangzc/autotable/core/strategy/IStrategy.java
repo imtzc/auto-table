@@ -23,14 +23,10 @@ public interface IStrategy<TABLE_META extends TableMetadata, COMPARE_TABLE_INFO 
     Logger log = LoggerFactory.getLogger(IStrategy.class);
 
     default void execute(Consumer<MAPPER> execute) {
-
-        // 从接口泛型上读取MapperClass
-        Class<MAPPER> mapperClass = getMapperClass();
-
-        // 执行
-        try (SqlSession sqlSession = SqlSessionFactoryManager.getSqlSessionFactory().openSession()) {
-            execute.accept(sqlSession.getMapper(mapperClass));
-        }
+        executeReturn(mapper -> {
+            execute.accept(mapper);
+            return null;
+        });
     }
 
     default <R> R executeReturn(Function<MAPPER, R> execute) {
@@ -46,6 +42,7 @@ public interface IStrategy<TABLE_META extends TableMetadata, COMPARE_TABLE_INFO 
 
     /**
      * 从接口泛型上读取MapperClass
+     *
      * @return MapperClass
      */
     default Class<MAPPER> getMapperClass() {
@@ -92,7 +89,7 @@ public interface IStrategy<TABLE_META extends TableMetadata, COMPARE_TABLE_INFO 
      */
     default void start(TABLE_META tableMetadata) {
         // 拦截表信息，供用户自定义修改
-        AutoTableGlobalConfig.getBuildTableMetadataIntercepter().intercept(this.databaseDialect(), tableMetadata);
+        AutoTableGlobalConfig.getBuildTableMetadataInterceptor().intercept(this.databaseDialect(), tableMetadata);
 
         RunMode runMode = AutoTableGlobalConfig.getAutoTableProperties().getMode();
         boolean validateMode = runMode == RunMode.validate;
@@ -123,7 +120,7 @@ public interface IStrategy<TABLE_META extends TableMetadata, COMPARE_TABLE_INFO 
         if (!tableIsExist) {
             log.info("创建表：{}", tableName);
             // 建表
-            AutoTableGlobalConfig.getCreateTableIntercepter().beforeCreateTable(this.databaseDialect(), tableMetadata);
+            AutoTableGlobalConfig.getCreateTableInterceptor().beforeCreateTable(this.databaseDialect(), tableMetadata);
             this.createTable(tableMetadata);
             AutoTableGlobalConfig.getCreateTableFinishCallback().afterCreateTable(this.databaseDialect(), tableMetadata);
         }
@@ -135,7 +132,7 @@ public interface IStrategy<TABLE_META extends TableMetadata, COMPARE_TABLE_INFO 
             if (compareTableInfo.needModify()) {
                 log.info("修改表：{}", tableName);
                 // 修改表信息
-                AutoTableGlobalConfig.getModifyTableIntercepter().beforeModifyTable(this.databaseDialect(), tableMetadata, compareTableInfo);
+                AutoTableGlobalConfig.getModifyTableInterceptor().beforeModifyTable(this.databaseDialect(), tableMetadata, compareTableInfo);
                 this.modifyTable(compareTableInfo);
                 AutoTableGlobalConfig.getModifyTableFinishCallback().afterModifyTable(this.databaseDialect(), tableMetadata, compareTableInfo);
             }

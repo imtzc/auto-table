@@ -15,14 +15,13 @@ import lombok.Data;
 import lombok.experimental.FieldNameConstants;
 
 @Data
-@MyAnno
 @TableName("sys_user")
 @TableIndexes({
         @TableIndex(name = "uni_name", fields = User.Fields.name, type = IndexTypeEnum.UNIQUE, comment = "姓名唯一索引"),
         @TableIndex(name = "uni_age", fields = User.Fields.age, type = IndexTypeEnum.NORMAL, comment = "年龄普通索引")
 })
 @FieldNameConstants
-public class User {
+public class User extends BaseEntity {
 
     @PrimaryKey(true)
     @ColumnComment("用户id")

@@ -21,4 +21,8 @@ public class SqlSessionFactoryManager {
         }
         return sessionFactory;
     }
+
+    public static void cleanSqlSessionFactory() {
+        sqlSessionFactory.remove();
+    }
 }

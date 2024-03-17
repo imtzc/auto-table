@@ -11,10 +11,10 @@ import com.tangzc.autotable.core.callback.ValidateFinishCallback;
 import com.tangzc.autotable.core.converter.JavaTypeToDatabaseTypeConverter;
 import com.tangzc.autotable.core.dynamicds.IDataSourceHandler;
 import com.tangzc.autotable.core.dynamicds.SqlSessionFactoryManager;
-import com.tangzc.autotable.core.intercepter.AutoTableAnnotationIntercepter;
-import com.tangzc.autotable.core.intercepter.BuildTableMetadataIntercepter;
-import com.tangzc.autotable.core.intercepter.CreateTableIntercepter;
-import com.tangzc.autotable.core.intercepter.ModifyTableIntercepter;
+import com.tangzc.autotable.core.interceptor.AutoTableAnnotationInterceptor;
+import com.tangzc.autotable.core.interceptor.BuildTableMetadataInterceptor;
+import com.tangzc.autotable.core.interceptor.CreateTableInterceptor;
+import com.tangzc.autotable.core.interceptor.ModifyTableInterceptor;
 import com.tangzc.autotable.core.strategy.CompareTableInfo;
 import com.tangzc.autotable.core.strategy.IStrategy;
 import com.tangzc.autotable.core.strategy.TableMetadata;
@@ -40,10 +40,10 @@ public class AutoTableAutoConfig {
             ObjectProvider<AutoTableOrmFrameAdapter> autoTableOrmFrameAdapter,
             ObjectProvider<IDataSourceHandler<?>> dynamicDataSourceHandler,
             /* 拦截器 */
-            ObjectProvider<AutoTableAnnotationIntercepter> autoTableAnnotationIntercepter,
-            ObjectProvider<BuildTableMetadataIntercepter> buildTableMetadataIntercepter,
-            ObjectProvider<CreateTableIntercepter> createTableIntercepter,
-            ObjectProvider<ModifyTableIntercepter> modifyTableIntercepter,
+            ObjectProvider<AutoTableAnnotationInterceptor> autoTableAnnotationInterceptor,
+            ObjectProvider<BuildTableMetadataInterceptor> buildTableMetadataInterceptor,
+            ObjectProvider<CreateTableInterceptor> createTableInterceptor,
+            ObjectProvider<ModifyTableInterceptor> modifyTableInterceptor,
             /* 回调事件 */
             ObjectProvider<CreateTableFinishCallback> createTableFinishCallback,
             ObjectProvider<ModifyTableFinishCallback> modifyTableFinishCallback,
@@ -72,13 +72,13 @@ public class AutoTableAutoConfig {
 
         /* 拦截器 */
         // 假如有自定义的注解拦截器，就使用自定义的注解拦截器
-        autoTableAnnotationIntercepter.ifAvailable(AutoTableGlobalConfig::setAutoTableAnnotationIntercepter);
+        autoTableAnnotationInterceptor.ifAvailable(AutoTableGlobalConfig::setAutoTableAnnotationInterceptor);
         // 假如有自定义的创建表拦截器，就使用自定义的创建表拦截器
-        buildTableMetadataIntercepter.ifAvailable(AutoTableGlobalConfig::setBuildTableMetadataIntercepter);
+        buildTableMetadataInterceptor.ifAvailable(AutoTableGlobalConfig::setBuildTableMetadataInterceptor);
         // 假如有自定义的创建表拦截器，就使用自定义的创建表拦截器
-        createTableIntercepter.ifAvailable(AutoTableGlobalConfig::setCreateTableIntercepter);
+        createTableInterceptor.ifAvailable(AutoTableGlobalConfig::setCreateTableInterceptor);
         // 假如有自定义的修改表拦截器，就使用自定义的修改表拦截器
-        modifyTableIntercepter.ifAvailable(AutoTableGlobalConfig::setModifyTableIntercepter);
+        modifyTableInterceptor.ifAvailable(AutoTableGlobalConfig::setModifyTableInterceptor);
 
         /* 回调事件 */
         // 假如有自定义的创建表回调，就使用自定义的创建表回调

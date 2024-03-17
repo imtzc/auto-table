@@ -58,7 +58,7 @@ public class MysqlTableMetadataBuilder {
             mysqlTableMetadata.setEngine(mysqlEngine.value());
         }
 
-        List<Field> fields = BeanClassUtil.getAllDeclaredFieldsExcludeStatic(clazz);
+        List<Field> fields = BeanClassUtil.listAllFieldForColumn(clazz);
         mysqlTableMetadata.setColumnMetadataList(MysqlColumnMetadataBuilder.buildList(clazz, fields));
         mysqlTableMetadata.setIndexMetadataList(IndexMetadataBuilder.of().buildList(clazz, fields));
 
