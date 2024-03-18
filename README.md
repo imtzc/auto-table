@@ -31,9 +31,17 @@ AutoTable分别在表名、字段名、主键、主键策略、枚举处理、�
 
 敬请期待
 
+## 流程图
+
+![框架运行图](https://autotable.tangzc.com/flow.png)
+
 ## 官方教程
 
 <a style="font-size:20px" href="https://autotable.tangzc.com" target="_blank">AutoTable教程</a>
+
+## 联系作者（微信）
+
+![微信](https://autotable.tangzc.com/wechat.png)
 
 ## 特别感谢
 > 感谢JetBrains提供的软件支持
