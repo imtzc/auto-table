@@ -21,6 +21,7 @@ import com.tangzc.autotable.core.strategy.mysql.data.dbdata.InformationSchemaSta
 import com.tangzc.autotable.core.strategy.mysql.data.dbdata.InformationSchemaTable;
 import com.tangzc.autotable.core.strategy.mysql.mapper.MysqlTablesMapper;
 import com.tangzc.autotable.core.utils.StringUtils;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigDecimal;
@@ -91,22 +92,20 @@ public class MysqlStrategy implements IStrategy<MysqlTableMetadata, MysqlCompare
 
     @Override
     public void dropTable(String tableName) {
+
         execute(mysqlTablesMapper -> mysqlTablesMapper.dropTableByName(tableName));
     }
 
     @Override
     public boolean checkTableExist(String tableName) {
+
         return executeReturn(mysqlTablesMapper -> mysqlTablesMapper.findTableByTableName(tableName) != null);
     }
 
     @Override
-    public MysqlTableMetadata analyseClass(Class<?> beanClass) {
-        MysqlTableMetadata mysqlTableMetadata = MysqlTableMetadataBuilder.build(beanClass);
-        if (mysqlTableMetadata.getColumnMetadataList().isEmpty()) {
-            log.warn("扫描发现{}没有建表字段请检查！", beanClass.getName());
-            return null;
-        }
-        return mysqlTableMetadata;
+    public @NonNull MysqlTableMetadata analyseClass(Class<?> beanClass) {
+
+        return MysqlTableMetadataBuilder.build(beanClass);
     }
 
     @Override
@@ -118,7 +117,7 @@ public class MysqlStrategy implements IStrategy<MysqlTableMetadata, MysqlCompare
     }
 
     @Override
-    public MysqlCompareTableInfo compareTable(MysqlTableMetadata tableMetadata) {
+    public @NonNull MysqlCompareTableInfo compareTable(MysqlTableMetadata tableMetadata) {
 
         String tableName = tableMetadata.getTableName();
         MysqlCompareTableInfo mysqlCompareTableInfo = new MysqlCompareTableInfo(tableName);

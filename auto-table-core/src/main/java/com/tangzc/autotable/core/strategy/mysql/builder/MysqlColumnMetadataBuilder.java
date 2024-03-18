@@ -35,7 +35,7 @@ public class MysqlColumnMetadataBuilder {
                 .map(field -> build(clazz, field, index.getAndIncrement()))
                 .collect(Collectors.toList());
         if (columnMetadata.isEmpty()) {
-            log.warn("扫描发现{}没有建表字段请检查！", clazz.getName());
+            log.warn("扫描发现{}没有建表字段请注意！", clazz.getName());
         }
         return columnMetadata;
     }

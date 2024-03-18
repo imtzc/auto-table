@@ -12,6 +12,7 @@ import com.tangzc.autotable.core.strategy.sqlite.data.SqliteDefaultTypeEnum;
 import com.tangzc.autotable.core.strategy.sqlite.data.dbdata.SqliteMaster;
 import com.tangzc.autotable.core.strategy.sqlite.mapper.SqliteTablesMapper;
 import com.tangzc.autotable.core.utils.StringUtils;
+import lombok.NonNull;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -86,13 +87,9 @@ public class SqliteStrategy implements IStrategy<DefaultTableMetadata, SqliteCom
     }
 
     @Override
-    public DefaultTableMetadata analyseClass(Class<?> beanClass) {
-        DefaultTableMetadata tableMetadata = SqliteTableMetadataBuilder.build(beanClass);
-        if (tableMetadata.getColumnMetadataList().isEmpty()) {
-            log.warn("扫描发现{}没有建表字段请检查！", beanClass.getName());
-            return null;
-        }
-        return tableMetadata;
+    public @NonNull DefaultTableMetadata analyseClass(Class<?> beanClass) {
+
+        return SqliteTableMetadataBuilder.build(beanClass);
     }
 
     @Override
@@ -108,7 +105,7 @@ public class SqliteStrategy implements IStrategy<DefaultTableMetadata, SqliteCom
     }
 
     @Override
-    public SqliteCompareTableInfo compareTable(DefaultTableMetadata tableMetadata) {
+    public @NonNull SqliteCompareTableInfo compareTable(DefaultTableMetadata tableMetadata) {
 
         String tableName = tableMetadata.getTableName();
         SqliteCompareTableInfo sqliteCompareTableInfo = new SqliteCompareTableInfo(tableName);

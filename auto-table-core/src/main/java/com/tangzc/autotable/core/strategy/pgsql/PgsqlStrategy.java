@@ -21,6 +21,7 @@ import com.tangzc.autotable.core.strategy.pgsql.data.dbdata.PgsqlDbIndex;
 import com.tangzc.autotable.core.strategy.pgsql.data.dbdata.PgsqlDbPrimary;
 import com.tangzc.autotable.core.strategy.pgsql.mapper.PgsqlTablesMapper;
 import com.tangzc.autotable.core.utils.StringUtils;
+import lombok.NonNull;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -93,13 +94,9 @@ public class PgsqlStrategy implements IStrategy<DefaultTableMetadata, PgsqlCompa
     }
 
     @Override
-    public DefaultTableMetadata analyseClass(Class<?> beanClass) {
-        DefaultTableMetadata tableMetadata = PgsqlTableMetadataBuilder.build(beanClass);
-        if (tableMetadata.getColumnMetadataList().isEmpty()) {
-            log.warn("扫描发现{}没有建表字段请检查！", beanClass.getName());
-            return null;
-        }
-        return tableMetadata;
+    public @NonNull DefaultTableMetadata analyseClass(Class<?> beanClass) {
+
+        return PgsqlTableMetadataBuilder.build(beanClass);
     }
 
     @Override
@@ -110,7 +107,7 @@ public class PgsqlStrategy implements IStrategy<DefaultTableMetadata, PgsqlCompa
     }
 
     @Override
-    public PgsqlCompareTableInfo compareTable(DefaultTableMetadata tableMetadata) {
+    public @NonNull PgsqlCompareTableInfo compareTable(DefaultTableMetadata tableMetadata) {
 
         String tableName = tableMetadata.getTableName();
 

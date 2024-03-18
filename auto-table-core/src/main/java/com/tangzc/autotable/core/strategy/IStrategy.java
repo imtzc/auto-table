@@ -4,6 +4,7 @@ import com.tangzc.autotable.core.AutoTableGlobalConfig;
 import com.tangzc.autotable.core.RunMode;
 import com.tangzc.autotable.core.converter.DefaultTypeEnumInterface;
 import com.tangzc.autotable.core.dynamicds.SqlSessionFactoryManager;
+import lombok.NonNull;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -72,11 +73,6 @@ public interface IStrategy<TABLE_META extends TableMetadata, COMPARE_TABLE_INFO 
 
         TABLE_META tableMetadata = this.analyseClass(entityClass);
 
-        // 没有可构建的数据模型，跳过
-        if (tableMetadata == null) {
-            return;
-        }
-
         start(tableMetadata);
 
         AutoTableGlobalConfig.getRunStateCallback().after(entityClass);
@@ -92,72 +88,103 @@ public interface IStrategy<TABLE_META extends TableMetadata, COMPARE_TABLE_INFO 
         AutoTableGlobalConfig.getBuildTableMetadataInterceptor().intercept(this.databaseDialect(), tableMetadata);
 
         RunMode runMode = AutoTableGlobalConfig.getAutoTableProperties().getMode();
-        boolean validateMode = runMode == RunMode.validate;
-        if (validateMode) {
-            validateTable(tableMetadata);
-        } else {
-            compareAndModifyTable(tableMetadata);
+
+        switch (runMode) {
+            case validate:
+                validateMode(tableMetadata);
+                break;
+            case create:
+                createMode(tableMetadata);
+                break;
+            case update:
+                updateMode(tableMetadata);
+                break;
+            default:
+                throw new RuntimeException("不支持的运行模式：" + runMode);
         }
     }
 
-    default void compareAndModifyTable(TABLE_META tableMetadata) {
+    /**
+     * 检查数据库数据模型与实体是否一致
+     * 1. 检查数据库数据模型是否存在
+     * 2. 检查数据库数据模型与实体是否一致
+     */
+    default void validateMode(TABLE_META tableMetadata) {
+
         String tableName = tableMetadata.getTableName();
 
-        // 表是否存在的标记
-        boolean tableIsExist;
-        RunMode runMode = AutoTableGlobalConfig.getAutoTableProperties().getMode();
-        if (runMode == RunMode.create) {
-            log.info("create模式，删除表：{}", tableName);
-            // 直接删除表重新生成
-            this.dropTable(tableName);
-            // 上一步表被删了，肯定不存在
-            tableIsExist = false;
-        } else {
-            tableIsExist = this.checkTableExist(tableName);
-        }
-
-        // 当表不存在的时候，直接生成表
-        if (!tableIsExist) {
-            log.info("创建表：{}", tableName);
-            // 建表
-            AutoTableGlobalConfig.getCreateTableInterceptor().beforeCreateTable(this.databaseDialect(), tableMetadata);
-            this.createTable(tableMetadata);
-            AutoTableGlobalConfig.getCreateTableFinishCallback().afterCreateTable(this.databaseDialect(), tableMetadata);
-        }
-
-        // update模型，且表存在，更新表信息
-        if (runMode == RunMode.update && tableIsExist) {
-            // 当表存在，比对表与Bean描述的差异
-            COMPARE_TABLE_INFO compareTableInfo = this.compareTable(tableMetadata);
-            if (compareTableInfo.needModify()) {
-                log.info("修改表：{}", tableName);
-                // 修改表信息
-                AutoTableGlobalConfig.getModifyTableInterceptor().beforeModifyTable(this.databaseDialect(), tableMetadata, compareTableInfo);
-                this.modifyTable(compareTableInfo);
-                AutoTableGlobalConfig.getModifyTableFinishCallback().afterModifyTable(this.databaseDialect(), tableMetadata, compareTableInfo);
-            }
-        }
-    }
-
-    default void validateTable(TABLE_META tableMetadata) {
-        String tableName = tableMetadata.getTableName();
         // 检查数据库数据模型与实体是否一致
-        boolean tableIsExist = this.checkTableExist(tableName);
-        COMPARE_TABLE_INFO compareTableInfo = null;
-        if (tableIsExist) {
-            compareTableInfo = this.compareTable(tableMetadata);
-        }
-
-        if (compareTableInfo == null) {
+        boolean tableNotExist = !this.checkTableExist(tableName);
+        if (tableNotExist) {
             AutoTableGlobalConfig.getValidateFinishCallback().validateFinish(false, this.databaseDialect(), null);
             throw new RuntimeException("启动失败，" + this.databaseDialect() + "数据表" + tableMetadata.getTableName() + "不存在");
         }
+
+        // 对比数据库表结构与新的表元数据的差异
+        COMPARE_TABLE_INFO compareTableInfo = this.compareTable(tableMetadata);
         if (compareTableInfo.needModify()) {
             log.warn(compareTableInfo.validateFailedMessage());
             AutoTableGlobalConfig.getValidateFinishCallback().validateFinish(false, this.databaseDialect(), compareTableInfo);
             throw new RuntimeException("启动失败，" + this.databaseDialect() + "数据表" + tableMetadata.getTableName() + "与实体不匹配");
         }
         AutoTableGlobalConfig.getValidateFinishCallback().validateFinish(true, this.databaseDialect(), compareTableInfo);
+    }
+
+    /**
+     * 创建模式
+     * 1. 删除表
+     * 2. 新建表
+     */
+    default void createMode(TABLE_META tableMetadata) {
+
+        String tableName = tableMetadata.getTableName();
+
+        // 表是否存在的标记
+        log.info("create模式，删除表：{}", tableName);
+        // 直接尝试删除表
+        this.dropTable(tableName);
+
+        // 新建表
+        executeCreateTable(tableMetadata);
+    }
+
+    /**
+     * 更新模式
+     * 1. 检查表是否存在
+     * 2. 不存在创建
+     * 3. 检查表是否需要修改
+     * 4. 需要修改就修改表
+     */
+    default void updateMode(TABLE_META tableMetadata) {
+
+        String tableName = tableMetadata.getTableName();
+
+        boolean tableNotExist = !this.checkTableExist(tableName);
+        // 当表不存在的时候，直接创建表
+        if (tableNotExist) {
+            executeCreateTable(tableMetadata);
+            return;
+        }
+
+        // 当表存在，比对数据库表结构与表元数据的差异
+        COMPARE_TABLE_INFO compareTableInfo = this.compareTable(tableMetadata);
+        if (compareTableInfo.needModify()) {
+            // 修改表信息
+            log.info("修改表：{}", tableName);
+            AutoTableGlobalConfig.getModifyTableInterceptor().beforeModifyTable(this.databaseDialect(), tableMetadata, compareTableInfo);
+            this.modifyTable(compareTableInfo);
+            AutoTableGlobalConfig.getModifyTableFinishCallback().afterModifyTable(this.databaseDialect(), tableMetadata, compareTableInfo);
+        }
+    }
+
+    default void executeCreateTable(TABLE_META tableMetadata) {
+
+        String tableName = tableMetadata.getTableName();
+        log.info("创建表：{}", tableName);
+
+        AutoTableGlobalConfig.getCreateTableInterceptor().beforeCreateTable(this.databaseDialect(), tableMetadata);
+        this.createTable(tableMetadata);
+        AutoTableGlobalConfig.getCreateTableFinishCallback().afterCreateTable(this.databaseDialect(), tableMetadata);
     }
 
     /**
@@ -195,7 +222,7 @@ public interface IStrategy<TABLE_META extends TableMetadata, COMPARE_TABLE_INFO 
      * @param beanClass 待分析的class
      * @return 表元信息
      */
-    TABLE_META analyseClass(Class<?> beanClass);
+    @NonNull TABLE_META analyseClass(Class<?> beanClass);
 
     /**
      * 创建表
@@ -210,7 +237,7 @@ public interface IStrategy<TABLE_META extends TableMetadata, COMPARE_TABLE_INFO 
      * @param tableMetadata 表元数据
      * @return 待修改的表信息描述
      */
-    COMPARE_TABLE_INFO compareTable(TABLE_META tableMetadata);
+    @NonNull COMPARE_TABLE_INFO compareTable(TABLE_META tableMetadata);
 
     /**
      * 修改表

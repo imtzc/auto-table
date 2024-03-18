@@ -32,11 +32,18 @@ public class ColumnMetadataBuilder {
     }
 
     public List<ColumnMetadata> buildList(Class<?> clazz, List<Field> fields) {
-        return fields.stream()
+
+        List<ColumnMetadata> columnMetadata = fields.stream()
                 .filter(field -> TableBeanUtils.isIncludeField(field, clazz))
                 .map(field -> this.build(clazz, field)
                 )
                 .collect(Collectors.toList());
+
+        if (columnMetadata.isEmpty()) {
+            log.warn("扫描发现{}没有建表字段请注意！", clazz.getName());
+        }
+
+        return columnMetadata;
     }
 
     public ColumnMetadata build(Class<?> clazz, Field field) {
