@@ -1,15 +1,11 @@
 <p align="center"><img src="https://s2.loli.net/2024/01/31/iPeLJUqVBQKwFbI.png" alt="1648883788444-1068117e-f573-4b0b-bbb9-8a3208810860.png" width="150px" /></p>
 
-
 <p align="center">你只负责维护实体，数据表的事情交给我</p>
 
 <p align="center">
 <img src="https://img.shields.io/maven-central/v/com.baomidou/mybatis-plus.svg?style=for-the-badge" alt="img" /> 
 <img src="https://img.shields.io/badge/license-Apache 2-4EB1BA.svg?style=for-the-badge" alt="img" />
 </p>
-
-
-
 
 ## 什么是AutoTable？
 

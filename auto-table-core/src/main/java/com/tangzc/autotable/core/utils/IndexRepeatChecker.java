@@ -9,7 +9,7 @@ import java.util.Set;
 public class IndexRepeatChecker {
 
     // 标记所有的索引，用于检测重复的
-    private Set<String> exitsIndexes = new HashSet<>(16);
+    private final Set<String> exitsIndexes = new HashSet<>(16);
 
     // 索引重复检测过滤器
     public boolean filter(String name) {
@@ -23,6 +23,4 @@ public class IndexRepeatChecker {
 
         return true;
     }
-
-    ;
 }
