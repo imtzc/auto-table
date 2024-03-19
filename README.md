@@ -21,7 +21,8 @@ AutoTable分别在表名、字段名、主键、主键策略、枚举处理、�
 
 ### mybatis-plus拓展包
 
-<a href="https://gitee.com/tangzc/mybatis-plus-ext" target="_blank">mybatis-plus-ext</a>是mybatis-plus框架的拓展包，在框架原有基础上做了进一步的轻度封装，增强内容：免手写Mapper、多数据源自动建表、数据自动填充、自动关联查询、冗余数据自动更新、动态查询条件等。
+<a href="https://gitee.com/tangzc/mybatis-plus-ext" target="_blank">mybatis-plus-ext</a>
+是mybatis-plus框架的拓展包，在框架原有基础上做了进一步的轻度封装，增强内容：免手写Mapper、多数据源自动建表、数据自动填充、自动关联查询、冗余数据自动更新、动态查询条件等。
 
 ### mybatis-flex拓展包
 
@@ -31,16 +32,16 @@ AutoTable分别在表名、字段名、主键、主键策略、枚举处理、�
 
 > 以下的测试版本属于我本地的部署版本，其他的版本未做详细测试，但不代表不能用，所以有测试过其他更低版本的小伙伴欢迎联系我修改相关版本号，感谢
 
-| 数据库          | 测试版本       | 说明                                                  |
-|--------------|------------|-----------------------------------------------------|
-| ✅ MySQL      | 8.0.29     |                                                     |
-| ✅ MariaDB    | 对应MySQL的版本 | 数据库的子协议使用MySQL，即`jdbc:mysql://`而不是`jdbc:mariadb://` |
-| ✅ PostgreSQL | 15.5       |                                                     |
-| ✅ SQLite     | 3.35.5     |                                                     |
-| ☑️ H2        | 敬请期待       | 🔥 正在开发中                                            |
-| Oracle       | 暂未支持       | 欢迎提交PR                                              |
-| SQLServer    | 暂未支持       | 欢迎提交PR                                              |
-| DB2          | 暂未支持       | 欢迎提交PR                                              |
+| 数据库          | 测试版本       | 说明                         |
+|--------------|------------|----------------------------|
+| ✅ MySQL      | 8.0.29     |                            |
+| ✅ MariaDB    | 对应MySQL的版本 | 协议使用MySQL，即`jdbc:mysql://` |
+| ✅ PostgreSQL | 15.5       |                            |
+| ✅ SQLite     | 3.35.5     |                            |
+| ☑️ H2        | 敬请期待       | 🔥 正在开发中                   |
+| Oracle       | 暂未支持       | 欢迎提交PR                     |
+| SQLServer    | 暂未支持       | 欢迎提交PR                     |
+| DB2          | 暂未支持       | 欢迎提交PR                     |
 
 ## 流程图
 
@@ -55,6 +56,7 @@ AutoTable分别在表名、字段名、主键、主键策略、枚举处理、�
 ![微信](https://autotable.tangzc.com/wechat.png)
 
 ## 特别感谢
+
 > 感谢JetBrains提供的软件支持
 
 <img width="200" src="https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.png" alt="JetBrains Logo (Main) logo.">
