@@ -8,7 +8,6 @@ import com.tangzc.autotable.annotation.TableName;
 import com.tangzc.autotable.annotation.mysql.MysqlCharset;
 import com.tangzc.autotable.annotation.mysql.MysqlEngine;
 import com.tangzc.autotable.core.dynamicds.IDataSourceHandler;
-import com.tangzc.autotable.core.dynamicds.SqlSessionFactoryManager;
 import com.tangzc.autotable.core.strategy.IStrategy;
 import com.tangzc.autotable.core.strategy.mysql.MysqlStrategy;
 import com.tangzc.autotable.core.strategy.pgsql.PgsqlStrategy;
@@ -16,12 +15,8 @@ import com.tangzc.autotable.core.strategy.sqlite.SqliteStrategy;
 import com.tangzc.autotable.core.utils.ClassScanner;
 import com.tangzc.autotable.core.utils.TableBeanUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.ibatis.session.Configuration;
 
 import java.lang.annotation.Annotation;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -76,10 +71,7 @@ public class AutoTableBootstrap {
 
         // 获取对应的数据源，根据不同数据库方言，执行不同的处理
         IDataSourceHandler<?> datasourceHandler = AutoTableGlobalConfig.getDatasourceHandler();
-        datasourceHandler.handleAnalysis(classes, (entityClasses) -> {
-
-            String databaseDialect = getDatabaseDialect();
-            log.info("数据库方言（" + databaseDialect + "）");
+        datasourceHandler.handleAnalysis(classes, (databaseDialect, entityClasses) -> {
 
             // 同一个数据源下，检查重名的表
             Map<String, Long> repeatCheckMap = entityClasses.stream().map(TableBeanUtils::getTableName).collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
@@ -93,37 +85,15 @@ public class AutoTableBootstrap {
 
             // 查找对应的数据源策略
             IStrategy<?, ?, ?> databaseStrategy = AutoTableGlobalConfig.getStrategy(databaseDialect);
-
-            for (Class<?> entityClass : entityClasses) {
-                if (databaseStrategy != null) {
+            if (databaseStrategy != null) {
+                for (Class<?> entityClass : entityClasses) {
                     databaseStrategy.start(entityClass);
-                } else {
-                    log.warn("没有找到对应的数据库（" + databaseDialect + "）方言策略，无法执行自动建表");
                 }
+            } else {
+                log.warn("没有找到对应的数据库（" + databaseDialect + "）方言策略，无法执行自动建表");
             }
         });
         log.info("AutoTable执行结束。耗时：{}", (System.currentTimeMillis() - start) + "ms");
-    }
-
-    /**
-     * 自动获取当前数据源的方言
-     *
-     * @return 返回数据方言
-     */
-    private static String getDatabaseDialect() {
-
-        // 获取Configuration对象
-        Configuration configuration = SqlSessionFactoryManager.getSqlSessionFactory().getConfiguration();
-
-        try (Connection connection = configuration.getEnvironment().getDataSource().getConnection()) {
-            // 通过连接获取DatabaseMetaData对象
-            DatabaseMetaData metaData = connection.getMetaData();
-            log.info("数据库链接 => {}", metaData.getURL());
-            // 获取数据库方言
-            return metaData.getDatabaseProductName();
-        } catch (SQLException e) {
-            throw new RuntimeException("获取数据方言失败", e);
-        }
     }
 
     private static String[] getModelPackage(AutoTableGlobalConfig.PropertyConfig autoTableProperties) {
