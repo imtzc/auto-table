@@ -69,10 +69,10 @@ public class BeanClassUtil {
         // 获取当前class的所有fields的name列表
         Set<String> fieldNames = fields.stream().map(Field::getName).collect(Collectors.toSet());
 
-        Set<Field> newFields = Arrays.stream(declaredFields)
+        List<Field> newFields = Arrays.stream(declaredFields)
                 // 避免重载属性
                 .filter(field -> !fieldNames.contains(field.getName()))
-                .collect(Collectors.toSet());
+                .collect(Collectors.toList());
 
         if (insertBack) {
             fields.addAll(newFields);

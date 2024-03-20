@@ -35,7 +35,7 @@ public class TestApplication {
         // 开启 删除不存在的列
         autoTableProperties.setAutoDropColumn(true);
         // 父类字段加到子类的前面
-        autoTableProperties.setSuperInsertPosition(AutoTableGlobalConfig.SuperInsertPosition.before);
+        autoTableProperties.setSuperInsertPosition(AutoTableGlobalConfig.SuperInsertPosition.after);
         AutoTableGlobalConfig.setAutoTableProperties(autoTableProperties);
 
         // 修改表信息
