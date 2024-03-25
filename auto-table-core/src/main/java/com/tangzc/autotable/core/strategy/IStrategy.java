@@ -12,6 +12,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.ParameterizedType;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -142,7 +146,8 @@ public interface IStrategy<TABLE_META extends TableMetadata, COMPARE_TABLE_INFO 
         // 表是否存在的标记
         log.info("create模式，删除表：{}", tableName);
         // 直接尝试删除表
-        this.dropTable(tableName);
+        String sql = this.dropTable(tableName);
+        executeSql(Collections.singletonList(sql));
 
         // 新建表
         executeCreateTable(tableMetadata);
@@ -172,7 +177,8 @@ public interface IStrategy<TABLE_META extends TableMetadata, COMPARE_TABLE_INFO 
             // 修改表信息
             log.info("修改表：{}", tableName);
             AutoTableGlobalConfig.getModifyTableInterceptor().beforeModifyTable(this.databaseDialect(), tableMetadata, compareTableInfo);
-            this.modifyTable(compareTableInfo);
+            List<String> sqlList = this.modifyTable(compareTableInfo);
+            executeSql(sqlList);
             AutoTableGlobalConfig.getModifyTableFinishCallback().afterModifyTable(this.databaseDialect(), tableMetadata, compareTableInfo);
         }
     }
@@ -183,8 +189,24 @@ public interface IStrategy<TABLE_META extends TableMetadata, COMPARE_TABLE_INFO 
         log.info("创建表：{}", tableName);
 
         AutoTableGlobalConfig.getCreateTableInterceptor().beforeCreateTable(this.databaseDialect(), tableMetadata);
-        this.createTable(tableMetadata);
+        List<String> sqlList = this.createTable(tableMetadata);
+        executeSql(sqlList);
         AutoTableGlobalConfig.getCreateTableFinishCallback().afterCreateTable(this.databaseDialect(), tableMetadata);
+    }
+
+    default void executeSql(List<String> sqlList) {
+        SqlSessionFactory sqlSessionFactory = SqlSessionFactoryManager.getSqlSessionFactory();
+        try (SqlSession sqlSession = sqlSessionFactory.openSession();
+             Statement statement = sqlSession.getConnection().createStatement()) {
+            for (String sql : sqlList) {
+                log.info("执行sql：{}", sql);
+                statement.execute(sql);
+            }
+            // 提交事务（如果开启了自动提交，则这步可以省略）
+            sqlSession.commit();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
@@ -206,7 +228,7 @@ public interface IStrategy<TABLE_META extends TableMetadata, COMPARE_TABLE_INFO 
      *
      * @param tableName 表名
      */
-    void dropTable(String tableName);
+    String dropTable(String tableName);
 
     /**
      * 检查表是否存在
@@ -229,7 +251,7 @@ public interface IStrategy<TABLE_META extends TableMetadata, COMPARE_TABLE_INFO 
      *
      * @param tableMetadata 表元数据
      */
-    void createTable(TABLE_META tableMetadata);
+    List<String> createTable(TABLE_META tableMetadata);
 
     /**
      * 对比表与bean的差异
@@ -244,5 +266,5 @@ public interface IStrategy<TABLE_META extends TableMetadata, COMPARE_TABLE_INFO 
      *
      * @param compareTableInfo 修改表的描述信息
      */
-    void modifyTable(COMPARE_TABLE_INFO compareTableInfo);
+    List<String> modifyTable(COMPARE_TABLE_INFO compareTableInfo);
 }

@@ -3,6 +3,7 @@ package com.tangzc.autotable.test.core;
 import com.tangzc.autotable.core.AutoTableBootstrap;
 import com.tangzc.autotable.core.AutoTableGlobalConfig;
 import com.tangzc.autotable.core.RunMode;
+import com.tangzc.autotable.core.config.PropertyConfig;
 import com.tangzc.autotable.core.constants.DatabaseDialect;
 import com.tangzc.autotable.core.dynamicds.SqlSessionFactoryManager;
 import com.tangzc.autotable.core.strategy.mysql.data.MysqlTableMetadata;
@@ -30,12 +31,12 @@ public class TestApplication {
         SqlSessionFactoryManager.setSqlSessionFactory(sessionFactory);
 
         // 配置信息
-        AutoTableGlobalConfig.PropertyConfig autoTableProperties = new AutoTableGlobalConfig.PropertyConfig();
+        PropertyConfig autoTableProperties = new PropertyConfig();
         autoTableProperties.setMode(RunMode.create);
         // 开启 删除不存在的列
         autoTableProperties.setAutoDropColumn(true);
         // 父类字段加到子类的前面
-        autoTableProperties.setSuperInsertPosition(AutoTableGlobalConfig.SuperInsertPosition.after);
+        autoTableProperties.setSuperInsertPosition(PropertyConfig.SuperInsertPosition.after);
         AutoTableGlobalConfig.setAutoTableProperties(autoTableProperties);
 
         // 修改表信息

@@ -5,6 +5,7 @@ import com.tangzc.autotable.annotation.mysql.MysqlCharset;
 import com.tangzc.autotable.annotation.mysql.MysqlEngine;
 import com.tangzc.autotable.core.AutoTableGlobalConfig;
 import com.tangzc.autotable.core.builder.IndexMetadataBuilder;
+import com.tangzc.autotable.core.config.PropertyConfig;
 import com.tangzc.autotable.core.strategy.mysql.data.MysqlTableMetadata;
 import com.tangzc.autotable.core.utils.BeanClassUtil;
 import com.tangzc.autotable.core.utils.StringUtils;
@@ -41,7 +42,7 @@ public class MysqlTableMetadataBuilder {
             charset = mysqlCharsetAnno.charset();
             collate = mysqlCharsetAnno.collate();
         } else {
-            AutoTableGlobalConfig.PropertyConfig autoTableProperties = AutoTableGlobalConfig.getAutoTableProperties();
+            PropertyConfig autoTableProperties = AutoTableGlobalConfig.getAutoTableProperties();
             charset = autoTableProperties.getMysql().getTableDefaultCharset();
             collate = autoTableProperties.getMysql().getTableDefaultCollation();
         }

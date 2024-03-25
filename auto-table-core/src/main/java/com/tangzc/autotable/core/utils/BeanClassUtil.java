@@ -1,6 +1,7 @@
 package com.tangzc.autotable.core.utils;
 
 import com.tangzc.autotable.core.AutoTableGlobalConfig;
+import com.tangzc.autotable.core.config.PropertyConfig;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -54,10 +55,10 @@ public class BeanClassUtil {
     public static List<Field> listAllFieldForColumn(Class<?> beanClass) {
 
         // 获取父类追加到子类位置的配置
-        AutoTableGlobalConfig.SuperInsertPosition superInsertPosition = AutoTableGlobalConfig.getAutoTableProperties().getSuperInsertPosition();
+        PropertyConfig.SuperInsertPosition superInsertPosition = AutoTableGlobalConfig.getAutoTableProperties().getSuperInsertPosition();
 
         List<Field> fieldList = new ArrayList<>();
-        getFieldList(fieldList, beanClass, superInsertPosition == AutoTableGlobalConfig.SuperInsertPosition.after);
+        getFieldList(fieldList, beanClass, superInsertPosition == PropertyConfig.SuperInsertPosition.after);
         return fieldList.stream()
                 .filter(field -> !Modifier.isStatic(field.getModifiers()))
                 .collect(Collectors.toList());

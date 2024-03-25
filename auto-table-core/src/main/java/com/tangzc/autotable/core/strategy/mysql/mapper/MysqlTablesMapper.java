@@ -3,7 +3,6 @@ package com.tangzc.autotable.core.strategy.mysql.mapper;
 import com.tangzc.autotable.core.strategy.mysql.data.dbdata.InformationSchemaColumn;
 import com.tangzc.autotable.core.strategy.mysql.data.dbdata.InformationSchemaStatistics;
 import com.tangzc.autotable.core.strategy.mysql.data.dbdata.InformationSchemaTable;
-import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Result;
 import org.apache.ibatis.annotations.Results;
 import org.apache.ibatis.annotations.Select;
@@ -16,14 +15,6 @@ import java.util.List;
  * @author don
  */
 public interface MysqlTablesMapper {
-
-    /**
-     * 万能sql执行器
-     *
-     * @param sql 待执行的sql
-     */
-    @Select("${sql}")
-    void executeSql(String sql);
 
     /**
      * 根据表名查询表在库中是否存在
@@ -118,12 +109,4 @@ public interface MysqlTablesMapper {
     })
     @Select("SELECT * FROM information_schema.statistics WHERE table_name = #{tableName} and table_schema = (select database())")
     List<InformationSchemaStatistics> queryTablePrimaryAndIndex(String tableName);
-
-    /**
-     * 根据表名删除表
-     *
-     * @param tableName 表名
-     */
-    @Select("DROP TABLE IF EXISTS `${tableName}`")
-    void dropTableByName(String tableName);
 }

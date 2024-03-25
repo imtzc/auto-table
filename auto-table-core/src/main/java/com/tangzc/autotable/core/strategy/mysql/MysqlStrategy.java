@@ -30,6 +30,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
@@ -91,9 +92,9 @@ public class MysqlStrategy implements IStrategy<MysqlTableMetadata, MysqlCompare
     }
 
     @Override
-    public void dropTable(String tableName) {
+    public String dropTable(String tableName) {
 
-        execute(mysqlTablesMapper -> mysqlTablesMapper.dropTableByName(tableName));
+        return String.format("DROP TABLE IF EXISTS `%s`", tableName);
     }
 
     @Override
@@ -109,11 +110,9 @@ public class MysqlStrategy implements IStrategy<MysqlTableMetadata, MysqlCompare
     }
 
     @Override
-    public void createTable(MysqlTableMetadata tableMetadata) {
-        String sqlStr = CreateTableSqlBuilder.buildSql(tableMetadata);
-        log.info("执行SQL：{}", sqlStr);
-        execute(mysqlTablesMapper -> mysqlTablesMapper.executeSql(sqlStr));
-        // insertExecuteSqlLog(sqlStr);
+    public List<String> createTable(MysqlTableMetadata tableMetadata) {
+        String sql = CreateTableSqlBuilder.buildSql(tableMetadata);
+        return Collections.singletonList(sql);
     }
 
     @Override
@@ -148,11 +147,9 @@ public class MysqlStrategy implements IStrategy<MysqlTableMetadata, MysqlCompare
     }
 
     @Override
-    public void modifyTable(MysqlCompareTableInfo mysqlCompareTableInfo) {
-        String sqlStr = ModifyTableSqlBuilder.buildSql(mysqlCompareTableInfo);
-        log.info("执行SQL：{}", sqlStr);
-        execute(mysqlTablesMapper -> mysqlTablesMapper.executeSql(sqlStr));
-        // insertExecuteSqlLog(sqlStr);
+    public List<String> modifyTable(MysqlCompareTableInfo mysqlCompareTableInfo) {
+        String sql = ModifyTableSqlBuilder.buildSql(mysqlCompareTableInfo);
+        return Collections.singletonList(sql);
     }
 
     private void compareIndexes(MysqlTableMetadata mysqlTableMetadata, MysqlCompareTableInfo mysqlCompareTableInfo, Map<String, List<InformationSchemaStatistics>> tableIndexs) {

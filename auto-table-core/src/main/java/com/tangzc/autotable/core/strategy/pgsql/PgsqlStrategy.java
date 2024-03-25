@@ -28,6 +28,7 @@ import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -84,8 +85,8 @@ public class PgsqlStrategy implements IStrategy<DefaultTableMetadata, PgsqlCompa
     }
 
     @Override
-    public void dropTable(String tableName) {
-        execute(pgsqlTablesMapper -> pgsqlTablesMapper.dropTableByName(tableName));
+    public String dropTable(String tableName) {
+        return String.format("DROP TABLE IF EXISTS \"public\".\"%s\"", tableName);
     }
 
     @Override
@@ -100,10 +101,9 @@ public class PgsqlStrategy implements IStrategy<DefaultTableMetadata, PgsqlCompa
     }
 
     @Override
-    public void createTable(DefaultTableMetadata tableMetadata) {
-        String buildSql = CreateTableSqlBuilder.buildSql(tableMetadata);
-        log.info("执行SQL：{}", buildSql);
-        execute(pgsqlTablesMapper -> pgsqlTablesMapper.executeSql(buildSql));
+    public List<String> createTable(DefaultTableMetadata tableMetadata) {
+        String sql = CreateTableSqlBuilder.buildSql(tableMetadata);
+        return Collections.singletonList(sql);
     }
 
     @Override
@@ -284,9 +284,8 @@ public class PgsqlStrategy implements IStrategy<DefaultTableMetadata, PgsqlCompa
     }
 
     @Override
-    public void modifyTable(PgsqlCompareTableInfo pgsqlCompareTableInfo) {
-        String buildSql = ModifyTableSqlBuilder.buildSql(pgsqlCompareTableInfo);
-        log.info("执行SQL：{}", buildSql);
-        execute(pgsqlTablesMapper -> pgsqlTablesMapper.executeSql(buildSql));
+    public List<String> modifyTable(PgsqlCompareTableInfo pgsqlCompareTableInfo) {
+        String sql = ModifyTableSqlBuilder.buildSql(pgsqlCompareTableInfo);
+        return Collections.singletonList(sql);
     }
 }

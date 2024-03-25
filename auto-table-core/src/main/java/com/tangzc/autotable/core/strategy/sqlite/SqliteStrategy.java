@@ -20,6 +20,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -76,8 +77,8 @@ public class SqliteStrategy implements IStrategy<DefaultTableMetadata, SqliteCom
     }
 
     @Override
-    public void dropTable(String tableName) {
-        execute(sqliteTablesMapper -> sqliteTablesMapper.dropTableByName(tableName));
+    public String dropTable(String tableName) {
+        return String.format("drop table if exists `%s`;", tableName);
     }
 
     @Override
@@ -93,15 +94,14 @@ public class SqliteStrategy implements IStrategy<DefaultTableMetadata, SqliteCom
     }
 
     @Override
-    public void createTable(DefaultTableMetadata tableMetadata) {
+    public List<String> createTable(DefaultTableMetadata tableMetadata) {
+
+        List<String> sqlList = new ArrayList<>();
         String createTableSql = CreateTableSqlBuilder.buildTableSql(tableMetadata.getTableName(), tableMetadata.getComment(), tableMetadata.getColumnMetadataList());
-        log.info("执行SQL：{}", createTableSql);
-        execute(sqliteTablesMapper -> sqliteTablesMapper.executeSql(createTableSql));
+        sqlList.add(createTableSql);
         List<String> createIndexSqlList = CreateTableSqlBuilder.buildIndexSql(tableMetadata.getTableName(), tableMetadata.getIndexMetadataList());
-        for (String createIndexSql : createIndexSqlList) {
-            log.info("执行SQL：{}", createIndexSql);
-            execute(sqliteTablesMapper -> sqliteTablesMapper.executeSql(createIndexSql));
-        }
+        sqlList.addAll(createIndexSqlList);
+        return sqlList;
     }
 
     @Override
@@ -163,13 +163,15 @@ public class SqliteStrategy implements IStrategy<DefaultTableMetadata, SqliteCom
     }
 
     @Override
-    public void modifyTable(SqliteCompareTableInfo sqliteCompareTableInfo) {
+    public List<String> modifyTable(SqliteCompareTableInfo sqliteCompareTableInfo) {
+
+        List<String> sqlList = new ArrayList<>();
 
         // 删除索引
         List<String> deleteIndexList = sqliteCompareTableInfo.getDeleteIndexList();
         if (!deleteIndexList.isEmpty()) {
             for (String deleteIndexName : deleteIndexList) {
-                execute(sqliteTablesMapper -> sqliteTablesMapper.dropIndexSql(deleteIndexName));
+                sqlList.add(String.format("drop index if exists \"%s\";", deleteIndexName));
             }
         }
 
@@ -179,20 +181,18 @@ public class SqliteStrategy implements IStrategy<DefaultTableMetadata, SqliteCom
             String orgTableName = sqliteCompareTableInfo.getName();
             String backupTableName = getBackupTableName(orgTableName);
             // 备份表
-            execute(sqliteTablesMapper -> sqliteTablesMapper.backupTable(orgTableName, backupTableName));
+            sqlList.add(String.format("ALTER TABLE \"%s\" RENAME TO \"%s\";", orgTableName, backupTableName));
             // 重新建表
-            execute(sqliteTablesMapper -> sqliteTablesMapper.executeSql(rebuildTableSql));
+            sqlList.add(rebuildTableSql);
             // 迁移数据
-            execute(sqliteTablesMapper -> sqliteTablesMapper.migrateData(orgTableName, backupTableName));
+            sqlList.add(String.format("INSERT INTO \"%s\" SELECT * FROM \"%s\";", orgTableName, backupTableName));
         }
 
         // 创建索引
         List<String> buildIndexSqlList = sqliteCompareTableInfo.getBuildIndexSqlList();
-        if (!buildIndexSqlList.isEmpty()) {
-            for (String buildIndexSql : buildIndexSqlList) {
-                execute(sqliteTablesMapper -> sqliteTablesMapper.executeSql(buildIndexSql));
-            }
-        }
+        sqlList.addAll(buildIndexSqlList);
+
+        return sqlList;
     }
 
     private String getBackupTableName(String orgTableName) {

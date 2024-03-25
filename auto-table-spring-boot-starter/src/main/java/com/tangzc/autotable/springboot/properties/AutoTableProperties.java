@@ -1,7 +1,7 @@
 package com.tangzc.autotable.springboot.properties;
 
-import com.tangzc.autotable.core.AutoTableGlobalConfig;
 import com.tangzc.autotable.core.RunMode;
+import com.tangzc.autotable.core.config.PropertyConfig;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
@@ -58,8 +58,13 @@ public class AutoTableProperties {
      */
     private Mysql mysql = new Mysql();
 
-    public AutoTableGlobalConfig.PropertyConfig toConfig() {
-        AutoTableGlobalConfig.PropertyConfig propertyConfig = new AutoTableGlobalConfig.PropertyConfig();
+    /**
+     * 记录执行的SQL
+     */
+    private RecordSqlProperties recordSql = new RecordSqlProperties();
+
+    public PropertyConfig toConfig() {
+        PropertyConfig propertyConfig = new PropertyConfig();
         propertyConfig.setShowBanner(this.showBanner);
         propertyConfig.setEnable(this.enable);
         propertyConfig.setMode(this.mode);
@@ -68,34 +73,24 @@ public class AutoTableProperties {
         propertyConfig.setAutoDropColumn(this.autoDropColumn);
         propertyConfig.setAutoDropIndex(this.autoDropIndex);
 
-        AutoTableGlobalConfig.SuperInsertPosition superInsertPosition =
-                AutoTableGlobalConfig.SuperInsertPosition.valueOf(this.superInsertPosition.name());
+        PropertyConfig.SuperInsertPosition superInsertPosition =
+                PropertyConfig.SuperInsertPosition.valueOf(this.superInsertPosition.name());
         propertyConfig.setSuperInsertPosition(superInsertPosition);
 
-        AutoTableGlobalConfig.MysqlConfig mysqlConfig = new AutoTableGlobalConfig.MysqlConfig();
+        PropertyConfig.MysqlConfig mysqlConfig = new PropertyConfig.MysqlConfig();
         mysqlConfig.setTableDefaultCharset(this.mysql.getTableDefaultCharset());
         mysqlConfig.setTableDefaultCharset(this.mysql.getTableDefaultCharset());
         mysqlConfig.setTableDefaultCharset(this.mysql.getTableDefaultCharset());
         mysqlConfig.setTableDefaultCharset(this.mysql.getTableDefaultCharset());
         propertyConfig.setMysql(mysqlConfig);
+
+        PropertyConfig.RecordSqlProperties recordSqlProperties = new PropertyConfig.RecordSqlProperties();
+        recordSqlProperties.setEnable(this.recordSql.enable);
+        recordSqlProperties.setTableName(this.recordSql.tableName);
+        propertyConfig.setRecordSql(recordSqlProperties);
+
         return propertyConfig;
     }
-
-    public static enum SuperInsertPosition {
-        /**
-         * 在子类的后面
-         */
-        after,
-        /**
-         * 在子类的前面
-         */
-        before
-    }
-
-    /**
-     * 记录执行的SQL
-     */
-    // private RecordSqlProperties recordSql = new RecordSqlProperties();
 
     @Data
     public static class Mysql {
@@ -115,5 +110,28 @@ public class AutoTableProperties {
          * 列默认排序规则
          */
         private String columnDefaultCollation;
+    }
+
+    @Data
+    public static class RecordSqlProperties {
+        /**
+         * 开启记录sql日志
+         */
+        private boolean enable = true;
+        /**
+         * sql日志记录的表的名字
+         */
+        private String tableName = "mpe_execute_sql_log";
+    }
+
+    public enum SuperInsertPosition {
+        /**
+         * 在子类的后面
+         */
+        after,
+        /**
+         * 在子类的前面
+         */
+        before
     }
 }

@@ -7,6 +7,7 @@ import com.tangzc.autotable.annotation.TableIndexes;
 import com.tangzc.autotable.annotation.TableName;
 import com.tangzc.autotable.annotation.mysql.MysqlCharset;
 import com.tangzc.autotable.annotation.mysql.MysqlEngine;
+import com.tangzc.autotable.core.config.PropertyConfig;
 import com.tangzc.autotable.core.dynamicds.IDataSourceHandler;
 import com.tangzc.autotable.core.strategy.IStrategy;
 import com.tangzc.autotable.core.strategy.mysql.MysqlStrategy;
@@ -35,7 +36,7 @@ public class AutoTableBootstrap {
 
     public static void start() {
 
-        AutoTableGlobalConfig.PropertyConfig autoTableProperties = AutoTableGlobalConfig.getAutoTableProperties();
+        PropertyConfig autoTableProperties = AutoTableGlobalConfig.getAutoTableProperties();
 
         // 判断模式，none或者禁用，不启动
         if (autoTableProperties.getMode() == RunMode.none || !autoTableProperties.getEnable()) {
@@ -96,7 +97,7 @@ public class AutoTableBootstrap {
         log.info("AutoTable执行结束。耗时：{}", (System.currentTimeMillis() - start) + "ms");
     }
 
-    private static String[] getModelPackage(AutoTableGlobalConfig.PropertyConfig autoTableProperties) {
+    private static String[] getModelPackage(PropertyConfig autoTableProperties) {
         String[] packs = autoTableProperties.getModelPackage();
         if (packs == null) {
             packs = new String[]{getBootPackage()};

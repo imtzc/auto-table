@@ -5,6 +5,7 @@ import com.tangzc.autotable.annotation.mysql.MysqlColumnCharset;
 import com.tangzc.autotable.core.AutoTableGlobalConfig;
 import com.tangzc.autotable.core.AutoTableOrmFrameAdapter;
 import com.tangzc.autotable.core.builder.ColumnMetadataBuilder;
+import com.tangzc.autotable.core.config.PropertyConfig;
 import com.tangzc.autotable.core.constants.DatabaseDialect;
 import com.tangzc.autotable.core.converter.DatabaseTypeAndLength;
 import com.tangzc.autotable.core.strategy.mysql.ParamValidChecker;
@@ -78,7 +79,7 @@ public class MysqlColumnMetadataBuilder {
             // 字符类型的添加默认的字符集和排序规则
             DatabaseTypeAndLength type = mysqlColumnMetadata.getType();
             if (MysqlTypeHelper.isCharString(type)) {
-                AutoTableGlobalConfig.PropertyConfig autoTableProperties = AutoTableGlobalConfig.getAutoTableProperties();
+                PropertyConfig autoTableProperties = AutoTableGlobalConfig.getAutoTableProperties();
                 charset = autoTableProperties.getMysql().getColumnDefaultCharset();
                 collate = autoTableProperties.getMysql().getColumnDefaultCollation();
             }
