@@ -132,8 +132,13 @@ public class MysqlColumnMetadataBuilder {
                 type.setValues(values);
             } else {
                 // 直接报错
-                throw new RuntimeException(ColumnType.class.getSimpleName() + "value为：" + String.join(", ", MysqlTypeHelper.ENUM_OR_SET_TYPE) + "的时候，"
-                        + clazz.getSimpleName() + "." + field.getName() + "必须是枚举类型或者指定" + ColumnType.class.getSimpleName() + "的values");
+                String columnTypeName = ColumnType.class.getSimpleName();
+                throw new RuntimeException(String.format("%s的value为：%s中的一种时，%s必须是枚举类型或者指定%s的values",
+                        columnTypeName,
+                        String.join(", ", MysqlTypeHelper.ENUM_OR_SET_TYPE),
+                        clazz.getSimpleName() + "." + field.getName(),
+                        columnTypeName
+                ));
             }
         }
     }

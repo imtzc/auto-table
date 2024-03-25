@@ -16,7 +16,7 @@ public class IndexRepeatChecker {
 
         boolean exits = exitsIndexes.contains(name);
         if (exits) {
-            throw new RuntimeException("发现重复索引:" + name);
+            throw new RuntimeException(String.format("发现重复索引:%s", name));
         } else {
             exitsIndexes.add(name);
         }

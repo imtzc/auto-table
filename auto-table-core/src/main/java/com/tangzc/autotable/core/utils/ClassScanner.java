@@ -41,7 +41,7 @@ public class ClassScanner {
                                         excludeAnnotations.stream().noneMatch(anno -> autoTableAnnotationFinder.exist(clazz, anno))
                         );
                     } catch (IOException | ClassNotFoundException e) {
-                        throw new RuntimeException("扫描包" + basePackage + "下实体出错", e);
+                        throw new RuntimeException(String.format("扫描包%s下实体出错", basePackage), e);
                     }
                 }).flatMap(Collection::stream).collect(Collectors.toSet());
     }

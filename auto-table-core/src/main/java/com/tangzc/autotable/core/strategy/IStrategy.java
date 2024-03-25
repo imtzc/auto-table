@@ -104,7 +104,7 @@ public interface IStrategy<TABLE_META extends TableMetadata, COMPARE_TABLE_INFO 
                 updateMode(tableMetadata);
                 break;
             default:
-                throw new RuntimeException("不支持的运行模式：" + runMode);
+                throw new RuntimeException(String.format("不支持的运行模式：%s", runMode));
         }
     }
 
@@ -121,7 +121,7 @@ public interface IStrategy<TABLE_META extends TableMetadata, COMPARE_TABLE_INFO 
         boolean tableNotExist = !this.checkTableExist(tableName);
         if (tableNotExist) {
             AutoTableGlobalConfig.getValidateFinishCallback().validateFinish(false, this.databaseDialect(), null);
-            throw new RuntimeException("启动失败，" + this.databaseDialect() + "数据表" + tableMetadata.getTableName() + "不存在");
+            throw new RuntimeException(String.format("启动失败，%s中不存在表%s", this.databaseDialect(), tableMetadata.getTableName()));
         }
 
         // 对比数据库表结构与新的表元数据的差异

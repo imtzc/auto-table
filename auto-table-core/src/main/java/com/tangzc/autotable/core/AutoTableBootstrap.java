@@ -80,7 +80,7 @@ public class AutoTableBootstrap {
                 Long sameTableNameCount = repeatCheckItem.getValue();
                 if (sameTableNameCount > 1) {
                     String tableName = repeatCheckItem.getKey();
-                    throw new RuntimeException("存在重名的表：" + tableName + "，请检查！");
+                    throw new RuntimeException(String.format("存在重名的表：%s，请检查！", tableName));
                 }
             }
 
@@ -91,10 +91,10 @@ public class AutoTableBootstrap {
                     databaseStrategy.start(entityClass);
                 }
             } else {
-                log.warn("没有找到对应的数据库（" + databaseDialect + "）方言策略，无法执行自动建表");
+                log.warn("没有找到对应的数据库（{}）方言策略，无法自动维护表结构", databaseDialect);
             }
         });
-        log.info("AutoTable执行结束。耗时：{}", (System.currentTimeMillis() - start) + "ms");
+        log.info("AutoTable执行结束。耗时：{}ms", System.currentTimeMillis() - start);
     }
 
     private static String[] getModelPackage(PropertyConfig autoTableProperties) {
