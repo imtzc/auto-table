@@ -62,7 +62,7 @@ public class IndexMetadataBuilder {
             String realColumnName = TableBeanUtils.getRealColumnName(clazz, field);
             IndexMetadata indexMetadata = indexMetadataSupplier.get();
             String indexName = index.name();
-            if (!StringUtils.hasText(indexName)) {
+            if (StringUtils.noText(indexName)) {
                 indexName = TableBeanUtils.getRealColumnName(clazz, field);
             }
             indexMetadata.setName(indexPrefix + indexName);

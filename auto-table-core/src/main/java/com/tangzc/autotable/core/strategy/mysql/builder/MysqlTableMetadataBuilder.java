@@ -25,7 +25,7 @@ public class MysqlTableMetadataBuilder {
 
         String tableName = TableBeanUtils.getTableName(clazz);
 
-        MysqlTableMetadata mysqlTableMetadata = new MysqlTableMetadata(tableName);
+        MysqlTableMetadata mysqlTableMetadata = new MysqlTableMetadata(clazz, tableName);
 
         // 设置表注释
         TableComment tableComment = TableBeanUtils.getTableComment(clazz);

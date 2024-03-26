@@ -12,12 +12,14 @@ import com.tangzc.autotable.core.interceptor.AutoTableAnnotationInterceptor;
 import com.tangzc.autotable.core.interceptor.BuildTableMetadataInterceptor;
 import com.tangzc.autotable.core.interceptor.CreateTableInterceptor;
 import com.tangzc.autotable.core.interceptor.ModifyTableInterceptor;
+import com.tangzc.autotable.core.recordsql.RecordSqlHandler;
 import com.tangzc.autotable.core.strategy.CompareTableInfo;
 import com.tangzc.autotable.core.strategy.IStrategy;
 import com.tangzc.autotable.core.strategy.TableMetadata;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,7 +37,7 @@ public class AutoTableGlobalConfig {
      */
     @Setter
     @Getter
-    private static IDataSourceHandler<?> datasourceHandler = new DefaultDataSourceHandler();
+    private static IDataSourceHandler datasourceHandler = new DefaultDataSourceHandler();
 
     /**
      * 自定义注解查找器
@@ -58,6 +60,14 @@ public class AutoTableGlobalConfig {
     @Setter
     @Getter
     private static JavaTypeToDatabaseTypeConverter javaTypeToDatabaseTypeConverter = new JavaTypeToDatabaseTypeConverter() {
+    };
+
+    /**
+     * 自定义记录sql的方式
+     */
+    @Setter
+    @Getter
+    private static RecordSqlHandler customRecordSqlHandler = sqlLog -> {
     };
 
     /**
@@ -140,6 +150,10 @@ public class AutoTableGlobalConfig {
 
     public static IStrategy<?, ?, ?> getStrategy(String databaseDialect) {
         return strategyMap.get(databaseDialect);
+    }
+
+    public static Collection<IStrategy<?, ?, ?>> getAllStrategy() {
+        return strategyMap.values();
     }
 
 }

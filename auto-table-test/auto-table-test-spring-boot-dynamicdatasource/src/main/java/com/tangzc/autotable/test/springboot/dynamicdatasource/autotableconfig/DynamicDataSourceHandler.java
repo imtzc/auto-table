@@ -7,7 +7,7 @@ import lombok.NonNull;
 import org.springframework.stereotype.Component;
 
 @Component
-public class DynamicDataSourceHandler implements IDataSourceHandler<String> {
+public class DynamicDataSourceHandler implements IDataSourceHandler {
 
     @Override
     public void useDataSource(String dataSourceName) {

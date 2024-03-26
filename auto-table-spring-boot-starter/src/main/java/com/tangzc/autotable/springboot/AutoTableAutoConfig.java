@@ -15,6 +15,7 @@ import com.tangzc.autotable.core.interceptor.AutoTableAnnotationInterceptor;
 import com.tangzc.autotable.core.interceptor.BuildTableMetadataInterceptor;
 import com.tangzc.autotable.core.interceptor.CreateTableInterceptor;
 import com.tangzc.autotable.core.interceptor.ModifyTableInterceptor;
+import com.tangzc.autotable.core.recordsql.RecordSqlHandler;
 import com.tangzc.autotable.core.strategy.CompareTableInfo;
 import com.tangzc.autotable.core.strategy.IStrategy;
 import com.tangzc.autotable.core.strategy.TableMetadata;
@@ -38,7 +39,8 @@ public class AutoTableAutoConfig {
             ObjectProvider<IStrategy<? extends TableMetadata, ? extends CompareTableInfo, ?>> strategies,
             ObjectProvider<AutoTableAnnotationFinder> autoTableAnnotationFinder,
             ObjectProvider<AutoTableOrmFrameAdapter> autoTableOrmFrameAdapter,
-            ObjectProvider<IDataSourceHandler<?>> dynamicDataSourceHandler,
+            ObjectProvider<IDataSourceHandler> dynamicDataSourceHandler,
+            ObjectProvider<RecordSqlHandler> recordSqlHandler,
             /* 拦截器 */
             ObjectProvider<AutoTableAnnotationInterceptor> autoTableAnnotationInterceptor,
             ObjectProvider<BuildTableMetadataInterceptor> buildTableMetadataInterceptor,
@@ -69,6 +71,9 @@ public class AutoTableAutoConfig {
 
         // 假如有自定义的动态数据源处理器，就使用自定义的动态数据源处理器
         dynamicDataSourceHandler.ifAvailable(AutoTableGlobalConfig::setDatasourceHandler);
+
+        // 假如有自定义的SQL记录处理器，就使用自定义的SQL记录处理器
+        recordSqlHandler.ifAvailable(AutoTableGlobalConfig::setCustomRecordSqlHandler);
 
         /* 拦截器 */
         // 假如有自定义的注解拦截器，就使用自定义的注解拦截器

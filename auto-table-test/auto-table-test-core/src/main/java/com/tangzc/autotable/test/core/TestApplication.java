@@ -5,6 +5,7 @@ import com.tangzc.autotable.core.AutoTableGlobalConfig;
 import com.tangzc.autotable.core.RunMode;
 import com.tangzc.autotable.core.config.PropertyConfig;
 import com.tangzc.autotable.core.constants.DatabaseDialect;
+import com.tangzc.autotable.core.constants.Version;
 import com.tangzc.autotable.core.dynamicds.SqlSessionFactoryManager;
 import com.tangzc.autotable.core.strategy.mysql.data.MysqlTableMetadata;
 import org.apache.ibatis.session.SqlSessionFactory;
@@ -32,11 +33,21 @@ public class TestApplication {
 
         // 配置信息
         PropertyConfig autoTableProperties = new PropertyConfig();
+        // create模式
         autoTableProperties.setMode(RunMode.create);
         // 开启 删除不存在的列
         autoTableProperties.setAutoDropColumn(true);
         // 父类字段加到子类的前面
         autoTableProperties.setSuperInsertPosition(PropertyConfig.SuperInsertPosition.after);
+        // 记录sql
+        PropertyConfig.RecordSqlProperties recordSqlProperties = new PropertyConfig.RecordSqlProperties();
+        recordSqlProperties.setEnable(true);
+        recordSqlProperties.setRecordType(PropertyConfig.RecordSqlProperties.TypeEnum.file);
+        // 指定记录方式为PropertyConfig.RecordSqlProperties.TypeEnum.file的情况下的文件路径
+        recordSqlProperties.setFolderPath("/Users/don/Downloads/sqlLogs");
+        recordSqlProperties.setVersion(Version.VALUE);
+        autoTableProperties.setRecordSql(recordSqlProperties);
+
         AutoTableGlobalConfig.setAutoTableProperties(autoTableProperties);
 
         // 修改表信息

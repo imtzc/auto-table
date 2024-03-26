@@ -71,7 +71,7 @@ public class AutoTableBootstrap {
         Set<Class<?>> classes = ClassScanner.scan(packs, includeAnnotations, ignoreAnnotations);
 
         // 获取对应的数据源，根据不同数据库方言，执行不同的处理
-        IDataSourceHandler<?> datasourceHandler = AutoTableGlobalConfig.getDatasourceHandler();
+        IDataSourceHandler datasourceHandler = AutoTableGlobalConfig.getDatasourceHandler();
         datasourceHandler.handleAnalysis(classes, (databaseDialect, entityClasses) -> {
 
             // 同一个数据源下，检查重名的表

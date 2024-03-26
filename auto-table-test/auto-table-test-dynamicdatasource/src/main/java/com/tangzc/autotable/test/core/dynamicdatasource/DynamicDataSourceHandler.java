@@ -10,7 +10,7 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
-public class DynamicDataSourceHandler implements IDataSourceHandler<String> {
+public class DynamicDataSourceHandler implements IDataSourceHandler {
 
     private static final Map<String, String> CONFIG_MAP = new HashMap<String, String>() {{
         put("mysql", "mybatis-config.xml");

@@ -1,6 +1,11 @@
 auto-table:
   enable: true
   auto-drop-column: true
+  record-sql:
+    enable: true
+    record-type: file
+    folder-path: /Users/don/Downloads/sqlLogs
+    version: 1.0.0
 server:
   port: 9999
 

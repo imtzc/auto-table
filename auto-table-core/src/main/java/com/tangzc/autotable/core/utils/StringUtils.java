@@ -6,6 +6,10 @@ public class StringUtils {
         return (str != null && !str.isEmpty() && containsText(str));
     }
 
+    public static boolean noText(String str) {
+        return !hasText(str);
+    }
+
     private static boolean containsText(CharSequence str) {
         int strLen = str.length();
         for (int i = 0; i < strLen; i++) {

@@ -82,12 +82,6 @@ public class SqliteStrategy implements IStrategy<DefaultTableMetadata, SqliteCom
     }
 
     @Override
-    public boolean checkTableExist(String tableName) {
-        int i = executeReturn(sqliteTablesMapper -> sqliteTablesMapper.checkTableExist(tableName));
-        return i > 0;
-    }
-
-    @Override
     public @NonNull DefaultTableMetadata analyseClass(Class<?> beanClass) {
 
         return SqliteTableMetadataBuilder.build(beanClass);
@@ -207,8 +201,8 @@ public class SqliteStrategy implements IStrategy<DefaultTableMetadata, SqliteCom
                 backupName.append("_").append(offset);
             }
             String finalBackupName = backupName.toString();
-            int count = executeReturn(sqliteTablesMapper -> sqliteTablesMapper.checkTableExist(finalBackupName));
-            if (count == 0) {
+            boolean tableNotExist = this.checkTableNotExist(finalBackupName);
+            if (tableNotExist) {
                 return backupName.toString();
             } else {
                 offset++;

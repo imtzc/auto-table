@@ -14,15 +14,6 @@ import java.util.List;
 public interface SqliteTablesMapper {
 
     /**
-     * 根据表名判断是否存在
-     *
-     * @param tableName 表名
-     * @return 影响行数
-     */
-    @Select("select count(1) from `sqlite_master` where type='table' and name=#{tableName};")
-    int checkTableExist(String tableName);
-
-    /**
      * 查询建表语句
      *
      * @param tableName 表名

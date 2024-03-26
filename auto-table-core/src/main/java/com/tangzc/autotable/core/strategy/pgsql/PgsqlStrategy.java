@@ -90,11 +90,6 @@ public class PgsqlStrategy implements IStrategy<DefaultTableMetadata, PgsqlCompa
     }
 
     @Override
-    public boolean checkTableExist(String tableName) {
-        return executeReturn(pgsqlTablesMapper -> pgsqlTablesMapper.checkTableExist(tableName) > 0);
-    }
-
-    @Override
     public @NonNull DefaultTableMetadata analyseClass(Class<?> beanClass) {
 
         return PgsqlTableMetadataBuilder.build(beanClass);

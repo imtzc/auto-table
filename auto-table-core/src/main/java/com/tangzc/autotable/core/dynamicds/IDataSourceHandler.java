@@ -5,7 +5,6 @@ import org.apache.ibatis.session.Configuration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
@@ -17,7 +16,7 @@ import java.util.stream.Collectors;
 /**
  * @author don
  */
-public interface IDataSourceHandler<T extends Serializable> {
+public interface IDataSourceHandler {
 
     Logger log = LoggerFactory.getLogger(IDataSourceHandler.class);
 
@@ -31,13 +30,14 @@ public interface IDataSourceHandler<T extends Serializable> {
     default void handleAnalysis(Set<Class<?>> classList, BiConsumer<String, Set<Class<?>>> consumer) {
 
         // <数据源，Set<表>>
-        Map<T, Set<Class<?>>> needHandleTableMap = classList.stream()
+        Map<String, Set<Class<?>>> needHandleTableMap = classList.stream()
                 .collect(Collectors.groupingBy(this::getDataSourceName, Collectors.toSet()));
 
         needHandleTableMap.forEach((dataSource, entityClasses) -> {
             // 使用数据源
             log.info("使用数据源：{}", dataSource);
             this.useDataSource(dataSource);
+            DatasourceNameManager.setDatasourceName(dataSource);
             try {
                 String databaseDialect = this.getDatabaseDialect(dataSource);
                 log.info("数据库方言（" + databaseDialect + "）");
@@ -45,6 +45,7 @@ public interface IDataSourceHandler<T extends Serializable> {
             } finally {
                 log.info("清理数据源：{}", dataSource);
                 this.clearDataSource(dataSource);
+                DatasourceNameManager.cleanDatasourceName();
             }
         });
     }
@@ -55,7 +56,7 @@ public interface IDataSourceHandler<T extends Serializable> {
      *
      * @return 返回数据方言
      */
-    default String getDatabaseDialect(T dataSource) {
+    default String getDatabaseDialect(String dataSource) {
 
         // 获取Configuration对象
         Configuration configuration = SqlSessionFactoryManager.getSqlSessionFactory().getConfiguration();
@@ -76,14 +77,14 @@ public interface IDataSourceHandler<T extends Serializable> {
      *
      * @param dataSourceName 数据源名称
      */
-    void useDataSource(T dataSourceName);
+    void useDataSource(String dataSourceName);
 
     /**
      * 清除当前数据源
      *
      * @param dataSourceName 数据源名称
      */
-    void clearDataSource(T dataSourceName);
+    void clearDataSource(String dataSourceName);
 
     /**
      * 获取指定类的数据库数据源
@@ -91,5 +92,5 @@ public interface IDataSourceHandler<T extends Serializable> {
      * @param clazz 指定类
      * @return 数据源名称，表分组的依据，届时，根据该值分组所有的表，同一数据源下的统一处理
      */
-    @NonNull T getDataSourceName(Class<?> clazz);
+    @NonNull String getDataSourceName(Class<?> clazz);
 }

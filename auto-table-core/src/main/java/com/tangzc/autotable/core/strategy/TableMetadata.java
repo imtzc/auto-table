@@ -12,6 +12,11 @@ import lombok.Setter;
 public abstract class TableMetadata {
 
     /**
+     * 实体类
+     */
+    protected Class<?> entityClass;
+
+    /**
      * 表名
      */
     protected String tableName;
@@ -22,7 +27,8 @@ public abstract class TableMetadata {
     @Setter
     protected String comment;
 
-    public TableMetadata(String tableName) {
+    public TableMetadata(Class<?> entityClass, String tableName) {
+        this.entityClass = entityClass;
         this.tableName = tableName;
     }
 }

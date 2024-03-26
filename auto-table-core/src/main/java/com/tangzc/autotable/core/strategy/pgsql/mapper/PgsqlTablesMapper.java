@@ -19,15 +19,6 @@ import java.util.List;
 public interface PgsqlTablesMapper {
 
     /**
-     * 判断表是否存在
-     *
-     * @param tableName 表名
-     * @return 数量
-     */
-    @Select("select count(*) from pg_class where relname = #{tableName}")
-    int checkTableExist(String tableName);
-
-    /**
      * 查询表名注释
      *
      * @param tableName 表名

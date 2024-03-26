@@ -19,7 +19,7 @@ public class TableMetadataBuilder {
 
         String tableName = TableBeanUtils.getTableName(clazz);
 
-        DefaultTableMetadata pgsqlTableMetadata = new DefaultTableMetadata(tableName);
+        DefaultTableMetadata pgsqlTableMetadata = new DefaultTableMetadata(clazz, tableName);
 
         TableComment tableComment = TableBeanUtils.getTableComment(clazz);
         if (tableComment != null) {

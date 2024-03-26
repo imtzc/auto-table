@@ -7,7 +7,7 @@ import lombok.NonNull;
  * @author don
  */
 
-public class DefaultDataSourceHandler implements IDataSourceHandler<String> {
+public class DefaultDataSourceHandler implements IDataSourceHandler {
 
     @Override
     public void useDataSource(String dataSourceName) {

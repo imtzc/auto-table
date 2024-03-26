@@ -98,12 +98,6 @@ public class MysqlStrategy implements IStrategy<MysqlTableMetadata, MysqlCompare
     }
 
     @Override
-    public boolean checkTableExist(String tableName) {
-
-        return executeReturn(mysqlTablesMapper -> mysqlTablesMapper.findTableByTableName(tableName) != null);
-    }
-
-    @Override
     public @NonNull MysqlTableMetadata analyseClass(Class<?> beanClass) {
 
         return MysqlTableMetadataBuilder.build(beanClass);

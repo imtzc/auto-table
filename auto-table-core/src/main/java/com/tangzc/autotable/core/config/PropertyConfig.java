@@ -59,11 +59,42 @@ public class PropertyConfig {
         /**
          * 开启记录sql日志
          */
-        private boolean enable = true;
+        private boolean enable = false;
+
+        /**
+         * 默认记录方式是数据库
+         */
+        private TypeEnum recordType = TypeEnum.db;
+
+        /**
+         * 当前SQL的版本，如果指定了，会体现在数据库的字段或者文件名上
+         */
+        private String version;
+
         /**
          * sql日志记录的表的名字
          */
-        private String tableName = "mpe_execute_sql_log";
+        private String tableName;
+
+        /**
+         * 记录到文件的目录（注意该路径是一个文件夹，而不是文件），自动以数据源为名称创建.sql文件
+         */
+        private String folderPath;
+
+        public static enum TypeEnum {
+            /**
+             * 记录到数据库
+             */
+            db,
+            /**
+             * 记录到文件
+             */
+            file,
+            /**
+             * 自定义
+             */
+            custom
+        }
     }
 
     public enum SuperInsertPosition {
