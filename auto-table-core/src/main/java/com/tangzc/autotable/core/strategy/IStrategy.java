@@ -239,8 +239,10 @@ public interface IStrategy<TABLE_META extends TableMetadata, COMPARE_TABLE_INFO 
         try (Connection connection = configuration.getEnvironment().getDataSource().getConnection()) {
             // 通过连接获取DatabaseMetaData对象
             DatabaseMetaData metaData = connection.getMetaData();
-            boolean exit = metaData.getTables(null, null, tableName, null).next();
-            return !exit;
+            String connectionCatalog = connection.getCatalog();
+            String connectionSchema = connection.getSchema();
+            boolean exist = metaData.getTables(connectionCatalog, connectionSchema, tableName, null).next();
+            return !exist;
         } catch (SQLException e) {
             throw new RuntimeException("判断数据库是否存在出错", e);
         }
