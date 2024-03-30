@@ -1,4 +1,4 @@
-<p align="center"><img src="https://s2.loli.net/2024/01/31/iPeLJUqVBQKwFbI.png" alt="1648883788444-1068117e-f573-4b0b-bbb9-8a3208810860.png" width="150px" /></p>
+<p align="center"><img src="https://autotable.tangzc.com/logo.png" alt="logo" width="150px" /></p>
 
 <p align="center">你只负责维护实体，数据表的事情交给我</p>
 
