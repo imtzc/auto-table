@@ -92,7 +92,7 @@ public class PgsqlStrategy implements IStrategy<DefaultTableMetadata, PgsqlCompa
     @Override
     public @NonNull DefaultTableMetadata analyseClass(Class<?> beanClass) {
 
-        return PgsqlTableMetadataBuilder.build(beanClass);
+        return new PgsqlTableMetadataBuilder().build(beanClass);
     }
 
     @Override

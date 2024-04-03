@@ -6,6 +6,8 @@ import com.tangzc.autotable.annotation.mysql.MysqlEngine;
 import com.tangzc.autotable.core.AutoTableGlobalConfig;
 import com.tangzc.autotable.core.builder.IndexMetadataBuilder;
 import com.tangzc.autotable.core.config.PropertyConfig;
+import com.tangzc.autotable.core.strategy.IndexMetadata;
+import com.tangzc.autotable.core.strategy.mysql.data.MysqlColumnMetadata;
 import com.tangzc.autotable.core.strategy.mysql.data.MysqlTableMetadata;
 import com.tangzc.autotable.core.utils.BeanClassUtil;
 import com.tangzc.autotable.core.utils.StringUtils;
@@ -60,8 +62,11 @@ public class MysqlTableMetadataBuilder {
         }
 
         List<Field> fields = BeanClassUtil.listAllFieldForColumn(clazz);
-        mysqlTableMetadata.setColumnMetadataList(MysqlColumnMetadataBuilder.buildList(clazz, fields));
-        mysqlTableMetadata.setIndexMetadataList(IndexMetadataBuilder.of().buildList(clazz, fields));
+
+        List<MysqlColumnMetadata> columnMetadataList = new MysqlColumnMetadataBuilder().buildList(clazz, fields);
+        mysqlTableMetadata.setColumnMetadataList(columnMetadataList);
+        List<IndexMetadata> indexMetadataList = new IndexMetadataBuilder().buildList(clazz, fields);
+        mysqlTableMetadata.setIndexMetadataList(indexMetadataList);
 
         return mysqlTableMetadata;
     }

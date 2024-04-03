@@ -3,6 +3,7 @@ package com.tangzc.autotable.test.core.dynamicdatasource;
 import com.tangzc.autotable.annotation.ColumnComment;
 import com.tangzc.autotable.annotation.ColumnDefault;
 import com.tangzc.autotable.annotation.ColumnType;
+import com.tangzc.autotable.annotation.Index;
 import com.tangzc.autotable.annotation.PrimaryKey;
 import com.tangzc.autotable.annotation.TableName;
 import com.tangzc.autotable.annotation.enums.DefaultValueEnum;
@@ -20,6 +21,7 @@ public class User2 {
     private Long id;
 
     @ColumnComment("姓名")
+    @Index
     private String name;
 
     @ColumnComment("备注")

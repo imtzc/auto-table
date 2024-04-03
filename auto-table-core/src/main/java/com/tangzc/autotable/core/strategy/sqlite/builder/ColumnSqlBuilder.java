@@ -23,9 +23,10 @@ public class ColumnSqlBuilder {
      * "card_number" text(30) NOT NULL -- 身份证号码
      */
     public static String buildSql(ColumnMetadata columnMetadata, boolean isSinglePrimaryKey, boolean addComma) {
+        boolean isAutoIncrement = isSinglePrimaryKey && columnMetadata.isPrimary() && columnMetadata.isAutoIncrement();
         return StringConnectHelper.newInstance("\"{columnName}\" {typeAndLength} {null} {default} {primaryKey}{comma}{columnComment}")
                 .replace("{columnName}", columnMetadata.getName())
-                .replace("{typeAndLength}", SqliteTypeHelper.getFullType(columnMetadata.getType()))
+                .replace("{typeAndLength}", SqliteTypeHelper.getFullType(columnMetadata.getType(), isAutoIncrement))
                 .replace("{null}", columnMetadata.isNotNull() ? "NOT NULL" : "NULL")
                 .replace("{default}", (key) -> {
                     // 指定NULL
@@ -46,7 +47,7 @@ public class ColumnSqlBuilder {
                 })
                 .replace("{primaryKey}", (key) -> {
                     // sqlite特殊：只能是一个主键的情况下，才能设置自增，且只有主键才能自增
-                    if (isSinglePrimaryKey && columnMetadata.isPrimary() && columnMetadata.isAutoIncrement()) {
+                    if (isAutoIncrement) {
                         return "PRIMARY KEY AUTOINCREMENT";
                     }
                     return "";

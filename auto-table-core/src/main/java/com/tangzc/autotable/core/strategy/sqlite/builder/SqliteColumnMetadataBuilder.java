@@ -1,0 +1,73 @@
+package com.tangzc.autotable.core.strategy.sqlite.builder;
+
+import com.tangzc.autotable.annotation.ColumnDefault;
+import com.tangzc.autotable.core.builder.ColumnMetadataBuilder;
+import com.tangzc.autotable.core.constants.DatabaseDialect;
+import com.tangzc.autotable.core.converter.DatabaseTypeAndLength;
+import com.tangzc.autotable.core.strategy.sqlite.SqliteTypeHelper;
+import com.tangzc.autotable.core.utils.StringUtils;
+import lombok.extern.slf4j.Slf4j;
+
+import java.lang.reflect.Field;
+
+/**
+ * 用于存放创建表的字段信息
+ *
+ * @author don
+ */
+@Slf4j
+public class SqliteColumnMetadataBuilder extends ColumnMetadataBuilder {
+
+    public SqliteColumnMetadataBuilder() {
+        super(DatabaseDialect.SQLite);
+    }
+
+    @Override
+    protected DatabaseTypeAndLength getTypeAndLength(String databaseDialect, Class<?> clazz, Field field) {
+        DatabaseTypeAndLength typeAndLength = super.getTypeAndLength(databaseDialect, clazz, field);
+        fixTypeAndLength(typeAndLength);
+        return typeAndLength;
+    }
+
+    @Override
+    protected String getDefaultValue(DatabaseTypeAndLength typeAndLength, ColumnDefault columnDefault) {
+
+        String defaultValue = super.getDefaultValue(typeAndLength, columnDefault);
+
+        if (StringUtils.hasText(defaultValue)) {
+            // 补偿逻辑：类型为Boolean的时候(实际数据库为bit数字类型)，兼容 true、false
+            boolean isBooleanType = SqliteTypeHelper.isInteger(typeAndLength) &&
+                    ("true".equalsIgnoreCase(defaultValue) || "false".equalsIgnoreCase(defaultValue));
+            if (isBooleanType) {
+                if (Boolean.parseBoolean(defaultValue)) {
+                    defaultValue = "1";
+                } else {
+                    defaultValue = "0";
+                }
+            }
+            // 补偿逻辑：字符串类型，前后自动添加'
+            if (SqliteTypeHelper.isText(typeAndLength) && !defaultValue.isEmpty() && !defaultValue.startsWith("'") && !defaultValue.endsWith("'")) {
+                defaultValue = "'" + defaultValue + "'";
+            }
+        }
+        return defaultValue;
+    }
+
+    private static void fixTypeAndLength(DatabaseTypeAndLength typeAndLength) {
+        // 纠正类型的写法为正规方式
+        String type = typeAndLength.getType().toLowerCase();
+        if (type.contains("int")) {
+            type = "integer";
+        }
+        if (type.contains("char") || type.contains("clob") || type.contains("text")) {
+            type = "text";
+        }
+        if (type.contains("blob")) {
+            type = "blob";
+        }
+        if (type.contains("real") || type.contains("floa") || type.contains("doub")) {
+            type = "real";
+        }
+        typeAndLength.setType(type);
+    }
+}

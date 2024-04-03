@@ -84,7 +84,7 @@ public class SqliteStrategy implements IStrategy<DefaultTableMetadata, SqliteCom
     @Override
     public @NonNull DefaultTableMetadata analyseClass(Class<?> beanClass) {
 
-        return SqliteTableMetadataBuilder.build(beanClass);
+        return new SqliteTableMetadataBuilder().build(beanClass);
     }
 
     @Override

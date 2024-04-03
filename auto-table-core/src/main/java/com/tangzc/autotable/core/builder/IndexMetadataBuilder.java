@@ -8,7 +8,6 @@ import com.tangzc.autotable.core.strategy.IndexMetadata;
 import com.tangzc.autotable.core.utils.IndexRepeatChecker;
 import com.tangzc.autotable.core.utils.StringUtils;
 import com.tangzc.autotable.core.utils.TableBeanUtils;
-import lombok.AllArgsConstructor;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -17,55 +16,56 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
  * @author don
  */
-@AllArgsConstructor(staticName = "of")
 public class IndexMetadataBuilder {
 
-    private final Supplier<IndexMetadata> indexMetadataSupplier;
-
-    public static IndexMetadataBuilder of() {
-        return of(IndexMetadata::new);
-    }
-
-    public List<IndexMetadata> buildList(Class<?> clazz, List<Field> fields) {
+    public <T extends IndexMetadata> List<T> buildList(Class<?> clazz, List<Field> fields) {
 
         IndexRepeatChecker indexRepeatChecker = IndexRepeatChecker.of();
 
+        List<IndexMetadata> indexMetadataList = new ArrayList<>(16);
+
         // 类上的索引注解
-        List<TableIndex> tableIndexes = TableBeanUtils.getTableIndexes(clazz);
-        List<IndexMetadata> indexMetadataList = tableIndexes.stream()
-                .map(tableIndex -> buildFromEntity(clazz, tableIndex, AutoTableGlobalConfig.getAutoTableProperties().getIndexPrefix()))
-                .filter(Objects::nonNull)
-                .filter(indexMetadata -> indexRepeatChecker.filter(indexMetadata.getName()))
-                .collect(Collectors.toList());
+        List<IndexMetadata> onClassIndexMetadata = buildFromClass(clazz, indexRepeatChecker);
+        indexMetadataList.addAll(onClassIndexMetadata);
 
         // 字段上的索引注解
-        List<IndexMetadata> onFieldIndexMetadata = fields.stream()
+        List<IndexMetadata> onFieldIndexMetadata = buildFromField(clazz, fields, indexRepeatChecker);
+        indexMetadataList.addAll(onFieldIndexMetadata);
+
+        return (List<T>) indexMetadataList;
+    }
+
+    protected List<IndexMetadata> buildFromField(Class<?> clazz, List<Field> fields, IndexRepeatChecker indexRepeatChecker) {
+        return fields.stream()
                 .filter(field -> TableBeanUtils.isIncludeField(field, clazz))
-                .map(field -> buildFromField(clazz, field, AutoTableGlobalConfig.getAutoTableProperties().getIndexPrefix()))
+                .map(field -> buildIndexMetadata(clazz, field))
                 .filter(Objects::nonNull)
                 .filter(indexMetadata -> indexRepeatChecker.filter(indexMetadata.getName()))
                 .collect(Collectors.toList());
-        indexMetadataList.addAll(onFieldIndexMetadata);
-        return indexMetadataList;
     }
 
-    public IndexMetadata buildFromField(Class<?> clazz, Field field, String indexPrefix) {
+    protected List<IndexMetadata> buildFromClass(Class<?> clazz, IndexRepeatChecker indexRepeatChecker) {
+        List<TableIndex> tableIndexes = TableBeanUtils.getTableIndexes(clazz);
+        return tableIndexes.stream()
+                .map(tableIndex -> buildIndexMetadata(clazz, tableIndex))
+                .filter(Objects::nonNull)
+                .filter(indexMetadata -> indexRepeatChecker.filter(indexMetadata.getName()))
+                .collect(Collectors.toList());
+    }
+
+    protected IndexMetadata buildIndexMetadata(Class<?> clazz, Field field) {
         // 获取当前字段的@Index注解
         Index index = TableBeanUtils.getIndex(field);
         if (null != index) {
             String realColumnName = TableBeanUtils.getRealColumnName(clazz, field);
-            IndexMetadata indexMetadata = indexMetadataSupplier.get();
-            String indexName = index.name();
-            if (StringUtils.noText(indexName)) {
-                indexName = TableBeanUtils.getRealColumnName(clazz, field);
-            }
-            indexMetadata.setName(indexPrefix + indexName);
+            IndexMetadata indexMetadata = newIndexMetadata();
+            String indexName = getIndexName(clazz, field, index);
+            indexMetadata.setName(indexName);
             indexMetadata.setType(index.type());
             indexMetadata.setComment(index.comment());
             indexMetadata.getColumns().add(IndexMetadata.IndexColumnParam.newInstance(realColumnName, null));
@@ -74,14 +74,28 @@ public class IndexMetadataBuilder {
         return null;
     }
 
-    public IndexMetadata buildFromEntity(Class<?> clazz, TableIndex tableIndex, String indexPrefix) {
+    protected String getIndexName(Class<?> clazz, Field field, Index index) {
+        String indexName = index.name();
+        if (StringUtils.noText(indexName)) {
+            indexName = getDefaultIndexName(clazz, field);
+        }
+        String indexPrefix = AutoTableGlobalConfig.getAutoTableProperties().getIndexPrefix();
+        return indexPrefix + indexName;
+    }
+
+    protected String getDefaultIndexName(Class<?> clazz, Field field) {
+        return TableBeanUtils.getRealColumnName(clazz, field);
+    }
+
+    protected IndexMetadata buildIndexMetadata(Class<?> clazz, TableIndex tableIndex) {
 
         // 获取当前字段的@Index注解
         if (null != tableIndex) {
 
             List<IndexMetadata.IndexColumnParam> columnParams = getColumnParams(clazz, tableIndex);
 
-            IndexMetadata indexMetadata = indexMetadataSupplier.get();
+            IndexMetadata indexMetadata = newIndexMetadata();
+            String indexPrefix = AutoTableGlobalConfig.getAutoTableProperties().getIndexPrefix();
             indexMetadata.setName(indexPrefix + tableIndex.name());
             indexMetadata.setType(tableIndex.type());
             indexMetadata.setComment(tableIndex.comment());
@@ -91,7 +105,11 @@ public class IndexMetadataBuilder {
         return null;
     }
 
-    private List<IndexMetadata.IndexColumnParam> getColumnParams(Class<?> clazz, final TableIndex tableIndex) {
+    protected IndexMetadata newIndexMetadata() {
+        return new IndexMetadata();
+    }
+
+    protected List<IndexMetadata.IndexColumnParam> getColumnParams(Class<?> clazz, final TableIndex tableIndex) {
         List<IndexMetadata.IndexColumnParam> columnParams = new ArrayList<>();
         // 防止 两种模式设置的字段有冲突
         Set<String> exitsColumns = new HashSet<>();

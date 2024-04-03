@@ -4,8 +4,8 @@ import com.tangzc.autotable.core.AutoTableGlobalConfig;
 import com.tangzc.autotable.core.RunMode;
 import com.tangzc.autotable.core.converter.DefaultTypeEnumInterface;
 import com.tangzc.autotable.core.dynamicds.SqlSessionFactoryManager;
-import com.tangzc.autotable.core.recordsql.RecordSqlService;
 import com.tangzc.autotable.core.recordsql.AutoTableExecuteSqlLog;
+import com.tangzc.autotable.core.recordsql.RecordSqlService;
 import lombok.NonNull;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.SqlSession;
@@ -180,6 +180,11 @@ public interface IStrategy<TABLE_META extends TableMetadata, COMPARE_TABLE_INFO 
         }
     }
 
+    /**
+     * 执行创建表
+     *
+     * @param tableMetadata 表元数据
+     */
     default void executeCreateTable(TABLE_META tableMetadata) {
 
         String tableName = tableMetadata.getTableName();
@@ -191,6 +196,12 @@ public interface IStrategy<TABLE_META extends TableMetadata, COMPARE_TABLE_INFO 
         AutoTableGlobalConfig.getCreateTableFinishCallback().afterCreateTable(this.databaseDialect(), tableMetadata);
     }
 
+    /**
+     * 执行SQL
+     *
+     * @param tableMetadata 表元数据
+     * @param sqlList       SQL集合
+     */
     default void executeSql(TABLE_META tableMetadata, List<String> sqlList) {
         SqlSessionFactory sqlSessionFactory = SqlSessionFactoryManager.getSqlSessionFactory();
 
@@ -216,7 +227,7 @@ public interface IStrategy<TABLE_META extends TableMetadata, COMPARE_TABLE_INFO 
                 connection.commit();
             } catch (Exception e) {
                 connection.rollback();
-                throw new RuntimeException("执行SQL期间出错", e);
+                throw new RuntimeException("执行SQL[" + sqlList + "]期间出错", e);
             }
 
             // 记录SQL
