@@ -1,6 +1,13 @@
 package com.tangzc.autotable.core.utils;
 
+/**
+ * 字符串工具类
+ * @author don
+ */
 public class StringUtils {
+
+    public static final String DATETIME_REGEX = "(\\d+.?)+";
+    public static final String NUMBER_REGEX = "[0-9]+(.[0-9]+)?";
 
     public static boolean hasText(String str) {
         return (str != null && !str.isEmpty() && containsText(str));

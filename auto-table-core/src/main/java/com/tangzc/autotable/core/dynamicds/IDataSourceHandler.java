@@ -54,6 +54,7 @@ public interface IDataSourceHandler {
     /**
      * 自动获取当前数据源的方言
      *
+     * @param dataSource 数据源名称
      * @return 返回数据方言
      */
     default String getDatabaseDialect(String dataSource) {

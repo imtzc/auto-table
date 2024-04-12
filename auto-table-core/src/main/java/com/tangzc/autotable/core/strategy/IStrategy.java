@@ -31,6 +31,11 @@ public interface IStrategy<TABLE_META extends TableMetadata, COMPARE_TABLE_INFO 
 
     Logger log = LoggerFactory.getLogger(IStrategy.class);
 
+    /**
+     * 获取mapper执行mapper的方法
+     *
+     * @return 数据库类型
+     */
     default <R> R executeReturn(Function<MAPPER, R> execute) {
 
         // 从接口泛型上读取MapperClass
@@ -109,6 +114,8 @@ public interface IStrategy<TABLE_META extends TableMetadata, COMPARE_TABLE_INFO 
      * 检查数据库数据模型与实体是否一致
      * 1. 检查数据库数据模型是否存在
      * 2. 检查数据库数据模型与实体是否一致
+     *
+     * @param tableMetadata 表元数据
      */
     default void validateMode(TABLE_META tableMetadata) {
 
@@ -135,6 +142,8 @@ public interface IStrategy<TABLE_META extends TableMetadata, COMPARE_TABLE_INFO 
      * 创建模式
      * 1. 删除表
      * 2. 新建表
+     *
+     * @param tableMetadata 表元数据
      */
     default void createMode(TABLE_META tableMetadata) {
 
@@ -156,6 +165,8 @@ public interface IStrategy<TABLE_META extends TableMetadata, COMPARE_TABLE_INFO 
      * 2. 不存在创建
      * 3. 检查表是否需要修改
      * 4. 需要修改就修改表
+     *
+     * @param tableMetadata 表元数据
      */
     default void updateMode(TABLE_META tableMetadata) {
 
@@ -285,9 +296,10 @@ public interface IStrategy<TABLE_META extends TableMetadata, COMPARE_TABLE_INFO 
     Map<Class<?>, DefaultTypeEnumInterface> typeMapping();
 
     /**
-     * 根据表名删除表
+     * 根据表名删除表，生成删除表的SQL
      *
      * @param tableName 表名
+     * @return SQL
      */
     String dropTable(String tableName);
 
@@ -300,9 +312,10 @@ public interface IStrategy<TABLE_META extends TableMetadata, COMPARE_TABLE_INFO 
     @NonNull TABLE_META analyseClass(Class<?> beanClass);
 
     /**
-     * 创建表
+     * 生成创建表SQL
      *
      * @param tableMetadata 表元数据
+     * @return SQL
      */
     List<String> createTable(TABLE_META tableMetadata);
 
@@ -315,9 +328,10 @@ public interface IStrategy<TABLE_META extends TableMetadata, COMPARE_TABLE_INFO 
     @NonNull COMPARE_TABLE_INFO compareTable(TABLE_META tableMetadata);
 
     /**
-     * 修改表
+     * 生成修改表SQL
      *
      * @param compareTableInfo 修改表的描述信息
+     * @return SQL
      */
     List<String> modifyTable(COMPARE_TABLE_INFO compareTableInfo);
 }

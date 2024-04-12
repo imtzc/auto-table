@@ -28,7 +28,7 @@ public class ColumnSqlBuilder {
                 .replace("{columnName}", columnMetadata.getName())
                 .replace("{typeAndLength}", SqliteTypeHelper.getFullType(columnMetadata.getType(), isAutoIncrement))
                 .replace("{null}", columnMetadata.isNotNull() ? "NOT NULL" : "NULL")
-                .replace("{default}", (key) -> {
+                .replace("{default}", () -> {
                     // 指定NULL
                     DefaultValueEnum defaultValueType = columnMetadata.getDefaultValueType();
                     if (defaultValueType == DefaultValueEnum.NULL) {
@@ -45,7 +45,7 @@ public class ColumnSqlBuilder {
                     }
                     return "";
                 })
-                .replace("{primaryKey}", (key) -> {
+                .replace("{primaryKey}", () -> {
                     // sqlite特殊：只能是一个主键的情况下，才能设置自增，且只有主键才能自增
                     if (isAutoIncrement) {
                         return "PRIMARY KEY AUTOINCREMENT";

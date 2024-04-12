@@ -83,6 +83,14 @@ public interface JavaTypeToDatabaseTypeConverter {
         return getDatabaseTypeAndLength(databaseDialect, clazz, field);
     }
 
+    /**
+     * 获取数据库类型
+     *
+     * @param databaseDialect 数据库类型，参考{@link DatabaseDialect}中的常量
+     * @param clazz           实体类
+     * @param field           字段
+     * @return 数据库类型
+     */
     default DatabaseTypeAndLength getDatabaseTypeAndLength(String databaseDialect, Class<?> clazz, Field field) {
 
         DatabaseTypeAndLength typeAndLength;

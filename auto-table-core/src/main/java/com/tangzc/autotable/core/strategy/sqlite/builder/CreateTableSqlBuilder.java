@@ -100,16 +100,13 @@ public class CreateTableSqlBuilder {
      * "age" ASC,
      * "address" ASC
      * );
-     *
-     * @param indexMetadata
-     * @return
      */
     public static String getIndexSql(String tableName, IndexMetadata indexMetadata) {
         return StringConnectHelper.newInstance("CREATE{indexType} INDEX \"{indexName}\" ON {tableName} ({columns}) {indexComment};")
                 .replace("{indexType}", indexMetadata.getType() == IndexTypeEnum.NORMAL ? "" : " " + indexMetadata.getType().name())
                 .replace("{indexName}", indexMetadata.getName())
                 .replace("{tableName}", tableName)
-                .replace("{columns}", (key) -> {
+                .replace("{columns}", () -> {
                     List<IndexMetadata.IndexColumnParam> columnParams = indexMetadata.getColumns();
                     return columnParams.stream().map(column ->
                             // 例："name" ASC

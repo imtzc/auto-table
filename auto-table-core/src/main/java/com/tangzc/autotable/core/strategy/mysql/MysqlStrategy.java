@@ -322,7 +322,7 @@ public class MysqlStrategy implements IStrategy<MysqlTableMetadata, MysqlCompare
             // 自定义值 默认值对比
             String defaultValue = mysqlColumnMetadata.getDefaultValue();
             // mysql中，如果是数据库浮点数，默认值后面会带上对应的小数位数，策略：数据库值于注解指定的值，均去掉多余的0进行对比
-            if (MysqlTypeHelper.isFloatNumber(columnType) && columnDefault != null && columnDefault.matches("[0-9]+(.[0-9]+)?")) {
+            if (MysqlTypeHelper.isFloatNumber(columnType) && columnDefault != null && columnDefault.matches(StringUtils.NUMBER_REGEX)) {
                 // 先转数字，再转字符串，消除多余的0，异常忽略
                 try {
                     columnDefault = String.valueOf(Double.parseDouble(columnDefault));

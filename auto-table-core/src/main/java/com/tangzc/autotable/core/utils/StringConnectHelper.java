@@ -2,9 +2,10 @@ package com.tangzc.autotable.core.utils;
 
 import lombok.AllArgsConstructor;
 
-import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
+ * 字符串拼接工具类
  * @author don
  */
 @AllArgsConstructor(staticName = "newInstance")
@@ -17,8 +18,8 @@ public class StringConnectHelper {
         return this;
     }
 
-    public StringConnectHelper replace(String key, Function<String, String> valueFunc) {
-        string = string.replace(key, valueFunc.apply(key));
+    public StringConnectHelper replace(String key, Supplier<String> valueFunc) {
+        string = string.replace(key, valueFunc.get());
         return this;
     }
 

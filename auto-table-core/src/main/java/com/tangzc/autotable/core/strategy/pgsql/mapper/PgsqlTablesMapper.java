@@ -3,7 +3,6 @@ package com.tangzc.autotable.core.strategy.pgsql.mapper;
 import com.tangzc.autotable.core.strategy.pgsql.data.dbdata.PgsqlDbColumn;
 import com.tangzc.autotable.core.strategy.pgsql.data.dbdata.PgsqlDbIndex;
 import com.tangzc.autotable.core.strategy.pgsql.data.dbdata.PgsqlDbPrimary;
-import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Result;
 import org.apache.ibatis.annotations.Results;
 import org.apache.ibatis.annotations.Select;

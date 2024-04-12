@@ -74,6 +74,23 @@ public class CreateTableSqlBuilder {
                         .collect(Collectors.joining(","))
         );
 
+        List<String> tableProperties = getTableProperties(engine, characterSet, collate, comment);
+
+        // 组合sql: 过滤空字符项，逗号拼接
+        String addSql = addItems.stream()
+                .filter(StringUtils::hasText)
+                .collect(Collectors.joining(","));
+        String propertiesSql = tableProperties.stream()
+                .filter(StringUtils::hasText)
+                .collect(Collectors.joining(","));
+
+        return "CREATE TABLE `{tableName}` ({addItems}) {tableProperties};"
+                .replace("{tableName}", name)
+                .replace("{addItems}", addSql)
+                .replace("{tableProperties}", propertiesSql);
+    }
+
+    public static List<String> getTableProperties(String engine, String characterSet, String collate, String comment) {
         List<String> tableProperties = new ArrayList<>();
 
         // 引擎
@@ -90,23 +107,12 @@ public class CreateTableSqlBuilder {
         }
         // 备注
         if (StringUtils.hasText(comment)) {
-            tableProperties.add("COMMENT = '{comment}'"
-                    .replace("{comment}", comment)
+            tableProperties.add(
+                    "COMMENT = '{comment}'"
+                            .replace("{comment}", comment)
             );
         }
-
-        // 组合sql: 过滤空字符项，逗号拼接
-        String addSql = addItems.stream()
-                .filter(StringUtils::hasText)
-                .collect(Collectors.joining(","));
-        String propertiesSql = tableProperties.stream()
-                .filter(StringUtils::hasText)
-                .collect(Collectors.joining(","));
-
-        return "CREATE TABLE `{tableName}` ({addItems}) {tableProperties};"
-                .replace("{tableName}", name)
-                .replace("{addItems}", addSql)
-                .replace("{tableProperties}", propertiesSql);
+        return tableProperties;
     }
 
     public static String getIndexSql(IndexMetadata indexMetadata) {
@@ -114,7 +120,7 @@ public class CreateTableSqlBuilder {
         return StringConnectHelper.newInstance("{indexType} INDEX `{indexName}`({columns}) {indexComment}")
                 .replace("{indexType}", indexMetadata.getType() == IndexTypeEnum.UNIQUE ? "UNIQUE" : "")
                 .replace("{indexName}", indexMetadata.getName())
-                .replace("{columns}", (key) -> {
+                .replace("{columns}", () -> {
                     List<IndexMetadata.IndexColumnParam> columnParams = indexMetadata.getColumns();
                     return columnParams.stream().map(column ->
                             // 例：`name` ASC

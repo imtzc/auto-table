@@ -41,35 +41,12 @@ public class ModifyTableSqlBuilder {
         List<String> modifyItems = new ArrayList<>();
 
         // 删除表字段处理
-        modifyItems.add(
-                dropColumnList.stream()
-                        .map(dropColumn -> "DROP COLUMN `{columnName}`"
-                                .replace("{columnName}", dropColumn)
-                        ).collect(Collectors.joining(","))
-        );
+        String dropColumnSql = getDropColumnSql(dropColumnList);
+        modifyItems.add(dropColumnSql);
 
         // 拼接每个字段的sql片段
-        modifyItems.add(
-                modifyMysqlColumnMetadataList.stream()
-                        .sorted(Comparator.comparingInt(modifyColumn -> modifyColumn.getMysqlColumnMetadata().getPosition()))
-                        .map(modifyColumn -> {
-                            MysqlColumnMetadata columnMetadata = modifyColumn.getMysqlColumnMetadata();
-                            // 判断是主键，自动设置为NOT NULL，并记录
-                            if (columnMetadata.isPrimary()) {
-                                columnMetadata.setNotNull(true);
-                            }
-                            String columnSql = ColumnSqlBuilder.buildSql(columnMetadata);
-
-                            if (modifyColumn.getType() == MysqlCompareTableInfo.ModifyType.MODIFY) {
-                                // 修改表字段处理
-                                return "MODIFY COLUMN " + columnSql;
-                            } else {
-                                // 新增表字段处理
-                                return "ADD COLUMN " + columnSql;
-                            }
-                        })
-                        .collect(Collectors.joining(","))
-        );
+        String columnsSql = getColumnsSql(modifyMysqlColumnMetadataList);
+        modifyItems.add(columnsSql);
 
         /*
         处理主键
@@ -88,40 +65,16 @@ public class ModifyTableSqlBuilder {
         }
 
         // 删除索引
-        modifyItems.add(
-                dropIndexList.stream()
-                        .map(dropIndex -> "DROP INDEX `{indexName}`"
-                                .replace("{indexName}", dropIndex))
-                        .collect(Collectors.joining(","))
-        );
+        String dropIndexSql = getDropIndexSql(dropIndexList);
+        modifyItems.add(dropIndexSql);
 
         // 添加索引
-        modifyItems.add(
-                mysqlIndexMetadataList.stream().map(indexParam -> {
-                    String indexSql = CreateTableSqlBuilder.getIndexSql(indexParam);
-                    return "ADD " + indexSql;
-                }).collect(Collectors.joining(","))
-        );
+        String addIndexSql = getAddIndexSql(mysqlIndexMetadataList);
+        modifyItems.add(addIndexSql);
 
-        // 引擎，相较于新增表，多了","前缀
-        if (StringUtils.hasText(engine)) {
-            modifyItems.add("ENGINE = " + engine);
-        }
-        // 字符集，相较于新增表，多了","前缀
-        if (StringUtils.hasText(characterSet)) {
-            modifyItems.add("CHARACTER SET = " + characterSet);
-        }
-        // 排序，相较于新增表，多了","前缀
-        if (StringUtils.hasText(collate)) {
-            modifyItems.add("COLLATE = " + collate);
-        }
-        // 备注，相较于新增表，多了","前缀
-        if (StringUtils.hasText(comment)) {
-            modifyItems.add(
-                    "COMMENT = '{comment}'"
-                            .replace("{comment}", comment)
-            );
-        }
+        // 添加表的属性
+        List<String> tableProperties = CreateTableSqlBuilder.getTableProperties(engine, characterSet, collate, comment);
+        modifyItems.addAll(tableProperties);
 
         // 组合sql: 过滤空字符项，逗号拼接
         String modifySql = modifyItems.stream()
@@ -131,5 +84,48 @@ public class ModifyTableSqlBuilder {
         return "ALTER TABLE `{tableName}` {modifyItems};"
                 .replace("{tableName}", name)
                 .replace("{modifyItems}", modifySql);
+    }
+
+    private static String getAddIndexSql(List<IndexMetadata> mysqlIndexMetadataList) {
+        return mysqlIndexMetadataList.stream().map(indexParam -> {
+            String indexSql = CreateTableSqlBuilder.getIndexSql(indexParam);
+            return "ADD " + indexSql;
+        }).collect(Collectors.joining(","));
+    }
+
+    private static String getDropIndexSql(List<String> dropIndexList) {
+        return dropIndexList.stream()
+                .map(dropIndex -> "DROP INDEX `{indexName}`"
+                        .replace("{indexName}", dropIndex))
+                .collect(Collectors.joining(","));
+    }
+
+    private static String getDropColumnSql(List<String> dropColumnList) {
+        return dropColumnList.stream()
+                .map(dropColumn -> "DROP COLUMN `{columnName}`"
+                        .replace("{columnName}", dropColumn)
+                ).collect(Collectors.joining(","));
+    }
+
+    private static String getColumnsSql(List<MysqlCompareTableInfo.MysqlModifyColumnMetadata> modifyMysqlColumnMetadataList) {
+        return modifyMysqlColumnMetadataList.stream()
+                .sorted(Comparator.comparingInt(modifyColumn -> modifyColumn.getMysqlColumnMetadata().getPosition()))
+                .map(modifyColumn -> {
+                    MysqlColumnMetadata columnMetadata = modifyColumn.getMysqlColumnMetadata();
+                    // 判断是主键，自动设置为NOT NULL，并记录
+                    if (columnMetadata.isPrimary()) {
+                        columnMetadata.setNotNull(true);
+                    }
+                    String columnSql = ColumnSqlBuilder.buildSql(columnMetadata);
+
+                    if (modifyColumn.getType() == MysqlCompareTableInfo.ModifyType.MODIFY) {
+                        // 修改表字段处理
+                        return "MODIFY COLUMN " + columnSql;
+                    } else {
+                        // 新增表字段处理
+                        return "ADD COLUMN " + columnSql;
+                    }
+                })
+                .collect(Collectors.joining(","));
     }
 }

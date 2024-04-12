@@ -22,14 +22,14 @@ public class ColumnSqlBuilder {
         return StringConnectHelper.newInstance("`{columnName}` {typeAndLength} {character} {collate} {null} {default} {autoIncrement} {columnComment} {position}")
                 .replace("{columnName}", columnMetadata.getName())
                 .replace("{typeAndLength}", MysqlTypeHelper.getFullType(columnMetadata.getType()))
-                .replace("{character}", $ -> {
+                .replace("{character}", () -> {
                     String characterSet = columnMetadata.getCharacterSet();
                     if (StringUtils.hasText(characterSet)) {
                         return "CHARACTER SET " + characterSet;
                     }
                     return "";
                 })
-                .replace("{collate}", $ -> {
+                .replace("{collate}", () -> {
                     String collate = columnMetadata.getCollate();
                     if (StringUtils.hasText(collate)) {
                         return "COLLATE " + collate;
@@ -37,7 +37,7 @@ public class ColumnSqlBuilder {
                     return "";
                 })
                 .replace("{null}", columnMetadata.isNotNull() ? "NOT NULL" : "NULL")
-                .replace("{default}", $ -> {
+                .replace("{default}", () -> {
                     // 指定NULL
                     DefaultValueEnum defaultValueType = columnMetadata.getDefaultValueType();
                     if (defaultValueType == DefaultValueEnum.NULL) {
@@ -56,7 +56,7 @@ public class ColumnSqlBuilder {
                 })
                 .replace("{autoIncrement}", columnMetadata.isAutoIncrement() ? "AUTO_INCREMENT" : "")
                 .replace("{columnComment}", StringUtils.hasText(columnMetadata.getComment()) ? "COMMENT '" + columnMetadata.getComment() + "'" : "")
-                .replace("{position}", $ -> {
+                .replace("{position}", () -> {
                     if (StringUtils.hasText(columnMetadata.getNewPreColumn())) {
                         return "AFTER `" + columnMetadata.getNewPreColumn() + "`";
                     }

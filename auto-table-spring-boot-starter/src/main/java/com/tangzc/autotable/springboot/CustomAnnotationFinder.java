@@ -7,6 +7,9 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
+/**
+ * @author don
+ */
 public class CustomAnnotationFinder implements AutoTableAnnotationFinder {
     @Override
     public <A extends Annotation> A find(Class<?> clazz, Class<A> annotationClass) {

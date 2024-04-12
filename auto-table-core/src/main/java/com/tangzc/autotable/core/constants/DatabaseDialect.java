@@ -1,5 +1,8 @@
 package com.tangzc.autotable.core.constants;
 
+/**
+ * @author don
+ */
 public interface DatabaseDialect {
 
     String MySQL = "MySQL";

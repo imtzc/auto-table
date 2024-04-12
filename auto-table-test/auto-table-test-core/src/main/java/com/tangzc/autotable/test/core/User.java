@@ -12,8 +12,13 @@ import com.tangzc.autotable.annotation.enums.IndexTypeEnum;
 import com.tangzc.autotable.annotation.mysql.MysqlColumnCharset;
 import com.tangzc.autotable.annotation.mysql.MysqlTypeConstant;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.experimental.FieldNameConstants;
 
+/**
+ * @author don
+ */
+@EqualsAndHashCode(callSuper = true)
 @Data
 @TableName("sys_user")
 @TableIndexes({

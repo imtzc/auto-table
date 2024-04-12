@@ -44,7 +44,10 @@ public class ParamValidChecker {
 
     public static void checkColumnParam(Class<?> clazz, Field field, MysqlColumnMetadata mysqlColumnMetadata) {
         for (IColumnChecker iColumnChecker : COLUMN_PARAM_CHECKER_LIST) {
-            iColumnChecker.check(clazz, field, mysqlColumnMetadata);
+            RuntimeException exception = iColumnChecker.check(clazz, field, mysqlColumnMetadata);
+            if(exception != null) {
+                throw exception;
+            }
         }
     }
 
@@ -56,6 +59,6 @@ public class ParamValidChecker {
         /**
          * 校验
          */
-        Exception check(Class<?> clazz, Field field, MysqlColumnMetadata mysqlColumnMetadata) throws RuntimeException;
+        RuntimeException check(Class<?> clazz, Field field, MysqlColumnMetadata mysqlColumnMetadata);
     }
 }

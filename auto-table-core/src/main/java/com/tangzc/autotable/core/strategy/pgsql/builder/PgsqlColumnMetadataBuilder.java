@@ -39,7 +39,7 @@ public class PgsqlColumnMetadataBuilder extends ColumnMetadataBuilder {
                 defaultValue = "'" + defaultValue + "'";
             }
             // 兼容逻辑：如果是日期，且非函数，自动包一层''（如果没有的话）
-            if (PgsqlTypeHelper.isTime(typeAndLength) && defaultValue.matches("(\\d+.?)+") && !defaultValue.startsWith("'") && !defaultValue.endsWith("'")) {
+            if (PgsqlTypeHelper.isTime(typeAndLength) && defaultValue.matches(StringUtils.DATETIME_REGEX) && !defaultValue.startsWith("'") && !defaultValue.endsWith("'")) {
                 defaultValue = "'" + defaultValue + "'";
             }
         }

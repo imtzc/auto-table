@@ -141,19 +141,19 @@ public class AutoTableGlobalConfig {
         }
     };
 
-    private final static Map<String, IStrategy<? extends TableMetadata, ? extends CompareTableInfo, ?>> strategyMap = new HashMap<>();
+    private final static Map<String, IStrategy<? extends TableMetadata, ? extends CompareTableInfo, ?>> STRATEGY_MAP = new HashMap<>();
 
     public static void addStrategy(IStrategy<? extends TableMetadata, ? extends CompareTableInfo, ?> strategy) {
-        strategyMap.put(strategy.databaseDialect(), strategy);
+        STRATEGY_MAP.put(strategy.databaseDialect(), strategy);
         JavaTypeToDatabaseTypeConverter.addTypeMapping(strategy.databaseDialect(), strategy.typeMapping());
     }
 
     public static IStrategy<?, ?, ?> getStrategy(String databaseDialect) {
-        return strategyMap.get(databaseDialect);
+        return STRATEGY_MAP.get(databaseDialect);
     }
 
     public static Collection<IStrategy<?, ?, ?>> getAllStrategy() {
-        return strategyMap.values();
+        return STRATEGY_MAP.values();
     }
 
 }

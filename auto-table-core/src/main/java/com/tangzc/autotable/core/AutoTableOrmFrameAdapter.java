@@ -63,10 +63,19 @@ public interface AutoTableOrmFrameAdapter {
         }
     }
 
+    /**
+     * 扫描注解
+     * @return 扫描的注解集合
+     */
     default List<Class<? extends Annotation>> scannerAnnotations() {
         return Collections.emptyList();
     }
 
+    /**
+     * 获取表名
+     * @param clazz 实体类
+     * @return 表名
+     */
     default String getTableName(Class<?> clazz) {
         TableName tableNameAnno = AutoTableGlobalConfig.getAutoTableAnnotationFinder().find(clazz, TableName.class);
         if (tableNameAnno != null) {
@@ -78,6 +87,12 @@ public interface AutoTableOrmFrameAdapter {
         return StringUtils.camelToUnderline(clazz.getSimpleName());
     }
 
+    /**
+     * 获取字段名
+     * @param clazz 实体类
+     * @param field 字段
+     * @return 字段名
+     */
     default String getRealColumnName(Class<?> clazz, Field field) {
         ColumnName columnNameAnno = AutoTableGlobalConfig.getAutoTableAnnotationFinder().find(field, ColumnName.class);
         if (columnNameAnno != null) {
@@ -108,5 +123,5 @@ public interface AutoTableOrmFrameAdapter {
             // 默认都不是自增的
             return false;
         }
-    };
+    }
 }

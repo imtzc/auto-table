@@ -68,7 +68,7 @@ public class MysqlColumnMetadataBuilder extends ColumnMetadataBuilder {
                 defaultValue = "'" + defaultValue + "'";
             }
             // 补偿逻辑：时间类型，非函数的值，前后自动添加'
-            if (MysqlTypeHelper.isDateTime(typeAndLength) && defaultValue.matches("(\\d+.?)+") && !defaultValue.startsWith("'") && !defaultValue.endsWith("'")) {
+            if (MysqlTypeHelper.isDateTime(typeAndLength) && defaultValue.matches(StringUtils.DATETIME_REGEX) && !defaultValue.startsWith("'") && !defaultValue.endsWith("'")) {
                 defaultValue = "'" + defaultValue + "'";
             }
         }
@@ -126,5 +126,4 @@ public class MysqlColumnMetadataBuilder extends ColumnMetadataBuilder {
             mysqlColumnMetadata.setCollate(collate);
         }
     }
-
 }

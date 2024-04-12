@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * 记录数据源名称
+ * @author don
  */
 @Slf4j
 public class DatasourceNameManager {
@@ -12,14 +13,14 @@ public class DatasourceNameManager {
     /**
      * 当前数据源
      */
-    private static final ThreadLocal<String> datasourceName = new ThreadLocal<>();
+    private static final ThreadLocal<String> DATASOURCE_NAME = new ThreadLocal<>();
 
     public static void setDatasourceName(@NonNull String datasourceName) {
-        DatasourceNameManager.datasourceName.set(datasourceName);
+        DatasourceNameManager.DATASOURCE_NAME.set(datasourceName);
     }
 
     public static String getDatasourceName() {
-        String datasourceName = DatasourceNameManager.datasourceName.get();
+        String datasourceName = DatasourceNameManager.DATASOURCE_NAME.get();
         if (datasourceName == null) {
             log.error("当前数据源下，未找到对应的DatasourceName");
         }
@@ -27,6 +28,6 @@ public class DatasourceNameManager {
     }
 
     public static void cleanDatasourceName() {
-        datasourceName.remove();
+        DATASOURCE_NAME.remove();
     }
 }

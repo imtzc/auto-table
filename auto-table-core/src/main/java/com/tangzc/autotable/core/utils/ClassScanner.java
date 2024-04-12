@@ -21,6 +21,7 @@ import java.util.jar.JarFile;
 import java.util.stream.Collectors;
 
 /**
+ * 基于注解扫描java类
  * @author don
  */
 public class ClassScanner {

@@ -46,7 +46,7 @@
             <groupId>org.xerial</groupId>
             <artifactId>sqlite-jdbc</artifactId>
             <!-- 升级版本，适配Mac M1-->
-            <version>3.34.0</version>
+            <version>3.44.1.0</version>
         </dependency>
 
         <dependency>

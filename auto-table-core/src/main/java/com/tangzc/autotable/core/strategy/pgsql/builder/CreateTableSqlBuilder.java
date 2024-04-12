@@ -55,7 +55,7 @@ public class CreateTableSqlBuilder {
                         .replace("{indexType}", pgsqlIndexMetadata.getType() == IndexTypeEnum.UNIQUE ? "UNIQUE" : "")
                         .replace("{indexName}", pgsqlIndexMetadata.getName())
                         .replace("{tableName}", tableName)
-                        .replace("{columns}", (key) -> {
+                        .replace("{columns}", () -> {
                             List<IndexMetadata.IndexColumnParam> columnParams = pgsqlIndexMetadata.getColumns();
                             return columnParams.stream().map(column ->
                                     // 例："name" ASC

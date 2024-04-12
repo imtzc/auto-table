@@ -45,7 +45,7 @@ public class IndexMetadataBuilder {
                 .filter(field -> TableBeanUtils.isIncludeField(field, clazz))
                 .map(field -> buildIndexMetadata(clazz, field))
                 .filter(Objects::nonNull)
-                .filter(indexMetadata -> indexRepeatChecker.filter(indexMetadata.getName()))
+                .peek(indexMetadata -> indexRepeatChecker.filter(indexMetadata.getName()))
                 .collect(Collectors.toList());
     }
 
@@ -54,7 +54,7 @@ public class IndexMetadataBuilder {
         return tableIndexes.stream()
                 .map(tableIndex -> buildIndexMetadata(clazz, tableIndex))
                 .filter(Objects::nonNull)
-                .filter(indexMetadata -> indexRepeatChecker.filter(indexMetadata.getName()))
+                .peek(indexMetadata -> indexRepeatChecker.filter(indexMetadata.getName()))
                 .collect(Collectors.toList());
     }
 
