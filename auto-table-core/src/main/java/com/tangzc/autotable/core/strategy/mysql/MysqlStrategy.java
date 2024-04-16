@@ -57,7 +57,7 @@ public class MysqlStrategy implements IStrategy<MysqlTableMetadata, MysqlCompare
 
     @Override
     public Map<Class<?>, DefaultTypeEnumInterface> typeMapping() {
-        return new HashMap<Class<?>, DefaultTypeEnumInterface>() {{
+        return new HashMap<Class<?>, DefaultTypeEnumInterface>(32) {{
             put(String.class, MySqlDefaultTypeEnum.VARCHAR);
             put(Character.class, MySqlDefaultTypeEnum.CHAR);
             put(char.class, MySqlDefaultTypeEnum.CHAR);
@@ -146,7 +146,7 @@ public class MysqlStrategy implements IStrategy<MysqlTableMetadata, MysqlCompare
         return Collections.singletonList(sql);
     }
 
-    private void compareIndexes(MysqlTableMetadata mysqlTableMetadata, MysqlCompareTableInfo mysqlCompareTableInfo, Map<String, List<InformationSchemaStatistics>> tableIndexs) {
+    private void compareIndexes(MysqlTableMetadata mysqlTableMetadata, MysqlCompareTableInfo mysqlCompareTableInfo, Map<String, List<InformationSchemaStatistics>> tableIndexes) {
         // Bean上所有的索引
         List<IndexMetadata> indexMetadataList = mysqlTableMetadata.getIndexMetadataList();
         // 以Bean上的索引开启循环，逐个匹配表上的索引
@@ -154,7 +154,7 @@ public class MysqlStrategy implements IStrategy<MysqlTableMetadata, MysqlCompare
             // 根据Bean上的索引名称获取表上的索引
             String indexName = indexMetadata.getName();
             // 获取表上对应索引名称的所有列
-            List<InformationSchemaStatistics> theIndexColumns = tableIndexs.remove(indexName);
+            List<InformationSchemaStatistics> theIndexColumns = tableIndexes.remove(indexName);
             if (theIndexColumns == null) {
                 // 表上不存在该索引，新增
                 mysqlCompareTableInfo.getIndexMetadataList().add(indexMetadata);
@@ -193,7 +193,7 @@ public class MysqlStrategy implements IStrategy<MysqlTableMetadata, MysqlCompare
             }
         }
         // 因为上一步循环，在基于Bean上索引匹配上表中的索引后，就立即删除了表上对应的索引，所以剩下的索引都是Bean上没有声明的索引，需要根据配置判断，是否删掉多余的索引
-        Set<String> needDropIndexes = tableIndexs.keySet();
+        Set<String> needDropIndexes = tableIndexes.keySet();
         if (!needDropIndexes.isEmpty()) {
             // 根据配置，决定是否删除库上的多余索引
             if (AutoTableGlobalConfig.getAutoTableProperties().getAutoDropIndex()) {

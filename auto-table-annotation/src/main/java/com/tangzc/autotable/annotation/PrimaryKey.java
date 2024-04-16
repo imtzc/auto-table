@@ -1,4 +1,4 @@
-package com.tangzc.autotable.annotation;// package com.tangzc.mfe.autotable.annotation;
+package com.tangzc.autotable.annotation;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;

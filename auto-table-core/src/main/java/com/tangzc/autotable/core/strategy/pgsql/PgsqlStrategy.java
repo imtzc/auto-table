@@ -50,7 +50,7 @@ public class PgsqlStrategy implements IStrategy<DefaultTableMetadata, PgsqlCompa
 
     @Override
     public Map<Class<?>, DefaultTypeEnumInterface> typeMapping() {
-        return new HashMap<Class<?>, DefaultTypeEnumInterface>() {{
+        return new HashMap<Class<?>, DefaultTypeEnumInterface>(32) {{
             put(String.class, PgsqlDefaultTypeEnum.VARCHAR);
             put(Character.class, PgsqlDefaultTypeEnum.CHAR);
             put(char.class, PgsqlDefaultTypeEnum.CHAR);

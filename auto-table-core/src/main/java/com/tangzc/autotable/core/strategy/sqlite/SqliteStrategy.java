@@ -42,7 +42,7 @@ public class SqliteStrategy implements IStrategy<DefaultTableMetadata, SqliteCom
 
     @Override
     public Map<Class<?>, DefaultTypeEnumInterface> typeMapping() {
-        return new HashMap<Class<?>, DefaultTypeEnumInterface>() {{
+        return new HashMap<Class<?>, DefaultTypeEnumInterface>(32) {{
             put(String.class, SqliteDefaultTypeEnum.TEXT);
             put(Character.class, SqliteDefaultTypeEnum.TEXT);
             put(char.class, SqliteDefaultTypeEnum.TEXT);
