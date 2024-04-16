@@ -95,7 +95,7 @@ public class ModifyTableSqlBuilder {
         // 组合sql
         String alterTableSql = "";
         if (!alterTableSqlList.isEmpty()) {
-            alterTableSql = "ALTER TABLE \"public\".\"" + tableName + "\" \n" + String.join(",\n", alterTableSqlList) + ";";
+            alterTableSql = "ALTER TABLE \"" + tableName + "\" \n" + String.join(",\n", alterTableSqlList) + ";";
         }
 
         /* 为 表、字段、索引 添加注释 */
@@ -104,7 +104,7 @@ public class ModifyTableSqlBuilder {
         /* 修改 索引 */
         // 删除索引
         List<String> dropIndexList = pgsqlCompareTableInfo.getDropIndexList();
-        String dropIndexSql = dropIndexList.stream().map(indexName -> "DROP INDEX \"public\".\"" + indexName + "\";").collect(Collectors.joining("\n"));
+        String dropIndexSql = dropIndexList.stream().map(indexName -> "DROP INDEX \"" + indexName + "\";").collect(Collectors.joining("\n"));
         // 添加索引
         String createIndexSql = CreateTableSqlBuilder.getCreateIndexSql(tableName, pgsqlCompareTableInfo.getIndexMetadataList());
 

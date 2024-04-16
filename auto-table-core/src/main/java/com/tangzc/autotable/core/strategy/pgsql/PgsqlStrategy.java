@@ -86,7 +86,7 @@ public class PgsqlStrategy implements IStrategy<DefaultTableMetadata, PgsqlCompa
 
     @Override
     public String dropTable(String tableName) {
-        return String.format("DROP TABLE IF EXISTS \"public\".\"%s\"", tableName);
+        return String.format("DROP TABLE IF EXISTS \"%s\"", tableName);
     }
 
     @Override
@@ -153,7 +153,7 @@ public class PgsqlStrategy implements IStrategy<DefaultTableMetadata, PgsqlCompa
             boolean isUniqueIndex = indexMetadata.getType() == IndexTypeEnum.UNIQUE;
             // 索引改变
             String indexColumnParams = indexMetadata.getColumns().stream().map(col -> col.getColumn() + (col.getSort() == IndexSortTypeEnum.DESC ? " DESC" : "")).collect(Collectors.joining(", "));
-            if (!indexdef.matches("^CREATE " + (isUniqueIndex ? "UNIQUE INDEX" : "INDEX") + " " + indexName + " ON public\\." + tableName + " USING btree \\(" + indexColumnParams + "\\)$")) {
+            if (!indexdef.matches("^CREATE " + (isUniqueIndex ? "UNIQUE INDEX" : "INDEX") + " " + indexName + " ON " + tableName + " USING btree \\(" + indexColumnParams + "\\)$")) {
                 pgsqlCompareTableInfo.addModifyIndex(indexMetadata);
             }
         }
