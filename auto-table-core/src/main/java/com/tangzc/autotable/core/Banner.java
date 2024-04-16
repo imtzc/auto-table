@@ -2,6 +2,10 @@ package com.tangzc.autotable.core;
 
 import com.tangzc.autotable.core.constants.Version;
 
+/**
+ * 启动时打印的banner
+ * @author don
+ */
 public class Banner {
 
     public static void print() {

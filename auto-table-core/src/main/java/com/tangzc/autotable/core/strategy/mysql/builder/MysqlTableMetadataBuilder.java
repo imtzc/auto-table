@@ -26,15 +26,9 @@ public class MysqlTableMetadataBuilder {
     public static MysqlTableMetadata build(Class<?> clazz) {
 
         String tableName = TableBeanUtils.getTableName(clazz);
-
-        MysqlTableMetadata mysqlTableMetadata = new MysqlTableMetadata(clazz, tableName);
-
-        // 设置表注释
-        TableComment tableComment = TableBeanUtils.getTableComment(clazz);
-        if (tableComment != null) {
-            // 获取表注释
-            mysqlTableMetadata.setComment(tableComment.value());
-        }
+        TableComment tableCommentAnno = TableBeanUtils.getTableComment(clazz);
+        String tableComment = tableCommentAnno == null ? null : tableCommentAnno.value();
+        MysqlTableMetadata mysqlTableMetadata = new MysqlTableMetadata(clazz, tableName, tableComment);
 
         // 设置表字符集
         String charset;

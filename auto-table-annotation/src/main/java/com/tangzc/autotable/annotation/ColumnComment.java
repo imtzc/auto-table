@@ -17,7 +17,7 @@ import java.lang.annotation.Target;
 public @interface ColumnComment {
 
     /**
-     * 列注释
+     * @return 列注释
      */
     String value();
 }

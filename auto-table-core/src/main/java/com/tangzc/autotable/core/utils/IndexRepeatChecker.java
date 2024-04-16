@@ -20,7 +20,6 @@ public class IndexRepeatChecker {
     /**
      * 索引重复检测过滤器
      * @param name 索引名称
-     * @return 是否通过
      */
     public void filter(String name) {
 

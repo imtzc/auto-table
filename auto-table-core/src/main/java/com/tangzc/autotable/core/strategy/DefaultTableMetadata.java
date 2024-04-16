@@ -24,7 +24,7 @@ public class DefaultTableMetadata extends TableMetadata {
      */
     private List<IndexMetadata> indexMetadataList;
 
-    public DefaultTableMetadata(Class<?> entityClass, String tableName) {
-        super(entityClass, tableName);
+    public DefaultTableMetadata(Class<?> entityClass, String tableName, String comment) {
+        super(entityClass, tableName, comment);
     }
 }

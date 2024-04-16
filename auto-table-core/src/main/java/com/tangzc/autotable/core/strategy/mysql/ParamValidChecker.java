@@ -42,6 +42,13 @@ public class ParamValidChecker {
 
     private static final List<IColumnChecker> COLUMN_PARAM_CHECKER_LIST = Arrays.asList(CHECK_AUTO_INCREMENT, CHECK_DEFAULT_IS_EMPTY_STRING);
 
+    /**
+     * 字段参数校验
+     * @param clazz 类
+     * @param field 字段
+     * @param mysqlColumnMetadata 字段参数
+     * @throws RuntimeException 校验不通过
+     */
     public static void checkColumnParam(Class<?> clazz, Field field, MysqlColumnMetadata mysqlColumnMetadata) {
         for (IColumnChecker iColumnChecker : COLUMN_PARAM_CHECKER_LIST) {
             RuntimeException exception = iColumnChecker.check(clazz, field, mysqlColumnMetadata);
@@ -58,6 +65,10 @@ public class ParamValidChecker {
     public static interface IColumnChecker {
         /**
          * 校验
+         * @param clazz 类
+         * @param field 字段
+         * @param mysqlColumnMetadata 字段参数
+         * @return 异常信息
          */
         RuntimeException check(Class<?> clazz, Field field, MysqlColumnMetadata mysqlColumnMetadata);
     }

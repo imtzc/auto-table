@@ -8,6 +8,7 @@ import com.tangzc.autotable.core.constants.Version;
 
 /**
  * 多数据源测试
+ * @author don
  */
 public class TestApplication {
 

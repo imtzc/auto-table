@@ -34,6 +34,7 @@ public interface IStrategy<TABLE_META extends TableMetadata, COMPARE_TABLE_INFO 
     /**
      * 获取mapper执行mapper的方法
      *
+     * @param execute 要执行的SQL方法
      * @return 数据库类型
      */
     default <R> R executeReturn(Function<MAPPER, R> execute) {

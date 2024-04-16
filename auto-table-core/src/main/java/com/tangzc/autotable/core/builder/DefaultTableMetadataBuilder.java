@@ -28,14 +28,9 @@ public class DefaultTableMetadataBuilder {
     public DefaultTableMetadata build(Class<?> clazz) {
 
         String tableName = TableBeanUtils.getTableName(clazz);
-
-        DefaultTableMetadata tableMetadata = new DefaultTableMetadata(clazz, tableName);
-
-        TableComment tableComment = TableBeanUtils.getTableComment(clazz);
-        if (tableComment != null) {
-            // 获取表注释
-            tableMetadata.setComment(tableComment.value());
-        }
+        TableComment tableCommentAnno = TableBeanUtils.getTableComment(clazz);
+        String tableComment = tableCommentAnno == null ? null : tableCommentAnno.value();
+        DefaultTableMetadata tableMetadata = new DefaultTableMetadata(clazz, tableName, tableComment);
 
         List<Field> fields = BeanClassUtil.listAllFieldForColumn(clazz);
 

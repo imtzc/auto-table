@@ -5,6 +5,7 @@ import com.tangzc.autotable.core.strategy.TableMetadata;
 /**
  * 表信息拦截器
  * 注解构建完表元信息后，执行拦截器
+ * @author don
  */
 @FunctionalInterface
 public interface BuildTableMetadataInterceptor {

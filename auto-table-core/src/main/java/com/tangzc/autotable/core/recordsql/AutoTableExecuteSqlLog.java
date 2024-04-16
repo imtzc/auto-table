@@ -5,6 +5,10 @@ import com.tangzc.autotable.annotation.Ignore;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * 记录自动建表执行的SQL
+ * @author don
+ */
 @Getter
 public class AutoTableExecuteSqlLog {
 

@@ -27,8 +27,9 @@ public abstract class TableMetadata {
     @Setter
     protected String comment;
 
-    public TableMetadata(Class<?> entityClass, String tableName) {
+    public TableMetadata(Class<?> entityClass, String tableName, String comment) {
         this.entityClass = entityClass;
         this.tableName = tableName;
+        this.comment = comment;
     }
 }

@@ -23,6 +23,10 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * 全局配置
+ * @author don
+ */
 public class AutoTableGlobalConfig {
 
     /**

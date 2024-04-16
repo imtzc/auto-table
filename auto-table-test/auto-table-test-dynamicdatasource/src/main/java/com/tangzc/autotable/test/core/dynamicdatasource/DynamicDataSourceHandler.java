@@ -10,6 +10,9 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * @author don
+ */
 public class DynamicDataSourceHandler implements IDataSourceHandler {
 
     private static final Map<String, String> CONFIG_MAP = new HashMap<String, String>() {{
@@ -22,7 +25,7 @@ public class DynamicDataSourceHandler implements IDataSourceHandler {
     @Override
     public void useDataSource(String dataSourceName) {
 
-        SqlSessionFactory sqlSessionFactory = STRING_SQL_SESSION_FACTORY_MAP.computeIfAbsent(dataSourceName, $ -> {
+        SqlSessionFactory sqlSessionFactory = STRING_SQL_SESSION_FACTORY_MAP.computeIfAbsent(dataSourceName, key -> {
 
             String resource = CONFIG_MAP.get(dataSourceName);
 

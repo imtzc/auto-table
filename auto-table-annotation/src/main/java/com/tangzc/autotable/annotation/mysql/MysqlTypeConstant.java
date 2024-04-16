@@ -1,5 +1,8 @@
 package com.tangzc.autotable.annotation.mysql;
 
+/**
+ * @author don
+ */
 public interface MysqlTypeConstant {
 
     /**

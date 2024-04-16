@@ -7,6 +7,10 @@ import java.lang.reflect.Proxy;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * 获取注解默认值
+ * @author tangzc
+ */
 public class AnnotationDefaultValueHelper {
 
     public static <A extends Annotation> A getAnnotationWithDefaultValues(Class<A> annotationType) {

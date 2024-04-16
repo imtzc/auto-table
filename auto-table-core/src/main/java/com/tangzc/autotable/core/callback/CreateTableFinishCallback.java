@@ -4,6 +4,7 @@ import com.tangzc.autotable.core.strategy.TableMetadata;
 
 /**
  * 建表回调
+ * @author don
  */
 @FunctionalInterface
 public interface CreateTableFinishCallback {

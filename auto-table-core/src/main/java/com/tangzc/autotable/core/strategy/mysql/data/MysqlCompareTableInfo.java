@@ -156,6 +156,13 @@ public class MysqlCompareTableInfo extends CompareTableInfo {
     }
 
     public static enum ModifyType {
-        ADD, MODIFY
+        /**
+         * 新增
+         */
+        ADD,
+        /**
+         * 修改
+         */
+        MODIFY
     }
 }

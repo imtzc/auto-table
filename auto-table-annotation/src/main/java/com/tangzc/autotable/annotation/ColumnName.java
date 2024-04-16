@@ -19,7 +19,7 @@ import java.lang.annotation.Target;
 public @interface ColumnName {
 
     /**
-     * 列名
+     * @return 列名
      */
     String value();
 }

@@ -50,7 +50,9 @@ public class BeanClassUtil {
     }
 
     /**
-     * 查询所有的列的字段
+     * 查询某个类下所有的列的字段
+     * @param beanClass 类class
+     * @return 所有列的字段
      */
     public static List<Field> listAllFieldForColumn(Class<?> beanClass) {
 
@@ -64,6 +66,12 @@ public class BeanClassUtil {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * 获取某个类下所有的字段
+     * @param fields 预先声明的集合
+     * @param beanClass 指定类
+     * @param insertBack 是否追加到集合后面
+     */
     private static void getFieldList(List<Field> fields, Class<?> beanClass, boolean insertBack) {
 
         Field[] declaredFields = beanClass.getDeclaredFields();

@@ -5,6 +5,7 @@ import com.tangzc.autotable.core.strategy.TableMetadata;
 
 /**
  * 修改表前拦截器
+ * @author don
  */
 @FunctionalInterface
 public interface ModifyTableInterceptor {

@@ -19,12 +19,12 @@ import java.lang.annotation.Target;
 public @interface ColumnDefault {
 
     /**
-     * 列的默认值类型
+     * @return 列的默认值类型
      */
     DefaultValueEnum type() default DefaultValueEnum.UNDEFINED;
 
     /**
-     * 列的默认值
+     * @return 列的默认值
      */
     String value() default "";
 }

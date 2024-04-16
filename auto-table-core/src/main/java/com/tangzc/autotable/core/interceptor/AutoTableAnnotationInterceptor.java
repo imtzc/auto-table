@@ -7,6 +7,7 @@ import java.util.Set;
  * 自动表注解扫描拦截器
  * <p>注解收集完后，会根据两个注解集合扫描指定的包下的类，本拦截器发生在扫描包之前。
  * <p>因此，这里可以最终决定扫描哪些注解，排除哪些注解
+ * @author don
  */
 @FunctionalInterface
 public interface AutoTableAnnotationInterceptor {

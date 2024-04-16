@@ -6,6 +6,10 @@ import com.tangzc.autotable.core.strategy.pgsql.data.PgsqlTypeHelper;
 import com.tangzc.autotable.core.utils.StringConnectHelper;
 import com.tangzc.autotable.core.utils.StringUtils;
 
+/**
+ * 列相关的SQL生成器
+ * @author don
+ */
 public class ColumnSqlBuilder {
 
     /**
