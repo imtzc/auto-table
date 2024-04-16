@@ -8,7 +8,7 @@
             <transactionManager type="JDBC"/>
             <dataSource type="POOLED">
                 <property name="driver" value="org.postgresql.Driver"/>
-                <property name="url" value="jdbc:postgresql://127.0.0.1:5432/auto-table"/>
+                <property name="url" value="jdbc:postgresql://127.0.0.1:5432/auto-table?currentSchema=public"/>
                 <property name="username" value="don"/>
             </dataSource>
         </environment>
