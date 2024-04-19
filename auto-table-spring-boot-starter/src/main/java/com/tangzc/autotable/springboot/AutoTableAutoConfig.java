@@ -21,7 +21,6 @@ import com.tangzc.autotable.core.strategy.IStrategy;
 import com.tangzc.autotable.core.strategy.TableMetadata;
 import com.tangzc.autotable.springboot.properties.AutoTableProperties;
 import org.mybatis.spring.SqlSessionTemplate;
-import org.mybatis.spring.boot.autoconfigure.MybatisAutoConfiguration;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
@@ -33,7 +32,7 @@ import org.springframework.context.event.EventListener;
  * @author don
  */
 @Configuration
-@AutoConfigureAfter({DataSourceAutoConfiguration.class, MybatisAutoConfiguration.class})
+@AutoConfigureAfter({DataSourceAutoConfiguration.class})
 public class AutoTableAutoConfig {
 
     public AutoTableAutoConfig(
