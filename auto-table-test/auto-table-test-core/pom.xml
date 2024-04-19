@@ -12,6 +12,12 @@
     <artifactId>auto-table-test-core</artifactId>
 
     <dependencies>
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>com.tangzc</groupId>
             <artifactId>auto-table-core</artifactId>

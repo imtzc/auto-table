@@ -23,9 +23,8 @@
             <groupId>org.mybatis.spring.boot</groupId>
             <artifactId>mybatis-spring-boot-starter</artifactId>
             <version>${mybatis-spring.version}</version>
-            <scope>provided</scope>
+            <optional>true</optional>
         </dependency>
-
 
         <dependency>
             <groupId>com.tangzc</groupId>
@@ -38,6 +37,7 @@
             <artifactId>spring-boot-configuration-processor</artifactId>
             <version>${spring-boot.version}</version>
             <scope>provided</scope>
+            <optional>true</optional>
         </dependency>
     </dependencies>
 
