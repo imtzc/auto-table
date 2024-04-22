@@ -19,6 +19,12 @@
         </dependency>
 
         <dependency>
+            <groupId>com.tangzc</groupId>
+            <artifactId>auto-table-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
             <version>${spring-boot.version}</version>
@@ -29,18 +35,14 @@
             <groupId>org.mybatis</groupId>
             <artifactId>mybatis</artifactId>
             <version>${mybatis.version}</version>
+            <optional>true</optional>
         </dependency>
 
         <dependency>
             <groupId>org.mybatis</groupId>
             <artifactId>mybatis-spring</artifactId>
             <version>${mybatis-spring.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.tangzc</groupId>
-            <artifactId>auto-table-core</artifactId>
-            <version>${project.version}</version>
+            <optional>true</optional>
         </dependency>
 
         <dependency>
