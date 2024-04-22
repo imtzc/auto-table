@@ -1,5 +1,5 @@
 package com.tangzc.autotable.core.constants;
 
 public interface Version {
-    String VALUE = "1.6.3";
+    String VALUE = "1.6.4";
 }
