@@ -77,7 +77,7 @@ public class SqliteStrategy implements IStrategy<DefaultTableMetadata, SqliteCom
     }
 
     @Override
-    public String dropTable(String tableName) {
+    public String dropTable(String schema, String tableName) {
         return String.format("drop table if exists `%s`;", tableName);
     }
 
@@ -102,7 +102,8 @@ public class SqliteStrategy implements IStrategy<DefaultTableMetadata, SqliteCom
     public @NonNull SqliteCompareTableInfo compareTable(DefaultTableMetadata tableMetadata) {
 
         String tableName = tableMetadata.getTableName();
-        SqliteCompareTableInfo sqliteCompareTableInfo = new SqliteCompareTableInfo(tableName);
+        String schema = tableMetadata.getSchema();
+        SqliteCompareTableInfo sqliteCompareTableInfo = new SqliteCompareTableInfo(tableName, schema);
 
         // 判断表是否需要重建
         String orgBuildTableSql = executeReturn(sqliteTablesMapper -> sqliteTablesMapper.queryBuildTableSql(tableName));
@@ -201,7 +202,7 @@ public class SqliteStrategy implements IStrategy<DefaultTableMetadata, SqliteCom
                 backupName.append("_").append(offset);
             }
             String finalBackupName = backupName.toString();
-            boolean tableNotExist = this.checkTableNotExist(finalBackupName);
+            boolean tableNotExist = this.checkTableNotExist("", finalBackupName);
             if (tableNotExist) {
                 return backupName.toString();
             } else {

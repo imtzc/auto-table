@@ -71,8 +71,8 @@ public class PgsqlCompareTableInfo extends CompareTableInfo {
      */
     private List<IndexMetadata> indexMetadataList = new ArrayList<>();
 
-    public PgsqlCompareTableInfo(@NonNull String name) {
-        super(name);
+    public PgsqlCompareTableInfo(@NonNull String name, @NonNull String schema) {
+        super(name, schema);
     }
 
     @Override
@@ -150,7 +150,7 @@ public class PgsqlCompareTableInfo extends CompareTableInfo {
         this.indexMetadataList.add(indexMetadata);
     }
 
-    public void addIndexComment(@NonNull String indexName, String newComment) {
+    public void addIndexComment(@NonNull String indexName, @NonNull String newComment) {
         this.indexComment.put(indexName, newComment);
     }
 

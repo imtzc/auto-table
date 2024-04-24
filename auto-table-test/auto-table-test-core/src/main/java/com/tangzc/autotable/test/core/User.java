@@ -1,12 +1,12 @@
 package com.tangzc.autotable.test.core;
 
+import com.tangzc.autotable.annotation.AutoTable;
 import com.tangzc.autotable.annotation.ColumnComment;
 import com.tangzc.autotable.annotation.ColumnDefault;
 import com.tangzc.autotable.annotation.ColumnType;
 import com.tangzc.autotable.annotation.PrimaryKey;
 import com.tangzc.autotable.annotation.TableIndex;
 import com.tangzc.autotable.annotation.TableIndexes;
-import com.tangzc.autotable.annotation.TableName;
 import com.tangzc.autotable.annotation.enums.DefaultValueEnum;
 import com.tangzc.autotable.annotation.enums.IndexTypeEnum;
 import com.tangzc.autotable.annotation.mysql.MysqlColumnCharset;
@@ -20,7 +20,7 @@ import lombok.experimental.FieldNameConstants;
  */
 @EqualsAndHashCode(callSuper = true)
 @Data
-@TableName("sys_user")
+@AutoTable("sys_user")
 @TableIndexes({
         @TableIndex(name = "uni_name", fields = User.Fields.name, type = IndexTypeEnum.UNIQUE, comment = "姓名唯一索引"),
         @TableIndex(name = "uni_age", fields = User.Fields.age, type = IndexTypeEnum.NORMAL, comment = "年龄普通索引")

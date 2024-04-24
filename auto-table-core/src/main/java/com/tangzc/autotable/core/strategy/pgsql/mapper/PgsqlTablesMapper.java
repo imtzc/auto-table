@@ -20,11 +20,15 @@ public interface PgsqlTablesMapper {
     /**
      * 查询表名注释
      *
+     * @param schema    schema
      * @param tableName 表名
      * @return 表注释
      */
-    @Select("select description from pg_description where objoid=(select oid from pg_class where relname = #{tableName}) and objsubid=0")
-    String selectTableDescription(String tableName);
+    @Select("SELECT * FROM pg_catalog.pg_description des " +
+            "LEFT JOIN pg_catalog.pg_class clas ON des.objoid = clas.oid " +
+            "LEFT JOIN pg_catalog.pg_namespace nams ON clas.relnamespace = nams.oid " +
+            "WHERE nams.nspname = #{schema} AND clas.relname = #{tableName} AND des.objsubid = 0;")
+    String selectTableDescription(String schema, String tableName);
 
     /**
      * 查询所有字段信息
@@ -80,12 +84,13 @@ public interface PgsqlTablesMapper {
             @Result(column = "generation_expression", property = "generationExpression"),
             @Result(column = "is_updatable", property = "isUpdatable"),
     })
-    @Select("SELECT key_col.column_name is not null as primary, des.description, col.* " +
-            "FROM information_schema.columns col " +
-            "LEFT JOIN pg_description des on col.ordinal_position=des.objsubid and col.table_name::regclass=des.objoid " +
-            "LEFT JOIN information_schema.key_column_usage key_col on key_col.column_name = col.column_name and key_col.table_name = col.table_name " +
-            "WHERE col.table_name = #{tableName}")
-    List<PgsqlDbColumn> selectTableFieldDetail(String tableName);
+    @Select("SELECT key_col.column_name IS NOT NULL AS primary, des.description, cols.* " +
+            "FROM information_schema.columns cols " +
+            "LEFT JOIN information_schema.key_column_usage key_col ON key_col.column_name = cols.column_name " +
+            "LEFT JOIN pg_catalog.pg_class clas ON clas.relname = cols.table_name " +
+            "LEFT JOIN pg_catalog.pg_description des ON des.objoid = clas.oid AND cols.ordinal_position = des.objsubid " +
+            "WHERE cols.table_schema = #{schema} AND cols.table_name = #{tableName};")
+    List<PgsqlDbColumn> selectTableFieldDetail(String schema, String tableName);
 
     /**
      * 查询所有索引信息
@@ -101,8 +106,12 @@ public interface PgsqlTablesMapper {
             @Result(column = "tablespace", property = "tablespace"),
             @Result(column = "indexdef", property = "indexdef"),
     })
-    @Select("SELECT d.description,idx.* FROM pg_indexes idx LEFT JOIN pg_description d ON idx.indexname::regclass = d.objoid WHERE idx.tablename = #{tableName}")
-    List<PgsqlDbIndex> selectTableIndexesDetail(String tableName);
+    @Select("SELECT des.description, idxs.* " +
+            "FROM pg_catalog.pg_indexes idxs " +
+            "LEFT JOIN pg_catalog.pg_class clas ON idxs.indexname = clas.relname " +
+            "LEFT JOIN pg_catalog.pg_description des ON clas.oid = des.objoid " +
+            "WHERE idxs.schemaname = #{schema} AND idxs.tablename = #{tableName};")
+    List<PgsqlDbIndex> selectTableIndexesDetail(String schema, String tableName);
 
     /**
      * 查询表下的主键信息
@@ -114,8 +123,9 @@ public interface PgsqlTablesMapper {
             @Result(column = "primary_name", property = "primaryName"),
             @Result(column = "columns", property = "columns"),
     })
-    @Select("SELECT constraint_name as primary_name, string_agg(column_name, ',' ORDER BY ordinal_position ASC) as columns " +
-            "FROM information_schema.key_column_usage " +
-            "WHERE table_name = #{tableName} GROUP BY constraint_name limit 1")
-    PgsqlDbPrimary selectPrimaryKeyName(String tableName);
+    @Select("SELECT key_col.constraint_name as primary_name, string_agg(key_col.column_name, ',' ORDER BY key_col.ordinal_position ASC) as columns " +
+            "FROM information_schema.key_column_usage key_col " +
+            "WHERE key_col.table_schema = #{schema} AND key_col.table_name = #{tableName} " +
+            "GROUP BY key_col.constraint_name;")
+    PgsqlDbPrimary selectPrimaryKeyName(String schema, String tableName);
 }

@@ -39,6 +39,6 @@ public class MysqlTableMetadata extends TableMetadata {
     private List<IndexMetadata> indexMetadataList = new ArrayList<>();
 
     public MysqlTableMetadata(Class<?> entityClass, String tableName, String comment) {
-        super(entityClass, tableName, comment);
+        super(entityClass, tableName, "", comment);
     }
 }

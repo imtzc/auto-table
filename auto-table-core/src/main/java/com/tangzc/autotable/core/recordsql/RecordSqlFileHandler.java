@@ -73,6 +73,11 @@ public class RecordSqlFileHandler implements RecordSqlHandler {
         if (StringUtils.hasText(dataSourceName)) {
             fileName.append(dataSourceName).append("_");
         }
+        // 添加tableSchema
+        String tableSchema = autoTableExecuteSqlLog.getTableSchema();
+        if(StringUtils.hasText(tableSchema)) {
+            fileName.append(tableSchema).append("_");
+        }
         // 添加表名
         fileName.append(autoTableExecuteSqlLog.getTableName());
 

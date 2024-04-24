@@ -1,6 +1,5 @@
 package com.tangzc.autotable.core.strategy.mysql.builder;
 
-import com.tangzc.autotable.annotation.TableComment;
 import com.tangzc.autotable.annotation.mysql.MysqlCharset;
 import com.tangzc.autotable.annotation.mysql.MysqlEngine;
 import com.tangzc.autotable.core.AutoTableGlobalConfig;
@@ -26,8 +25,7 @@ public class MysqlTableMetadataBuilder {
     public static MysqlTableMetadata build(Class<?> clazz) {
 
         String tableName = TableBeanUtils.getTableName(clazz);
-        TableComment tableCommentAnno = TableBeanUtils.getTableComment(clazz);
-        String tableComment = tableCommentAnno == null ? null : tableCommentAnno.value();
+        String tableComment = TableBeanUtils.getTableComment(clazz);
         MysqlTableMetadata mysqlTableMetadata = new MysqlTableMetadata(clazz, tableName, tableComment);
 
         // 设置表字符集

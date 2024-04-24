@@ -1,5 +1,6 @@
 package com.tangzc.autotable.core;
 
+import com.tangzc.autotable.annotation.AutoTable;
 import com.tangzc.autotable.annotation.ColumnName;
 import com.tangzc.autotable.annotation.TableName;
 import com.tangzc.autotable.core.utils.StringUtils;
@@ -18,6 +19,7 @@ public interface AutoTableOrmFrameAdapter {
 
     /**
      * 拓展判断是否是忽略的字段
+     *
      * @param field 字段
      * @param clazz 类
      * @return 是否忽略
@@ -26,6 +28,7 @@ public interface AutoTableOrmFrameAdapter {
 
     /**
      * 判断是否是主键
+     *
      * @param field 字段
      * @param clazz 类
      * @return 是否是主键
@@ -34,6 +37,7 @@ public interface AutoTableOrmFrameAdapter {
 
     /**
      * 判断是否是自增的主键
+     *
      * @param field 字段
      * @param clazz 类
      * @return 是否是自增的主键
@@ -42,6 +46,7 @@ public interface AutoTableOrmFrameAdapter {
 
     /**
      * 三方框架定义的字段类型，通常是某些特殊注解或者枚举，定义为字符串类型
+     *
      * @param field 字段
      * @param clazz 类
      * @return 该字段的类型
@@ -52,6 +57,7 @@ public interface AutoTableOrmFrameAdapter {
 
     /**
      * 获取枚举值，默认是枚举的名字
+     *
      * @param enumType 枚举类型
      * @return 该枚举下的所有追
      */
@@ -65,6 +71,7 @@ public interface AutoTableOrmFrameAdapter {
 
     /**
      * 扫描注解
+     *
      * @return 扫描的注解集合
      */
     default List<Class<? extends Annotation>> scannerAnnotations() {
@@ -73,22 +80,35 @@ public interface AutoTableOrmFrameAdapter {
 
     /**
      * 获取表名
+     *
      * @param clazz 实体类
      * @return 表名
      */
     default String getTableName(Class<?> clazz) {
+
+        String tableName = null;
+
+        // TODO 将要删除的逻辑，仅供兼容
         TableName tableNameAnno = AutoTableGlobalConfig.getAutoTableAnnotationFinder().find(clazz, TableName.class);
-        if (tableNameAnno != null) {
-            String tableName = tableNameAnno.value();
-            if (StringUtils.hasText(tableName)) {
-                return tableName;
-            }
+        if (tableNameAnno != null && StringUtils.hasText(tableNameAnno.value())) {
+            tableName = tableNameAnno.value();
         }
-        return StringUtils.camelToUnderline(clazz.getSimpleName());
+
+        AutoTable autoTable = AutoTableGlobalConfig.getAutoTableAnnotationFinder().find(clazz, AutoTable.class);
+        if (autoTable != null && StringUtils.hasText(autoTable.value())) {
+            tableName = autoTable.value();
+        }
+
+        if (tableName == null) {
+            tableName = StringUtils.camelToUnderline(clazz.getSimpleName());
+        }
+
+        return tableName;
     }
 
     /**
      * 获取字段名
+     *
      * @param clazz 实体类
      * @param field 字段
      * @return 字段名

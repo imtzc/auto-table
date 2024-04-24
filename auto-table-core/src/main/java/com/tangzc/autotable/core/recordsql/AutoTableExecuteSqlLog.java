@@ -15,6 +15,8 @@ public class AutoTableExecuteSqlLog {
     @Ignore
     private Class<?> entityClass;
 
+    private String tableSchema;
+
     private String tableName;
 
     @ColumnType(length = 5000)
@@ -30,9 +32,10 @@ public class AutoTableExecuteSqlLog {
     private AutoTableExecuteSqlLog() {
     }
 
-    public static AutoTableExecuteSqlLog of(Class<?> entityClass, String tableName, String sql, long executionTime, long executionEndTime) {
+    public static AutoTableExecuteSqlLog of(Class<?> entityClass, String tableSchema, String tableName, String sql, long executionTime, long executionEndTime) {
         AutoTableExecuteSqlLog autoTableExecuteSqlLog = new AutoTableExecuteSqlLog();
         autoTableExecuteSqlLog.entityClass = entityClass;
+        autoTableExecuteSqlLog.tableSchema = tableSchema;
         autoTableExecuteSqlLog.tableName = tableName;
         autoTableExecuteSqlLog.sqlStatement = sql;
         autoTableExecuteSqlLog.executionTime = executionTime;

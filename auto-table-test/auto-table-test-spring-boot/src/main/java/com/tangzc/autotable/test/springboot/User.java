@@ -1,14 +1,14 @@
 package com.tangzc.autotable.test.springboot;
 
+import com.tangzc.autotable.annotation.AutoTable;
 import com.tangzc.autotable.annotation.ColumnComment;
 import com.tangzc.autotable.annotation.ColumnType;
 import com.tangzc.autotable.annotation.PrimaryKey;
-import com.tangzc.autotable.annotation.TableName;
 import com.tangzc.autotable.annotation.mysql.MysqlTypeConstant;
 import lombok.Data;
 
 @Data
-@TableName("sys_user")
+@AutoTable("sys_user")
 public class User {
 
     @PrimaryKey(true)

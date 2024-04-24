@@ -22,14 +22,20 @@ public abstract class TableMetadata {
     protected String tableName;
 
     /**
+     * schema
+     */
+    protected String schema;
+
+    /**
      * 注释
      */
     @Setter
     protected String comment;
 
-    public TableMetadata(Class<?> entityClass, String tableName, String comment) {
+    public TableMetadata(Class<?> entityClass, String tableName, String schema, String comment) {
         this.entityClass = entityClass;
         this.tableName = tableName;
+        this.schema = schema;
         this.comment = comment;
     }
 }

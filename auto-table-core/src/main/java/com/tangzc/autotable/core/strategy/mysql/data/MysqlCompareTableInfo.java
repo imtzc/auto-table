@@ -60,8 +60,8 @@ public class MysqlCompareTableInfo extends CompareTableInfo {
      */
     private final List<IndexMetadata> indexMetadataList = new ArrayList<>();
 
-    public MysqlCompareTableInfo(@NonNull String name) {
-        super(name);
+    public MysqlCompareTableInfo(@NonNull String name, @NonNull String schema) {
+        super(name, schema);
     }
 
     /**

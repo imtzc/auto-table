@@ -92,7 +92,7 @@ public class MysqlStrategy implements IStrategy<MysqlTableMetadata, MysqlCompare
     }
 
     @Override
-    public String dropTable(String tableName) {
+    public String dropTable(String schema, String tableName) {
 
         return String.format("DROP TABLE IF EXISTS `%s`", tableName);
     }
@@ -113,7 +113,8 @@ public class MysqlStrategy implements IStrategy<MysqlTableMetadata, MysqlCompare
     public @NonNull MysqlCompareTableInfo compareTable(MysqlTableMetadata tableMetadata) {
 
         String tableName = tableMetadata.getTableName();
-        MysqlCompareTableInfo mysqlCompareTableInfo = new MysqlCompareTableInfo(tableName);
+        String schema = tableMetadata.getSchema();
+        MysqlCompareTableInfo mysqlCompareTableInfo = new MysqlCompareTableInfo(tableName, schema);
 
         InformationSchemaTable informationSchemaTable = executeReturn(mysqlTablesMapper -> mysqlTablesMapper.findTableByTableName(tableName));
 

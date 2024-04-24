@@ -1,6 +1,5 @@
 package com.tangzc.autotable.core.builder;
 
-import com.tangzc.autotable.annotation.TableComment;
 import com.tangzc.autotable.core.strategy.ColumnMetadata;
 import com.tangzc.autotable.core.strategy.DefaultTableMetadata;
 import com.tangzc.autotable.core.strategy.IndexMetadata;
@@ -27,10 +26,10 @@ public class DefaultTableMetadataBuilder {
 
     public DefaultTableMetadata build(Class<?> clazz) {
 
-        String tableName = TableBeanUtils.getTableName(clazz);
-        TableComment tableCommentAnno = TableBeanUtils.getTableComment(clazz);
-        String tableComment = tableCommentAnno == null ? null : tableCommentAnno.value();
-        DefaultTableMetadata tableMetadata = new DefaultTableMetadata(clazz, tableName, tableComment);
+        String tableName = getTableName(clazz);
+        String tableSchema = getTableSchema(clazz);
+        String tableComment = getTableComment(clazz);
+        DefaultTableMetadata tableMetadata = new DefaultTableMetadata(clazz, tableName, tableSchema, tableComment);
 
         List<Field> fields = BeanClassUtil.listAllFieldForColumn(clazz);
 
@@ -41,6 +40,18 @@ public class DefaultTableMetadataBuilder {
         fillIndexMetadataList(clazz, tableMetadata, fields);
 
         return tableMetadata;
+    }
+
+    protected String getTableComment(Class<?> clazz) {
+        return TableBeanUtils.getTableComment(clazz);
+    }
+
+    protected String getTableSchema(Class<?> clazz) {
+        return TableBeanUtils.getTableSchema(clazz);
+    }
+
+    protected String getTableName(Class<?> clazz) {
+        return TableBeanUtils.getTableName(clazz);
     }
 
     protected void fillIndexMetadataList(Class<?> clazz, DefaultTableMetadata tableMetadata, List<Field> fields) {

@@ -1,7 +1,6 @@
 package com.tangzc.autotable.core.recordsql;
 
 import com.tangzc.autotable.core.AutoTableGlobalConfig;
-import com.tangzc.autotable.core.AutoTableOrmFrameAdapter;
 import com.tangzc.autotable.core.config.PropertyConfig;
 import com.tangzc.autotable.core.dynamicds.DatasourceNameManager;
 import com.tangzc.autotable.core.dynamicds.IDataSourceHandler;
@@ -30,12 +29,10 @@ public class RecordSqlDbHandler implements RecordSqlHandler {
 
         PropertyConfig.RecordSqlProperties recordSqlConfig = AutoTableGlobalConfig.getAutoTableProperties().getRecordSql();
 
-        // 获取框架适配器
-        AutoTableOrmFrameAdapter autoTableOrmFrameAdapter = AutoTableGlobalConfig.getAutoTableOrmFrameAdapter();
         // 优先使用自定义的表名，没有则根据统一的风格定义表名
         String tableName = recordSqlConfig.getTableName();
         if (StringUtils.noText(tableName)) {
-            tableName = autoTableOrmFrameAdapter.getTableName(AutoTableExecuteSqlLog.class);
+            tableName = TableBeanUtils.getTableName(AutoTableExecuteSqlLog.class);
         }
 
         // 判断表是否存在，不存在则创建
@@ -61,15 +58,15 @@ public class RecordSqlDbHandler implements RecordSqlHandler {
         /* 插入数据 */
         Class<AutoTableExecuteSqlLog> sqlLogClass = AutoTableExecuteSqlLog.class;
         // 筛选列
-        List<Field> ColumnFields = Arrays.stream(sqlLogClass.getDeclaredFields())
+        List<Field> columnFields = Arrays.stream(sqlLogClass.getDeclaredFields())
                 .filter(field -> TableBeanUtils.isIncludeField(field, sqlLogClass))
                 .collect(Collectors.toList());
         // 根据统一的风格定义列名
-        List<String> columns = ColumnFields.stream()
+        List<String> columns = columnFields.stream()
                 .map(field -> TableBeanUtils.getRealColumnName(sqlLogClass, field))
                 .collect(Collectors.toList());
         // 获取每一列的值
-        List<Object> values = ColumnFields.stream().map(field -> {
+        List<Object> values = columnFields.stream().map(field -> {
             try {
                 field.setAccessible(true);
                 return field.get(autoTableExecuteSqlLog);

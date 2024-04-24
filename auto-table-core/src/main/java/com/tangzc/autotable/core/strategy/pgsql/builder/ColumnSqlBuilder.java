@@ -20,7 +20,7 @@ public class ColumnSqlBuilder {
     public static String buildSql(ColumnMetadata columnMetadata) {
         // 例子："name" varchar(100) NULL DEFAULT '张三' COMMENT '名称'
         // 例子："id" int4(32) NOT NULL AUTO_INCREMENT COMMENT '主键'
-        return StringConnectHelper.newInstance("\"{columnName}\" {typeAndLength} {null} {default}")
+        return StringConnectHelper.newInstance("{columnName} {typeAndLength} {null} {default}")
                 .replace("{columnName}", columnMetadata.getName())
                 .replace("{typeAndLength}", () -> {
                     /* 如果是自增，忽略指定的类型，交给pgsql自动处理，pgsql会设定int4(32)类型，

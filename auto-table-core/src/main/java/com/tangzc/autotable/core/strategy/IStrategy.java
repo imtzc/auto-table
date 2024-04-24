@@ -6,6 +6,7 @@ import com.tangzc.autotable.core.converter.DefaultTypeEnumInterface;
 import com.tangzc.autotable.core.dynamicds.SqlSessionFactoryManager;
 import com.tangzc.autotable.core.recordsql.AutoTableExecuteSqlLog;
 import com.tangzc.autotable.core.recordsql.RecordSqlService;
+import com.tangzc.autotable.core.utils.StringUtils;
 import lombok.NonNull;
 import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.SqlSession;
@@ -120,10 +121,11 @@ public interface IStrategy<TABLE_META extends TableMetadata, COMPARE_TABLE_INFO 
      */
     default void validateMode(TABLE_META tableMetadata) {
 
+        String schema = tableMetadata.getSchema();
         String tableName = tableMetadata.getTableName();
 
         // 检查数据库数据模型与实体是否一致
-        boolean tableNotExist = this.checkTableNotExist(tableName);
+        boolean tableNotExist = this.checkTableNotExist(schema, tableName);
         if (tableNotExist) {
             AutoTableGlobalConfig.getValidateFinishCallback().validateFinish(false, this.databaseDialect(), null);
             throw new RuntimeException(String.format("启动失败，%s中不存在表%s", this.databaseDialect(), tableMetadata.getTableName()));
@@ -148,12 +150,13 @@ public interface IStrategy<TABLE_META extends TableMetadata, COMPARE_TABLE_INFO 
      */
     default void createMode(TABLE_META tableMetadata) {
 
+        String schema = tableMetadata.getSchema();
         String tableName = tableMetadata.getTableName();
 
         // 表是否存在的标记
         log.info("create模式，删除表：{}", tableName);
         // 直接尝试删除表
-        String sql = this.dropTable(tableName);
+        String sql = this.dropTable(schema, tableName);
         this.executeSql(tableMetadata, Collections.singletonList(sql));
 
         // 新建表
@@ -171,9 +174,10 @@ public interface IStrategy<TABLE_META extends TableMetadata, COMPARE_TABLE_INFO 
      */
     default void updateMode(TABLE_META tableMetadata) {
 
+        String schema = tableMetadata.getSchema();
         String tableName = tableMetadata.getTableName();
 
-        boolean tableNotExist = this.checkTableNotExist(tableName);
+        boolean tableNotExist = this.checkTableNotExist(schema, tableName);
         // 当表不存在的时候，直接创建表
         if (tableNotExist) {
             executeCreateTable(tableMetadata);
@@ -184,7 +188,7 @@ public interface IStrategy<TABLE_META extends TableMetadata, COMPARE_TABLE_INFO 
         COMPARE_TABLE_INFO compareTableInfo = this.compareTable(tableMetadata);
         if (compareTableInfo.needModify()) {
             // 修改表信息
-            log.info("修改表：{}", tableName);
+            log.info("修改表：{}", (StringUtils.hasText(schema) ? schema + "." : "") + tableName);
             AutoTableGlobalConfig.getModifyTableInterceptor().beforeModifyTable(this.databaseDialect(), tableMetadata, compareTableInfo);
             List<String> sqlList = this.modifyTable(compareTableInfo);
             this.executeSql(tableMetadata, sqlList);
@@ -199,8 +203,9 @@ public interface IStrategy<TABLE_META extends TableMetadata, COMPARE_TABLE_INFO 
      */
     default void executeCreateTable(TABLE_META tableMetadata) {
 
+        String schema = tableMetadata.getSchema();
         String tableName = tableMetadata.getTableName();
-        log.info("创建表：{}", tableName);
+        log.info("创建表：{}", (StringUtils.hasText(schema) ? schema + "." : "") + tableName);
 
         AutoTableGlobalConfig.getCreateTableInterceptor().beforeCreateTable(this.databaseDialect(), tableMetadata);
         List<String> sqlList = this.createTable(tableMetadata);
@@ -230,7 +235,7 @@ public interface IStrategy<TABLE_META extends TableMetadata, COMPARE_TABLE_INFO 
                     long executionTime = System.currentTimeMillis();
                     statement.execute(sql);
                     long executionEndTime = System.currentTimeMillis();
-                    AutoTableExecuteSqlLog autoTableExecuteSqlLog = AutoTableExecuteSqlLog.of(tableMetadata.getEntityClass(), tableMetadata.getTableName(), sql, executionTime, executionEndTime);
+                    AutoTableExecuteSqlLog autoTableExecuteSqlLog = AutoTableExecuteSqlLog.of(tableMetadata.getEntityClass(), tableMetadata.getSchema(), tableMetadata.getTableName(), sql, executionTime, executionEndTime);
                     autoTableExecuteSqlLogs.add(autoTableExecuteSqlLog);
                     log.info("执行sql({}ms)：{}", executionEndTime - executionTime, sql);
                 }
@@ -239,7 +244,7 @@ public interface IStrategy<TABLE_META extends TableMetadata, COMPARE_TABLE_INFO 
                 connection.commit();
             } catch (Exception e) {
                 connection.rollback();
-                throw new RuntimeException("执行SQL[" + sqlList + "]期间出错", e);
+                throw new RuntimeException("执行SQL: \n" + String.join("\n", sqlList) + "\n期间出错", e);
             }
 
             // 记录SQL
@@ -253,10 +258,11 @@ public interface IStrategy<TABLE_META extends TableMetadata, COMPARE_TABLE_INFO 
     /**
      * 检查表是否存在
      *
+     * @param schema    schema
      * @param tableName 表名
      * @return 表详情
      */
-    default boolean checkTableNotExist(String tableName) {
+    default boolean checkTableNotExist(String schema, String tableName) {
         // 获取Configuration对象
         Configuration configuration = SqlSessionFactoryManager.getSqlSessionFactory().getConfiguration();
         try (Connection connection = configuration.getEnvironment().getDataSource().getConnection()) {
@@ -264,7 +270,7 @@ public interface IStrategy<TABLE_META extends TableMetadata, COMPARE_TABLE_INFO 
             DatabaseMetaData metaData = connection.getMetaData();
             String connectionCatalog = connection.getCatalog();
             String connectionSchema = connection.getSchema();
-            boolean exist = metaData.getTables(connectionCatalog, connectionSchema, tableName, null).next();
+            boolean exist = metaData.getTables(connectionCatalog, StringUtils.hasText(schema) ? schema : connectionSchema, tableName, null).next();
             return !exist;
         } catch (SQLException e) {
             throw new RuntimeException("判断数据库是否存在出错", e);
@@ -299,10 +305,11 @@ public interface IStrategy<TABLE_META extends TableMetadata, COMPARE_TABLE_INFO 
     /**
      * 根据表名删除表，生成删除表的SQL
      *
+     * @param schema    schema
      * @param tableName 表名
      * @return SQL
      */
-    String dropTable(String tableName);
+    String dropTable(String schema, String tableName);
 
     /**
      * 分析Bean，得到元数据信息
@@ -310,7 +317,8 @@ public interface IStrategy<TABLE_META extends TableMetadata, COMPARE_TABLE_INFO 
      * @param beanClass 待分析的class
      * @return 表元信息
      */
-    @NonNull TABLE_META analyseClass(Class<?> beanClass);
+    @NonNull
+    TABLE_META analyseClass(Class<?> beanClass);
 
     /**
      * 生成创建表SQL
@@ -326,7 +334,8 @@ public interface IStrategy<TABLE_META extends TableMetadata, COMPARE_TABLE_INFO 
      * @param tableMetadata 表元数据
      * @return 待修改的表信息描述
      */
-    @NonNull COMPARE_TABLE_INFO compareTable(TABLE_META tableMetadata);
+    @NonNull
+    COMPARE_TABLE_INFO compareTable(TABLE_META tableMetadata);
 
     /**
      * 生成修改表SQL

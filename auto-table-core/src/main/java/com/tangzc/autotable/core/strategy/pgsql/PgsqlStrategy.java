@@ -85,8 +85,8 @@ public class PgsqlStrategy implements IStrategy<DefaultTableMetadata, PgsqlCompa
     }
 
     @Override
-    public String dropTable(String tableName) {
-        return String.format("DROP TABLE IF EXISTS \"%s\"", tableName);
+    public String dropTable(String schema, String tableName) {
+        return String.format("DROP TABLE IF EXISTS %s", withSchemaName(schema, tableName));
     }
 
     @Override
@@ -105,23 +105,28 @@ public class PgsqlStrategy implements IStrategy<DefaultTableMetadata, PgsqlCompa
     public @NonNull PgsqlCompareTableInfo compareTable(DefaultTableMetadata tableMetadata) {
 
         String tableName = tableMetadata.getTableName();
+        String schema = tableMetadata.getSchema();
 
-        PgsqlCompareTableInfo pgsqlCompareTableInfo = new PgsqlCompareTableInfo(tableName);
+        PgsqlCompareTableInfo pgsqlCompareTableInfo = new PgsqlCompareTableInfo(tableName, schema);
 
         // 比较表信息
-        compareTableInfo(tableMetadata, tableName, pgsqlCompareTableInfo);
+        compareTableInfo(tableMetadata, pgsqlCompareTableInfo);
 
         // 比较字段信息
-        compareColumnInfo(tableMetadata, tableName, pgsqlCompareTableInfo);
+        compareColumnInfo(tableMetadata, pgsqlCompareTableInfo);
 
         // 比较索引信息
-        compareIndexInfo(tableMetadata, tableName, pgsqlCompareTableInfo);
+        compareIndexInfo(tableMetadata, pgsqlCompareTableInfo);
 
         return pgsqlCompareTableInfo;
     }
 
-    private void compareIndexInfo(DefaultTableMetadata tableMetadata, String tableName, PgsqlCompareTableInfo pgsqlCompareTableInfo) {
-        List<PgsqlDbIndex> pgsqlDbIndices = executeReturn(pgsqlTablesMapper -> pgsqlTablesMapper.selectTableIndexesDetail(tableName));
+    private void compareIndexInfo(DefaultTableMetadata tableMetadata, PgsqlCompareTableInfo pgsqlCompareTableInfo) {
+
+        String tableName = tableMetadata.getTableName();
+        String schema = tableMetadata.getSchema();
+
+        List<PgsqlDbIndex> pgsqlDbIndices = executeReturn(pgsqlTablesMapper -> pgsqlTablesMapper.selectTableIndexesDetail(schema, tableName));
         Map<String, PgsqlDbIndex> pgsqlDbIndexMap = pgsqlDbIndices.stream()
                 // 仅仅处理自定义的索引
                 .filter(idx -> idx.getIndexName().startsWith(AutoTableGlobalConfig.getAutoTableProperties().getIndexPrefix()))
@@ -130,11 +135,12 @@ public class PgsqlStrategy implements IStrategy<DefaultTableMetadata, PgsqlCompa
         List<IndexMetadata> indexMetadataList = tableMetadata.getIndexMetadataList();
         for (IndexMetadata indexMetadata : indexMetadataList) {
             String indexName = indexMetadata.getName();
-            PgsqlDbIndex dbIndex = pgsqlDbIndexMap.remove(indexName);
-            // 新增索引
             String comment = indexMetadata.getComment();
-            comment = StringUtils.hasText(comment) ? comment : null;
-            if (dbIndex == null) {
+            // 尝试从索引标记集合中删除索引
+            PgsqlDbIndex dbIndex = pgsqlDbIndexMap.remove(indexName);
+            // 删除失败，表示是新增的索引
+            boolean isNewIndex = dbIndex == null;
+            if (isNewIndex) {
                 // 标记注释
                 if (StringUtils.hasText(comment)) {
                     pgsqlCompareTableInfo.addIndexComment(indexMetadata.getName(), comment);
@@ -144,7 +150,8 @@ public class PgsqlStrategy implements IStrategy<DefaultTableMetadata, PgsqlCompa
                 continue;
             }
             // 修改索引注释
-            if (!Objects.equals(dbIndex.getDescription(), comment)) {
+            boolean anyOneIsValid = StringUtils.hasText(dbIndex.getDescription()) || StringUtils.hasText(comment);
+            if (anyOneIsValid && !Objects.equals(dbIndex.getDescription(), comment)) {
                 pgsqlCompareTableInfo.addIndexComment(indexName, comment);
             }
 
@@ -153,7 +160,7 @@ public class PgsqlStrategy implements IStrategy<DefaultTableMetadata, PgsqlCompa
             boolean isUniqueIndex = indexMetadata.getType() == IndexTypeEnum.UNIQUE;
             // 索引改变
             String indexColumnParams = indexMetadata.getColumns().stream().map(col -> col.getColumn() + (col.getSort() == IndexSortTypeEnum.DESC ? " DESC" : "")).collect(Collectors.joining(", "));
-            if (!indexdef.matches("^CREATE " + (isUniqueIndex ? "UNIQUE INDEX" : "INDEX") + " " + indexName + " ON " + tableName + " USING btree \\(" + indexColumnParams + "\\)$")) {
+            if (!indexdef.matches("^CREATE " + (isUniqueIndex ? "UNIQUE INDEX" : "INDEX") + " " + indexName + " ON " + PgsqlStrategy.withSchemaName(schema, tableName) + " USING btree \\(" + indexColumnParams + "\\)$")) {
                 pgsqlCompareTableInfo.addModifyIndex(indexMetadata);
             }
         }
@@ -168,9 +175,12 @@ public class PgsqlStrategy implements IStrategy<DefaultTableMetadata, PgsqlCompa
         }
     }
 
-    private void compareColumnInfo(DefaultTableMetadata tableMetadata, String tableName, PgsqlCompareTableInfo pgsqlCompareTableInfo) {
+    private void compareColumnInfo(DefaultTableMetadata tableMetadata, PgsqlCompareTableInfo pgsqlCompareTableInfo) {
+
+        String tableName = tableMetadata.getTableName();
+        String schema = tableMetadata.getSchema();
         // 数据库字段元信息
-        List<PgsqlDbColumn> pgsqlDbColumns = executeReturn(pgsqlTablesMapper -> pgsqlTablesMapper.selectTableFieldDetail(tableName));
+        List<PgsqlDbColumn> pgsqlDbColumns = executeReturn(pgsqlTablesMapper -> pgsqlTablesMapper.selectTableFieldDetail(schema, tableName));
         Map<String, PgsqlDbColumn> pgsqlFieldDetailMap = pgsqlDbColumns.stream().collect(Collectors.toMap(PgsqlDbColumn::getColumnName, Function.identity()));
         // 当前字段信息
         List<ColumnMetadata> columnMetadataList = tableMetadata.getColumnMetadataList();
@@ -219,7 +229,7 @@ public class PgsqlStrategy implements IStrategy<DefaultTableMetadata, PgsqlCompa
         // 获取所有主键
         List<ColumnMetadata> primaryColumnList = columnMetadataList.stream().filter(ColumnMetadata::isPrimary).collect(Collectors.toList());
         // 查询数据库主键信息
-        PgsqlDbPrimary pgsqlDbPrimary = executeReturn(pgsqlTablesMapper -> pgsqlTablesMapper.selectPrimaryKeyName(tableName));
+        PgsqlDbPrimary pgsqlDbPrimary = executeReturn(pgsqlTablesMapper -> pgsqlTablesMapper.selectPrimaryKeyName(schema, tableName));
 
         boolean removePrimary = primaryColumnList.isEmpty() && pgsqlDbPrimary != null;
         String newPrimaryColumns = primaryColumnList.stream().map(ColumnMetadata::getName).collect(Collectors.joining(","));
@@ -248,7 +258,7 @@ public class PgsqlStrategy implements IStrategy<DefaultTableMetadata, PgsqlCompa
     private static boolean isDefaultDiff(ColumnMetadata columnMetadata, String columnDefault) {
 
         // 纠正default值，去掉类型转换
-        if(columnDefault != null) {
+        if (columnDefault != null) {
             int castChart = columnDefault.indexOf("::");
             if (castChart > 0) {
                 columnDefault = columnDefault.substring(0, castChart);
@@ -271,8 +281,12 @@ public class PgsqlStrategy implements IStrategy<DefaultTableMetadata, PgsqlCompa
         return false;
     }
 
-    private void compareTableInfo(DefaultTableMetadata tableMetadata, String tableName, PgsqlCompareTableInfo pgsqlCompareTableInfo) {
-        String tableDescription = executeReturn(pgsqlTablesMapper -> pgsqlTablesMapper.selectTableDescription(tableName));
+    private void compareTableInfo(DefaultTableMetadata tableMetadata, PgsqlCompareTableInfo pgsqlCompareTableInfo) {
+
+        String tableName = tableMetadata.getTableName();
+        String schema = tableMetadata.getSchema();
+
+        String tableDescription = executeReturn(pgsqlTablesMapper -> pgsqlTablesMapper.selectTableDescription(schema, tableName));
         if (!Objects.equals(tableDescription, tableMetadata.getComment())) {
             pgsqlCompareTableInfo.setComment(tableMetadata.getComment());
         }
@@ -282,5 +296,9 @@ public class PgsqlStrategy implements IStrategy<DefaultTableMetadata, PgsqlCompa
     public List<String> modifyTable(PgsqlCompareTableInfo pgsqlCompareTableInfo) {
         String sql = ModifyTableSqlBuilder.buildSql(pgsqlCompareTableInfo);
         return Collections.singletonList(sql);
+    }
+
+    public static String withSchemaName(String schema, String name) {
+        return StringUtils.hasText(schema) ? (schema + "." + name) : name;
     }
 }

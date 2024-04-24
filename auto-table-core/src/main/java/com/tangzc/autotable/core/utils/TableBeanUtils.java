@@ -1,5 +1,6 @@
 package com.tangzc.autotable.core.utils;
 
+import com.tangzc.autotable.annotation.AutoTable;
 import com.tangzc.autotable.annotation.ColumnComment;
 import com.tangzc.autotable.annotation.ColumnDefault;
 import com.tangzc.autotable.annotation.ColumnNotNull;
@@ -10,6 +11,7 @@ import com.tangzc.autotable.annotation.PrimaryKey;
 import com.tangzc.autotable.annotation.TableComment;
 import com.tangzc.autotable.annotation.TableIndex;
 import com.tangzc.autotable.annotation.TableIndexes;
+import com.tangzc.autotable.core.AutoTableAnnotationFinder;
 import com.tangzc.autotable.core.AutoTableGlobalConfig;
 import com.tangzc.autotable.core.AutoTableOrmFrameAdapter;
 
@@ -48,8 +50,28 @@ public class TableBeanUtils {
         return tableIndices;
     }
 
-    public static TableComment getTableComment(Class<?> clazz) {
-        return AutoTableGlobalConfig.getAutoTableAnnotationFinder().find(clazz, TableComment.class);
+    public static String getTableSchema(Class<?> clazz) {
+        AutoTableAnnotationFinder autoTableAnnotationFinder = AutoTableGlobalConfig.getAutoTableAnnotationFinder();
+        AutoTable autoTable = autoTableAnnotationFinder.find(clazz, AutoTable.class);
+        if(autoTable != null) {
+            return autoTable.schema();
+        }
+        return null;
+    }
+
+    public static String getTableComment(Class<?> clazz) {
+        AutoTableAnnotationFinder autoTableAnnotationFinder = AutoTableGlobalConfig.getAutoTableAnnotationFinder();
+
+        TableComment tableComment = autoTableAnnotationFinder.find(clazz, TableComment.class);
+        if(tableComment != null) {
+            return tableComment.value();
+        }
+
+        AutoTable autoTable = autoTableAnnotationFinder.find(clazz, AutoTable.class);
+        if(autoTable != null) {
+            return autoTable.comment();
+        }
+        return null;
     }
 
     public static boolean isPrimary(Field field, Class<?> clazz) {
