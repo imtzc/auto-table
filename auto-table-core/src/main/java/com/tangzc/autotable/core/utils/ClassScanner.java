@@ -7,21 +7,21 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.net.JarURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.Set;
+import java.nio.file.Files;
+import java.util.*;
 import java.util.function.Function;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
  * 基于注解扫描java类
+ *
  * @author don
  */
 public class ClassScanner {
@@ -48,64 +48,70 @@ public class ClassScanner {
     }
 
     public static Set<Class<?>> getClasses(String packageName, Function<Class<?>, Boolean> checker) throws IOException, ClassNotFoundException {
+
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         String path = packageName.replace('.', '/');
-        Enumeration<URL> resources = classLoader.getResources(path);
-        Set<Class<?>> classes = new HashSet<>();
+        String basePackage = path.split("/\\*")[0];
+        Pattern checkPattern = Pattern.compile("(" + packageName.replace(".", "\\/").replace("**", "[a-z0-9\\/]+").replace("*", "[a-z0-9]+") + "[A-Za-z0-9\\/]+)\\.class$");
 
+        Enumeration<URL> resources = classLoader.getResources(basePackage);
+        Set<Class<?>> classes = new HashSet<>();
         while (resources.hasMoreElements()) {
             URL resource = resources.nextElement();
             if ("file".equals(resource.getProtocol())) {
                 String decodedPath = URLDecoder.decode(resource.getFile(), "UTF-8");
-                classes.addAll(findClassesLocal(packageName, new File(decodedPath), checker));
+                classes.addAll(findClassesLocal(checkPattern, new File(decodedPath), checker));
             } else if ("jar".equals(resource.getProtocol())) {
                 JarURLConnection jarURLConnection = (JarURLConnection) resource.openConnection();
-                classes.addAll(findClassesJar(packageName, jarURLConnection.getJarFile(), checker));
+                classes.addAll(findClassesJar(checkPattern, jarURLConnection.getJarFile(), checker));
             }
         }
-
         return classes;
     }
 
-    private static Set<Class<?>> findClassesLocal(String packageName, File directory, Function<Class<?>, Boolean> checker) throws ClassNotFoundException {
+    private static Set<Class<?>> findClassesLocal(Pattern checkPattern, File directory, Function<Class<?>, Boolean> checker) throws ClassNotFoundException, IOException {
         Set<Class<?>> classes = new HashSet<>();
         if (!directory.exists()) {
             return classes;
         }
 
-        File[] files = directory.listFiles();
-        if (files != null) {
-            for (File file : files) {
-                if (file.isDirectory()) {
-                    assert !file.getName().contains(".");
-                    classes.addAll(findClassesLocal(packageName + "." + file.getName(), file, checker));
-                } else if (file.getName().endsWith(".class")) {
-                    Class<?> clazz = Class.forName(packageName + '.' + file.getName().substring(0, file.getName().length() - 6));
+        Files.walk(directory.toPath()).filter(
+                (path) -> Files.isRegularFile(path) && path.toString().endsWith(".class")
+        ).collect(Collectors.toList()).forEach(path -> {
+            try {
+                String pathUrl = path.toUri().toURL().toString();
+                Matcher matcher = checkPattern.matcher(pathUrl);
+                if(matcher.find()){
+                    String className = matcher.group(1).replace("/", ".");
+                    Class<?> clazz = Class.forName(className);
+                    if (checker.apply(clazz)) { // check annotation
+                        classes.add(clazz);
+                    }
+                }
+            } catch (ClassNotFoundException | MalformedURLException e) {
+                // ignore
+            }
+        });
+        return classes;
+    }
+
+    private static Set<Class<?>> findClassesJar(Pattern checkPattern, JarFile jarFile, Function<Class<?>, Boolean> checker) throws ClassNotFoundException {
+        Set<Class<?>> classes = new HashSet<>();
+        Enumeration<JarEntry> entries = jarFile.entries();
+
+        while (entries.hasMoreElements()) {
+            JarEntry entry = entries.nextElement();
+            if (entry.getName().endsWith(".class")){
+                Matcher matcher = checkPattern.matcher(entry.getName());
+                if(matcher.find()){
+                    String className = matcher.group(1).replace("/", ".");
+                    Class<?> clazz = Class.forName(className);
                     if (checker.apply(clazz)) {
                         classes.add(clazz);
                     }
                 }
             }
         }
-
-        return classes;
-    }
-
-    private static Set<Class<?>> findClassesJar(String packageName, JarFile jarFile, Function<Class<?>, Boolean> checker) throws ClassNotFoundException {
-        Set<Class<?>> classes = new HashSet<>();
-        Enumeration<JarEntry> entries = jarFile.entries();
-
-        while (entries.hasMoreElements()) {
-            JarEntry entry = entries.nextElement();
-            if (entry.getName().endsWith(".class") && entry.getName().startsWith(packageName.replace('.', '/'))) {
-                String className = entry.getName().replace('/', '.').substring(0, entry.getName().length() - 6);
-                Class<?> clazz = Class.forName(className);
-                if (checker.apply(clazz)) {
-                    classes.add(clazz);
-                }
-            }
-        }
-
         return classes;
     }
 }
