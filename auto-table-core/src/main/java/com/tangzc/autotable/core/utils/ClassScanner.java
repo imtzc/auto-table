@@ -11,7 +11,12 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.file.Files;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -52,7 +57,7 @@ public class ClassScanner {
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         String path = packageName.replace('.', '/');
         String basePackage = path.split("/\\*")[0];
-        Pattern checkPattern = Pattern.compile("(" + packageName.replace(".", "\\/").replace("**", "[a-z0-9\\/]+").replace("*", "[a-z0-9]+") + "[A-Za-z0-9\\/]+)\\.class$");
+        Pattern checkPattern = Pattern.compile("(" + packageName.replace(".", "\\/").replace("**", "[A-Za-z0-9$_/]+").replace("*", "[A-Za-z0-9$_]+") + "[A-Za-z0-9$_/]+)\\.class$");
 
         Enumeration<URL> resources = classLoader.getResources(basePackage);
         Set<Class<?>> classes = new HashSet<>();
@@ -75,23 +80,23 @@ public class ClassScanner {
             return classes;
         }
 
-        Files.walk(directory.toPath()).filter(
-                (path) -> Files.isRegularFile(path) && path.toString().endsWith(".class")
-        ).collect(Collectors.toList()).forEach(path -> {
-            try {
-                String pathUrl = path.toUri().toURL().toString();
-                Matcher matcher = checkPattern.matcher(pathUrl);
-                if(matcher.find()){
-                    String className = matcher.group(1).replace("/", ".");
-                    Class<?> clazz = Class.forName(className);
-                    if (checker.apply(clazz)) { // check annotation
-                        classes.add(clazz);
+        Files.walk(directory.toPath())
+                .filter(path -> Files.isRegularFile(path) && path.toString().endsWith(".class"))
+                .forEach(path -> {
+                    try {
+                        String pathUrl = path.toUri().toURL().toString();
+                        Matcher matcher = checkPattern.matcher(pathUrl);
+                        if (matcher.find()) {
+                            String className = matcher.group(1).replace("/", ".");
+                            Class<?> clazz = Class.forName(className);
+                            if (checker.apply(clazz)) { // check annotation
+                                classes.add(clazz);
+                            }
+                        }
+                    } catch (ClassNotFoundException | MalformedURLException e) {
+                        // ignore
                     }
-                }
-            } catch (ClassNotFoundException | MalformedURLException e) {
-                // ignore
-            }
-        });
+                });
         return classes;
     }
 
@@ -101,9 +106,9 @@ public class ClassScanner {
 
         while (entries.hasMoreElements()) {
             JarEntry entry = entries.nextElement();
-            if (entry.getName().endsWith(".class")){
+            if (entry.getName().endsWith(".class")) {
                 Matcher matcher = checkPattern.matcher(entry.getName());
-                if(matcher.find()){
+                if (matcher.find()) {
                     String className = matcher.group(1).replace("/", ".");
                     Class<?> clazz = Class.forName(className);
                     if (checker.apply(clazz)) {

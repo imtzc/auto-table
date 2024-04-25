@@ -36,6 +36,8 @@ public class TestApplication {
         PropertyConfig autoTableProperties = new PropertyConfig();
         // create模式
         autoTableProperties.setMode(RunMode.create);
+        // 指定扫描包
+        autoTableProperties.setModelPackage(new String[]{"com.**.test.core"});
         // 开启 删除不存在的列
         autoTableProperties.setAutoDropColumn(true);
         // 父类字段加到子类的前面
