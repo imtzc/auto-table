@@ -50,13 +50,25 @@ public class TableBeanUtils {
         return tableIndices;
     }
 
+    /**
+     * 获取bean上的表名
+     *
+     * @param clazz bean
+     * @return 表名
+     */
+    public static String getTableName(Class<?> clazz) {
+        AutoTableOrmFrameAdapter autoTableOrmFrameAdapter = AutoTableGlobalConfig.getAutoTableOrmFrameAdapter();
+        return autoTableOrmFrameAdapter.getTableName(clazz);
+    }
+
+    /**
+     * 获取bean上的schema
+     * @param clazz bean
+     * @return schema
+     */
     public static String getTableSchema(Class<?> clazz) {
-        AutoTableAnnotationFinder autoTableAnnotationFinder = AutoTableGlobalConfig.getAutoTableAnnotationFinder();
-        AutoTable autoTable = autoTableAnnotationFinder.find(clazz, AutoTable.class);
-        if(autoTable != null) {
-            return autoTable.schema();
-        }
-        return null;
+        AutoTableOrmFrameAdapter autoTableOrmFrameAdapter = AutoTableGlobalConfig.getAutoTableOrmFrameAdapter();
+        return autoTableOrmFrameAdapter.getTableSchema(clazz);
     }
 
     public static String getTableComment(Class<?> clazz) {
@@ -134,17 +146,6 @@ public class TableBeanUtils {
         }
 
         return fieldType;
-    }
-
-    /**
-     * 获取bean上的表名
-     *
-     * @param clazz bean
-     * @return 表名
-     */
-    public static String getTableName(Class<?> clazz) {
-        AutoTableOrmFrameAdapter autoTableOrmFrameAdapter = AutoTableGlobalConfig.getAutoTableOrmFrameAdapter();
-        return autoTableOrmFrameAdapter.getTableName(clazz);
     }
 
     /**

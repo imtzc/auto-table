@@ -88,13 +88,15 @@ public interface AutoTableOrmFrameAdapter {
 
         String tableName = null;
 
+        AutoTableAnnotationFinder autoTableAnnotationFinder = AutoTableGlobalConfig.getAutoTableAnnotationFinder();
+
         // TODO 将要删除的逻辑，仅供兼容
-        TableName tableNameAnno = AutoTableGlobalConfig.getAutoTableAnnotationFinder().find(clazz, TableName.class);
+        TableName tableNameAnno = autoTableAnnotationFinder.find(clazz, TableName.class);
         if (tableNameAnno != null && StringUtils.hasText(tableNameAnno.value())) {
             tableName = tableNameAnno.value();
         }
 
-        AutoTable autoTable = AutoTableGlobalConfig.getAutoTableAnnotationFinder().find(clazz, AutoTable.class);
+        AutoTable autoTable = autoTableAnnotationFinder.find(clazz, AutoTable.class);
         if (autoTable != null && StringUtils.hasText(autoTable.value())) {
             tableName = autoTable.value();
         }
@@ -104,6 +106,22 @@ public interface AutoTableOrmFrameAdapter {
         }
 
         return tableName;
+    }
+
+    /**
+     * 获取表schema
+     *
+     * @param clazz 实体类
+     * @return 表schema
+     */
+    default String getTableSchema(Class<?> clazz) {
+
+        AutoTableAnnotationFinder autoTableAnnotationFinder = AutoTableGlobalConfig.getAutoTableAnnotationFinder();
+        AutoTable autoTable = autoTableAnnotationFinder.find(clazz, AutoTable.class);
+        if(autoTable != null) {
+            return autoTable.schema();
+        }
+        return null;
     }
 
     /**
