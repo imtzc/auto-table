@@ -1,5 +1,5 @@
 # 版本升级
-version=1.7.0
+version=1.7.1
 
 # 以下不动
 template=$(cat << EOF
