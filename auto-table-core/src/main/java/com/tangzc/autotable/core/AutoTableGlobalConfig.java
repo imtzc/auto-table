@@ -25,6 +25,7 @@ import java.util.Map;
 
 /**
  * 全局配置
+ *
  * @author don
  */
 public class AutoTableGlobalConfig {
@@ -56,7 +57,8 @@ public class AutoTableGlobalConfig {
      */
     @Setter
     @Getter
-    private static AutoTableOrmFrameAdapter autoTableOrmFrameAdapter = new AutoTableOrmFrameAdapter.DefaultAutoTableOrmFrameAdapter();
+    private static AutoTableOrmFrameAdapter autoTableOrmFrameAdapter = new AutoTableOrmFrameAdapter() {
+    };
 
     /**
      * 数据库类型转换

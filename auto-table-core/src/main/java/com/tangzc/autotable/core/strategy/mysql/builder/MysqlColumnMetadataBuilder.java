@@ -4,7 +4,6 @@ import com.tangzc.autotable.annotation.ColumnDefault;
 import com.tangzc.autotable.annotation.ColumnType;
 import com.tangzc.autotable.annotation.mysql.MysqlColumnCharset;
 import com.tangzc.autotable.core.AutoTableGlobalConfig;
-import com.tangzc.autotable.core.AutoTableOrmFrameAdapter;
 import com.tangzc.autotable.core.builder.ColumnMetadataBuilder;
 import com.tangzc.autotable.core.config.PropertyConfig;
 import com.tangzc.autotable.core.constants.DatabaseDialect;
@@ -17,7 +16,9 @@ import com.tangzc.autotable.core.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 用于存放创建表的字段信息
@@ -81,9 +82,13 @@ public class MysqlColumnMetadataBuilder extends ColumnMetadataBuilder {
         // 如果是枚举类型，但是没有指定枚举的可选值
         if (MysqlTypeHelper.isEnum(typeAndLength) && typeAndLength.getValues().isEmpty()) {
             // 判断字段是不是java的枚举类型，是的话，提取所有的枚举值
-            if (field.getType().isEnum()) {
-                AutoTableOrmFrameAdapter autoTableOrmFrameAdapter = AutoTableGlobalConfig.getAutoTableOrmFrameAdapter();
-                List<String> values = autoTableOrmFrameAdapter.getEnumValues(field.getType());
+            Class<?> enumType = field.getType();
+            if (enumType.isEnum()) {
+                // 调用第三方框架获取枚举的可选值
+                List<String> values = AutoTableGlobalConfig.getAutoTableOrmFrameAdapter().getEnumValues(enumType);
+                if(values.isEmpty()) {
+                    values = Arrays.stream(enumType.getEnumConstants()).map(Object::toString).collect(Collectors.toList());
+                }
                 typeAndLength.setValues(values);
             } else {
                 // 直接报错

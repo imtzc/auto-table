@@ -3,6 +3,7 @@ package com.tangzc.autotable.core.utils;
 import com.tangzc.autotable.annotation.AutoTable;
 import com.tangzc.autotable.annotation.ColumnComment;
 import com.tangzc.autotable.annotation.ColumnDefault;
+import com.tangzc.autotable.annotation.ColumnName;
 import com.tangzc.autotable.annotation.ColumnNotNull;
 import com.tangzc.autotable.annotation.ColumnType;
 import com.tangzc.autotable.annotation.Ignore;
@@ -11,6 +12,7 @@ import com.tangzc.autotable.annotation.PrimaryKey;
 import com.tangzc.autotable.annotation.TableComment;
 import com.tangzc.autotable.annotation.TableIndex;
 import com.tangzc.autotable.annotation.TableIndexes;
+import com.tangzc.autotable.annotation.TableName;
 import com.tangzc.autotable.core.AutoTableAnnotationFinder;
 import com.tangzc.autotable.core.AutoTableGlobalConfig;
 import com.tangzc.autotable.core.AutoTableOrmFrameAdapter;
@@ -27,13 +29,13 @@ public class TableBeanUtils {
 
     public static boolean isIncludeField(Field field, Class<?> clazz) {
 
-        AutoTableOrmFrameAdapter autoTableOrmFrameAdapter = AutoTableGlobalConfig.getAutoTableOrmFrameAdapter();
         Ignore ignore = AutoTableGlobalConfig.getAutoTableAnnotationFinder().find(field, Ignore.class);
         if (ignore != null) {
             return false;
         }
-        // 外部框架检测钩子
-        boolean isIgnoreField = autoTableOrmFrameAdapter.isIgnoreField(field, clazz);
+
+        // 调用第三方ORM实现
+        boolean isIgnoreField = AutoTableGlobalConfig.getAutoTableOrmFrameAdapter().isIgnoreField(field, clazz);
         return !isIgnoreField;
     }
 
@@ -57,8 +59,32 @@ public class TableBeanUtils {
      * @return 表名
      */
     public static String getTableName(Class<?> clazz) {
-        AutoTableOrmFrameAdapter autoTableOrmFrameAdapter = AutoTableGlobalConfig.getAutoTableOrmFrameAdapter();
-        return autoTableOrmFrameAdapter.getTableName(clazz);
+
+        String tableName = null;
+
+        AutoTableAnnotationFinder autoTableAnnotationFinder = AutoTableGlobalConfig.getAutoTableAnnotationFinder();
+
+        // TODO 将要删除的逻辑，仅供兼容
+        TableName tableNameAnno = autoTableAnnotationFinder.find(clazz, TableName.class);
+        if (tableNameAnno != null && StringUtils.hasText(tableNameAnno.value())) {
+            tableName = tableNameAnno.value();
+        }
+
+        AutoTable autoTable = autoTableAnnotationFinder.find(clazz, AutoTable.class);
+        if (autoTable != null && StringUtils.hasText(autoTable.value())) {
+            tableName = autoTable.value();
+        }
+
+        // 调用第三方ORM实现
+        if (tableName == null) {
+            tableName = AutoTableGlobalConfig.getAutoTableOrmFrameAdapter().getTableName(clazz);
+        }
+
+        if (tableName == null) {
+            tableName = StringUtils.camelToUnderline(clazz.getSimpleName());
+        }
+
+        return tableName;
     }
 
     /**
@@ -67,8 +93,15 @@ public class TableBeanUtils {
      * @return schema
      */
     public static String getTableSchema(Class<?> clazz) {
-        AutoTableOrmFrameAdapter autoTableOrmFrameAdapter = AutoTableGlobalConfig.getAutoTableOrmFrameAdapter();
-        return autoTableOrmFrameAdapter.getTableSchema(clazz);
+
+        AutoTableAnnotationFinder autoTableAnnotationFinder = AutoTableGlobalConfig.getAutoTableAnnotationFinder();
+        AutoTable autoTable = autoTableAnnotationFinder.find(clazz, AutoTable.class);
+        if(autoTable != null) {
+            return autoTable.schema();
+        }
+
+        // 调用第三方ORM实现
+        return AutoTableGlobalConfig.getAutoTableOrmFrameAdapter().getTableSchema(clazz);
     }
 
     public static String getTableComment(Class<?> clazz) {
@@ -92,8 +125,9 @@ public class TableBeanUtils {
         if (isPrimary != null) {
             return true;
         }
-        AutoTableOrmFrameAdapter autoTableOrmFrameAdapter = AutoTableGlobalConfig.getAutoTableOrmFrameAdapter();
-        return autoTableOrmFrameAdapter.isPrimary(field, clazz);
+
+        // 调用第三方ORM实现
+        return AutoTableGlobalConfig.getAutoTableOrmFrameAdapter().isPrimary(field, clazz);
     }
 
     public static boolean isAutoIncrement(Field field, Class<?> clazz) {
@@ -138,8 +172,7 @@ public class TableBeanUtils {
     public static Class<?> getFieldType(Class<?> clazz, Field field) {
 
         // 自定义获取字段的类型
-        AutoTableOrmFrameAdapter autoTableOrmFrameAdapter = AutoTableGlobalConfig.getAutoTableOrmFrameAdapter();
-        Class<?> fieldType = autoTableOrmFrameAdapter.customFieldTypeHandler(clazz, field);
+        Class<?> fieldType = AutoTableGlobalConfig.getAutoTableOrmFrameAdapter().customFieldTypeHandler(clazz, field);
 
         if (fieldType == null) {
             fieldType = field.getType();
@@ -157,8 +190,20 @@ public class TableBeanUtils {
      */
     public static String getRealColumnName(Class<?> clazz, Field field) {
 
-        AutoTableOrmFrameAdapter autoTableOrmFrameAdapter = AutoTableGlobalConfig.getAutoTableOrmFrameAdapter();
-        return autoTableOrmFrameAdapter.getRealColumnName(clazz, field);
+        ColumnName columnNameAnno = AutoTableGlobalConfig.getAutoTableAnnotationFinder().find(field, ColumnName.class);
+        if (columnNameAnno != null) {
+            String columnName = columnNameAnno.value();
+            if (StringUtils.hasText(columnName)) {
+                return columnName;
+            }
+        }
+
+        String realColumnName = AutoTableGlobalConfig.getAutoTableOrmFrameAdapter().getRealColumnName(clazz, field);
+        if(StringUtils.hasText(realColumnName)) {
+            return realColumnName;
+        }
+
+        return StringUtils.camelToUnderline(field.getName());
     }
 
     /**
