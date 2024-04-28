@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.tangzc</groupId>
         <artifactId>auto-table</artifactId>
-        <version>1.7.1</version>
+        <version>1.7.2</version>
     </parent>
 
     <artifactId>auto-table-annotation</artifactId>
