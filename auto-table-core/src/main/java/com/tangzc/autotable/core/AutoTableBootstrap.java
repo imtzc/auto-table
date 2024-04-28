@@ -18,9 +18,9 @@ import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -71,12 +71,14 @@ public class AutoTableBootstrap {
         datasourceHandler.handleAnalysis(classes, (databaseDialect, entityClasses) -> {
 
             // 同一个数据源下，检查重名的表
-            Map<String, Long> repeatCheckMap = entityClasses.stream().map(TableBeanUtils::getTableName).collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
-            for (Map.Entry<String, Long> repeatCheckItem : repeatCheckMap.entrySet()) {
-                Long sameTableNameCount = repeatCheckItem.getValue();
+            Map<String, List<Class<?>>> repeatCheckMap = entityClasses.stream()
+                    .collect(Collectors.groupingBy(entity -> TableBeanUtils.getTableSchema(entity) + "." + TableBeanUtils.getTableName(entity)));
+            for (Map.Entry<String, List<Class<?>>> repeatCheckItem : repeatCheckMap.entrySet()) {
+                int sameTableNameCount = repeatCheckItem.getValue().size();
                 if (sameTableNameCount > 1) {
                     String tableName = repeatCheckItem.getKey();
-                    throw new RuntimeException(String.format("存在重名的表：%s，请检查！", tableName));
+                    throw new RuntimeException(String.format("存在重名的表：%s(%s)，请检查！", tableName,
+                            String.join(",", repeatCheckItem.getValue().stream().map(Class::getName).collect(Collectors.toSet()))));
                 }
             }
 
