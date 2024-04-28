@@ -84,7 +84,7 @@ public interface PgsqlTablesMapper {
             @Result(column = "generation_expression", property = "generationExpression"),
             @Result(column = "is_updatable", property = "isUpdatable"),
     })
-    @Select("SELECT key_col.column_name IS NOT NULL AS primary, des.description, cols.* " +
+    @Select("SELECT DISTINCT key_col.column_name IS NOT NULL AS primary, des.description, cols.* " +
             "FROM information_schema.columns cols " +
             "LEFT JOIN information_schema.key_column_usage key_col ON key_col.column_name = cols.column_name " +
             "LEFT JOIN pg_catalog.pg_class clas ON clas.relname = cols.table_name " +
@@ -106,7 +106,7 @@ public interface PgsqlTablesMapper {
             @Result(column = "tablespace", property = "tablespace"),
             @Result(column = "indexdef", property = "indexdef"),
     })
-    @Select("SELECT des.description, idxs.* " +
+    @Select("SELECT DISTINCT des.description, idxs.* " +
             "FROM pg_catalog.pg_indexes idxs " +
             "LEFT JOIN pg_catalog.pg_class clas ON idxs.indexname = clas.relname " +
             "LEFT JOIN pg_catalog.pg_description des ON clas.oid = des.objoid " +
