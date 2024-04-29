@@ -24,7 +24,7 @@ public interface PgsqlTablesMapper {
      * @param tableName 表名
      * @return 表注释
      */
-    @Select("SELECT description FROM pg_catalog.pg_description des " +
+    @Select("SELECT des.description FROM pg_catalog.pg_description des " +
             "LEFT JOIN pg_catalog.pg_class clas ON des.objoid = clas.oid " +
             "LEFT JOIN pg_catalog.pg_namespace nams ON clas.relnamespace = nams.oid " +
             "WHERE nams.nspname = #{schema} AND clas.relname = #{tableName} AND des.objsubid = 0;")
