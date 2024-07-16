@@ -1,5 +1,6 @@
 package com.tangzc.autotable.core.utils;
 
+import com.tangzc.autotable.annotation.AutoColumn;
 import com.tangzc.autotable.annotation.AutoTable;
 import com.tangzc.autotable.annotation.ColumnComment;
 import com.tangzc.autotable.annotation.ColumnDefault;
@@ -13,10 +14,12 @@ import com.tangzc.autotable.annotation.TableComment;
 import com.tangzc.autotable.annotation.TableIndex;
 import com.tangzc.autotable.annotation.TableIndexes;
 import com.tangzc.autotable.annotation.TableName;
+import com.tangzc.autotable.annotation.enums.DefaultValueEnum;
 import com.tangzc.autotable.core.AutoTableAnnotationFinder;
 import com.tangzc.autotable.core.AutoTableGlobalConfig;
 import com.tangzc.autotable.core.AutoTableOrmFrameAdapter;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -89,6 +92,7 @@ public class TableBeanUtils {
 
     /**
      * 获取bean上的schema
+     *
      * @param clazz bean
      * @return schema
      */
@@ -96,7 +100,7 @@ public class TableBeanUtils {
 
         AutoTableAnnotationFinder autoTableAnnotationFinder = AutoTableGlobalConfig.getAutoTableAnnotationFinder();
         AutoTable autoTable = autoTableAnnotationFinder.find(clazz, AutoTable.class);
-        if(autoTable != null) {
+        if (autoTable != null) {
             return autoTable.schema();
         }
 
@@ -108,12 +112,12 @@ public class TableBeanUtils {
         AutoTableAnnotationFinder autoTableAnnotationFinder = AutoTableGlobalConfig.getAutoTableAnnotationFinder();
 
         TableComment tableComment = autoTableAnnotationFinder.find(clazz, TableComment.class);
-        if(tableComment != null) {
+        if (tableComment != null) {
             return tableComment.value();
         }
 
         AutoTable autoTable = autoTableAnnotationFinder.find(clazz, AutoTable.class);
-        if(autoTable != null) {
+        if (autoTable != null) {
             return autoTable.comment();
         }
         return null;
@@ -146,7 +150,14 @@ public class TableBeanUtils {
         }
 
         ColumnNotNull column = AutoTableGlobalConfig.getAutoTableAnnotationFinder().find(field, ColumnNotNull.class);
-        return column != null && column.value();
+        if (column != null) {
+            return column.value();
+        }
+        AutoColumn autoColumn = AutoTableGlobalConfig.getAutoTableAnnotationFinder().find(field, AutoColumn.class);
+        if (autoColumn != null) {
+            return autoColumn.notNull();
+        }
+        return false;
     }
 
     public static String getComment(Field field) {
@@ -154,15 +165,76 @@ public class TableBeanUtils {
         if (column != null) {
             return column.value();
         }
+        AutoColumn autoColumn = AutoTableGlobalConfig.getAutoTableAnnotationFinder().find(field, AutoColumn.class);
+        if (autoColumn != null) {
+            return autoColumn.comment();
+        }
         return "";
     }
 
     public static ColumnDefault getDefaultValue(Field field) {
-        return AutoTableGlobalConfig.getAutoTableAnnotationFinder().find(field, ColumnDefault.class);
+        ColumnDefault columnDefault = AutoTableGlobalConfig.getAutoTableAnnotationFinder().find(field, ColumnDefault.class);
+        if (columnDefault != null) {
+            return columnDefault;
+        }
+        AutoColumn autoColumn = AutoTableGlobalConfig.getAutoTableAnnotationFinder().find(field, AutoColumn.class);
+        if (autoColumn != null) {
+            return new ColumnDefault() {
+                @Override
+                public Class<? extends Annotation> annotationType() {
+                    return ColumnDefault.class;
+                }
+
+                @Override
+                public DefaultValueEnum type() {
+                    return autoColumn.defaultValueType();
+                }
+
+                @Override
+                public String value() {
+                    return autoColumn.defaultValue();
+                }
+            };
+        }
+        return null;
     }
 
     public static ColumnType getColumnType(Field field) {
-        return AutoTableGlobalConfig.getAutoTableAnnotationFinder().find(field, ColumnType.class);
+        ColumnType columnType = AutoTableGlobalConfig.getAutoTableAnnotationFinder().find(field, ColumnType.class);
+        if (columnType != null) {
+            return columnType;
+        }
+
+        AutoColumn autoColumn = AutoTableGlobalConfig.getAutoTableAnnotationFinder().find(field, AutoColumn.class);
+        if (autoColumn != null) {
+            return new ColumnType() {
+                @Override
+                public String value() {
+                    return autoColumn.type();
+                }
+
+                @Override
+                public int length() {
+                    return autoColumn.length();
+                }
+
+                @Override
+                public int decimalLength() {
+                    return autoColumn.decimalLength();
+                }
+
+                @Override
+                public String[] values() {
+                    return new String[0];
+                }
+
+                @Override
+                public Class<? extends Annotation> annotationType() {
+                    return ColumnType.class;
+                }
+            };
+        }
+        return null;
     }
 
     public static Index getIndex(Field field) {
@@ -197,9 +269,16 @@ public class TableBeanUtils {
                 return columnName;
             }
         }
+        AutoColumn autoColumn = AutoTableGlobalConfig.getAutoTableAnnotationFinder().find(field, AutoColumn.class);
+        if (autoColumn != null) {
+            String columnName = autoColumn.value();
+            if (StringUtils.hasText(columnName)) {
+                return columnName;
+            }
+        }
 
         String realColumnName = AutoTableGlobalConfig.getAutoTableOrmFrameAdapter().getRealColumnName(clazz, field);
-        if(StringUtils.hasText(realColumnName)) {
+        if (StringUtils.hasText(realColumnName)) {
             return realColumnName;
         }
 
