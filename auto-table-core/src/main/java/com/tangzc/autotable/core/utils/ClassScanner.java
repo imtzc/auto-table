@@ -110,8 +110,13 @@ public class ClassScanner {
                 Matcher matcher = checkPattern.matcher(entry.getName());
                 if (matcher.find()) {
                     String className = matcher.group(1).replace("/", ".");
-                    Class<?> clazz = Class.forName(className);
-                    if (checker.apply(clazz)) {
+                    Class<?> clazz;
+                    try {
+                        clazz = Class.forName(className);
+                    }catch (ClassNotFoundException e){
+                        clazz = Thread.currentThread().getContextClassLoader().loadClass(className);
+                    }
+                    if (clazz != null && checker.apply(clazz)) {
                         classes.add(clazz);
                     }
                 }
