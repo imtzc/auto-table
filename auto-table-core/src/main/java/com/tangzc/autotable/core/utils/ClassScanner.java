@@ -57,7 +57,7 @@ public class ClassScanner {
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         String path = packageName.replace('.', '/');
         String basePackage = path.split("/\\*")[0];
-        Pattern checkPattern = Pattern.compile("(" + packageName.replace(".", "\\/").replace("**", "[A-Za-z0-9$_/]+").replace("*", "[A-Za-z0-9$_]+") + "[A-Za-z0-9$_/]+)\\.class$");
+        Pattern checkPattern = Pattern.compile("^(" + packageName.replace(".", "\\/").replace("**", "[A-Za-z0-9$_/]+").replace("*", "[A-Za-z0-9$_]+") + "[A-Za-z0-9$_/]+)\\.class$");
 
         Enumeration<URL> resources = classLoader.getResources(basePackage);
         Set<Class<?>> classes = new HashSet<>();
@@ -110,8 +110,13 @@ public class ClassScanner {
                 Matcher matcher = checkPattern.matcher(entry.getName());
                 if (matcher.find()) {
                     String className = matcher.group(1).replace("/", ".");
-                    Class<?> clazz = Class.forName(className);
-                    if (checker.apply(clazz)) {
+                    Class<?> clazz;
+                    try {
+                        clazz = Class.forName(className);
+                    }catch (ClassNotFoundException e){
+                        clazz = Thread.currentThread().getContextClassLoader().loadClass(className);
+                    }
+                    if (clazz != null && checker.apply(clazz)) {
                         classes.add(clazz);
                     }
                 }
