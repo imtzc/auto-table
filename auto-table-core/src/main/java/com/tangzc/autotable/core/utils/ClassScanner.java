@@ -57,7 +57,7 @@ public class ClassScanner {
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         String path = packageName.replace('.', '/');
         String basePackage = path.split("/\\*")[0];
-        Pattern checkPattern = Pattern.compile("^(" + packageName.replace(".", "\\/").replace("**", "[A-Za-z0-9$_/]+").replace("*", "[A-Za-z0-9$_]+") + "[A-Za-z0-9$_/]+)\\.class$");
+        Pattern checkPattern = Pattern.compile("(" + packageName.replace(".", "\\/").replace("**", "[A-Za-z0-9$_/]+").replace("*", "[A-Za-z0-9$_]+") + "[A-Za-z0-9$_/]+)\\.class$");
 
         Enumeration<URL> resources = classLoader.getResources(basePackage);
         Set<Class<?>> classes = new HashSet<>();
