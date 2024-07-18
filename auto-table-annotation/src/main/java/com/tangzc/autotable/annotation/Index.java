@@ -11,6 +11,7 @@ import java.lang.annotation.Target;
 
 /**
  * 设置字段索引
+ *
  * @author don
  */
 @Target({ElementType.FIELD, ElementType.ANNOTATION_TYPE})
@@ -19,8 +20,12 @@ import java.lang.annotation.Target;
 public @interface Index {
 
     /**
-     * 索引的名字，不设置默认为{mpe_idx_当前标记字段名@Column的name}<p>
-     * 如果设置了名字例如union_name,系统会默认在名字前加mpe_idx_前缀，也就是mpe_idx_union_name
+     * 索引的名字，不设置默认为{auto_idx_[表名]_[字段名]}
+     * <p>生成规则优化：
+     * <p>1. 优先使用 auto_idx_`[表名]`_`[字段名1]`_`[字段名2]`
+     * <p>2. 若超长(63字符)了，使用 auto_idx_`[表名]`_`[所有字段名链接后的hash值]`
+     * <p>   > 注：长度定义63是兼容了pgsql的63字符，与mysql的64字符考虑的，Oracle本就不打算兼容，所以不考虑它的30字符长度
+     * <p>3. 若仍超长了，使用 auto_idx_`[表名+所有字段名链接后的hash值]`
      */
     String name() default "";
 

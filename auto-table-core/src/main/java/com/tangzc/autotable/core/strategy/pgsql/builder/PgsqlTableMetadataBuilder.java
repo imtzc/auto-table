@@ -1,6 +1,7 @@
 package com.tangzc.autotable.core.strategy.pgsql.builder;
 
 import com.tangzc.autotable.core.builder.DefaultTableMetadataBuilder;
+import com.tangzc.autotable.core.builder.IndexMetadataBuilder;
 import com.tangzc.autotable.core.dynamicds.SqlSessionFactoryManager;
 import com.tangzc.autotable.core.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +16,7 @@ import java.sql.Connection;
 public class PgsqlTableMetadataBuilder extends DefaultTableMetadataBuilder {
 
     public PgsqlTableMetadataBuilder() {
-        super(new PgsqlColumnMetadataBuilder(), new PgsqlIndexMetadataBuilder());
+        super(new PgsqlColumnMetadataBuilder(), new IndexMetadataBuilder());
     }
 
     @Override

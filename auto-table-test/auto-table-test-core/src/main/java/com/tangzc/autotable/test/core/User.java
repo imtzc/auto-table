@@ -4,10 +4,12 @@ import com.tangzc.autotable.annotation.AutoTable;
 import com.tangzc.autotable.annotation.ColumnComment;
 import com.tangzc.autotable.annotation.ColumnDefault;
 import com.tangzc.autotable.annotation.ColumnType;
+import com.tangzc.autotable.annotation.IndexField;
 import com.tangzc.autotable.annotation.PrimaryKey;
 import com.tangzc.autotable.annotation.TableIndex;
 import com.tangzc.autotable.annotation.TableIndexes;
 import com.tangzc.autotable.annotation.enums.DefaultValueEnum;
+import com.tangzc.autotable.annotation.enums.IndexSortTypeEnum;
 import com.tangzc.autotable.annotation.enums.IndexTypeEnum;
 import com.tangzc.autotable.annotation.mysql.MysqlColumnCharset;
 import com.tangzc.autotable.annotation.mysql.MysqlTypeConstant;
@@ -22,8 +24,8 @@ import lombok.experimental.FieldNameConstants;
 @Data
 @AutoTable("sys_user")
 @TableIndexes({
-        @TableIndex(name = "uni_name", fields = User.Fields.name, type = IndexTypeEnum.UNIQUE, comment = "姓名唯一索引"),
-        @TableIndex(name = "uni_age", fields = User.Fields.age, type = IndexTypeEnum.NORMAL, comment = "年龄普通索引")
+        @TableIndex(fields = User.Fields.name, type = IndexTypeEnum.UNIQUE, comment = "姓名唯一索引"),
+        @TableIndex(indexFields = @IndexField(field = User.Fields.age, sort = IndexSortTypeEnum.DESC), type = IndexTypeEnum.NORMAL, comment = "年龄普通索引")
 })
 @FieldNameConstants
 public class User extends BaseEntity {

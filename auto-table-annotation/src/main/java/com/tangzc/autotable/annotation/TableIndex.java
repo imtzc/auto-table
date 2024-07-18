@@ -9,9 +9,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-
 /**
- * 设置表索引
+ * 设置表索引，fields与indexFields必须配置一个，不然不生效
+ *
  * @author tangzc
  */
 @Target({ElementType.TYPE, ElementType.ANNOTATION_TYPE})
@@ -21,9 +21,14 @@ import java.lang.annotation.Target;
 public @interface TableIndex {
 
     /**
-     * <p>索引的名字，设置了名字例如union_name,系统会默认在名字前加mpe_idx_前缀，也就是mpe_idx_union_name
+     * <p>索引的名字，设置了名字例如union_name,系统会默认在名字前加auto_idx_前缀，也就是auto_idx_union_name
+     * <p>如果为空，则采用如下规则：
+     * <p>1. 优先使用 auto_idx_`[表名]`_`[字段名1]`_`[字段名2]`
+     * <p>2. 若超长(63字符)了，使用 auto_idx_`[表名]`_`[所有字段名链接后的hash值]`
+     * <p>   > 注：长度定义63是兼容了pgsql的63字符以及mysql的64字符考虑的，Oracle本就不打算兼容，所以不考虑它的30字符长度
+     * <p>3. 若仍超长了，使用 auto_idx_`[表名+所有字段名链接后的hash值]`
      */
-    String name();
+    String name() default "";
 
     /**
      * 索引类型
@@ -35,7 +40,7 @@ public @interface TableIndex {
      * <p>注意，多字段的情况下，字段书序即构建索引时候的顺序，牵扯索引左匹配问题
      * <p>该配置优先级低于{@link #indexFields()}，具体可参考{@link #indexFields()}的说明
      */
-    String[] fields();
+    String[] fields() default {};
 
     /**
      * <p>字段名：兼容需要指定字段排序方式的模式

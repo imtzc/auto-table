@@ -8,8 +8,10 @@ import com.tangzc.autotable.core.strategy.IndexMetadata;
 import com.tangzc.autotable.core.utils.IndexRepeatChecker;
 import com.tangzc.autotable.core.utils.StringUtils;
 import com.tangzc.autotable.core.utils.TableBeanUtils;
+import lombok.SneakyThrows;
 
 import java.lang.reflect.Field;
+import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -17,6 +19,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author don
@@ -74,29 +77,98 @@ public class IndexMetadataBuilder {
         return null;
     }
 
-    protected String getIndexName(Class<?> clazz, Field field, Index index) {
-        String indexName = index.name();
-        if (StringUtils.noText(indexName)) {
-            indexName = getDefaultIndexName(clazz, field);
-        }
+    protected String getIndexName(Class<?> clazz, TableIndex tableIndex) {
         String indexPrefix = AutoTableGlobalConfig.getAutoTableProperties().getIndexPrefix();
-        return indexPrefix + indexName;
+
+        // 手动指定了索引名
+        String indexName = tableIndex.name();
+        if (StringUtils.hasText(indexName)) {
+            return indexPrefix + indexName;
+        }
+
+        String filedNames = Stream.concat(Arrays.stream(tableIndex.indexFields()).map(IndexField::field), Arrays.stream(tableIndex.fields()))
+                .map(fieldName -> TableBeanUtils.getRealColumnName(clazz, fieldName))
+                .collect(Collectors.joining("_"));
+        String tableName = TableBeanUtils.getTableName(clazz);
+        return encryptIndexName(indexPrefix, tableName, filedNames);
+    }
+
+    protected String getIndexName(Class<?> clazz, Field field, Index index) {
+        String indexPrefix = AutoTableGlobalConfig.getAutoTableProperties().getIndexPrefix();
+
+        // 手动指定了索引名
+        String indexName = index.name();
+        if (StringUtils.hasText(indexName)) {
+            return indexPrefix + indexName;
+        }
+
+        String realColumnName = getDefaultIndexName(clazz, field);
+        String tableName = TableBeanUtils.getTableName(clazz);
+        return encryptIndexName(indexPrefix, tableName, realColumnName);
     }
 
     protected String getDefaultIndexName(Class<?> clazz, Field field) {
         return TableBeanUtils.getRealColumnName(clazz, field);
     }
 
+    protected String encryptIndexName(String prefix, String tableNamePart, String filedNamePart) {
+        String indexName = prefix + tableNamePart + "_" + filedNamePart;
+        if (indexName.length() > 63) {
+
+            // 当只是字段名超长了的情况下
+            String onePart = prefix + tableNamePart + "_";
+            int partSurplusLength = 63 - 32 - onePart.length();
+            if (partSurplusLength >= 0) {
+                String md5 = generateMD5(filedNamePart);
+                if (partSurplusLength != 0) {
+                    md5 = filedNamePart.substring(0, partSurplusLength) + md5;
+                }
+                indexName = onePart + md5;
+                return indexName;
+            }
+
+            // 当表名+字段名超长的情况下
+            String endPart = tableNamePart + "_" + filedNamePart;
+            String md5 = generateMD5(endPart);
+            partSurplusLength = 63 - 32 - prefix.length();
+            if (partSurplusLength >= 0) {
+                if (partSurplusLength > 0) {
+                    md5 = endPart.substring(0, partSurplusLength) + md5;
+                }
+                indexName = prefix + md5;
+                return indexName;
+            }
+
+            // 当算上前缀，仍然超长的情况下
+            if (32 + partSurplusLength < 0) {
+                throw new RuntimeException("索引名前缀[" + prefix + "]超长，无法生成有效索引名称，请手动指定索引名称");
+            }
+            // 截断md5的值，保留长度，控制总长度在63
+            indexName = prefix + generateMD5(endPart).substring(0, 32 + partSurplusLength);
+        }
+        return indexName;
+    }
+
+    @SneakyThrows
+    private String generateMD5(String text) {
+        MessageDigest md = MessageDigest.getInstance("MD5");
+        byte[] hashBytes = md.digest(text.getBytes());
+        StringBuilder sb = new StringBuilder();
+        for (byte b : hashBytes) {
+            sb.append(String.format("%02x", b));
+        }
+        return sb.toString();
+    }
+
     protected IndexMetadata buildIndexMetadata(Class<?> clazz, TableIndex tableIndex) {
 
         // 获取当前字段的@Index注解
-        if (null != tableIndex) {
+        if (null != tableIndex && (tableIndex.fields().length > 0 || tableIndex.indexFields().length > 0)) {
 
             List<IndexMetadata.IndexColumnParam> columnParams = getColumnParams(clazz, tableIndex);
 
             IndexMetadata indexMetadata = newIndexMetadata();
-            String indexPrefix = AutoTableGlobalConfig.getAutoTableProperties().getIndexPrefix();
-            indexMetadata.setName(indexPrefix + tableIndex.name());
+            indexMetadata.setName(getIndexName(clazz, tableIndex));
             indexMetadata.setType(tableIndex.type());
             indexMetadata.setComment(tableIndex.comment());
             indexMetadata.setColumns(columnParams);
@@ -151,5 +223,11 @@ public class IndexMetadataBuilder {
         }
 
         return columnParams;
+    }
+
+    public static void main(String[] args) {
+        IndexMetadataBuilder indexMetadataBuilder = new IndexMetadataBuilder();
+        String indexName = indexMetadataBuilder.encryptIndexName("idx_idx_idx_idx_idx_idx_idx_idx_idx_idx_idx_idx_idx_idx_idx_idx", "table", "test_test_test_test_test_test_test_test_test_test_test_test_test_test_test_test_test");
+        System.out.println(indexName);
     }
 }
