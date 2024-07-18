@@ -51,6 +51,7 @@ public class BeanClassUtil {
 
     /**
      * 查询某个类下所有的列的字段
+     *
      * @param beanClass 类class
      * @return 所有列的字段
      */
@@ -60,19 +61,18 @@ public class BeanClassUtil {
         PropertyConfig.SuperInsertPosition superInsertPosition = AutoTableGlobalConfig.getAutoTableProperties().getSuperInsertPosition();
 
         List<Field> fieldList = new ArrayList<>();
-        getFieldList(fieldList, beanClass, superInsertPosition == PropertyConfig.SuperInsertPosition.after);
-        return fieldList.stream()
-                .filter(field -> !Modifier.isStatic(field.getModifiers()))
-                .collect(Collectors.toList());
+        getColumnFieldList(fieldList, beanClass, false, superInsertPosition == PropertyConfig.SuperInsertPosition.after);
+        return fieldList;
     }
 
     /**
      * 获取某个类下所有的字段
-     * @param fields 预先声明的集合
-     * @param beanClass 指定类
-     * @param insertBack 是否追加到集合后面
+     *
+     * @param fields           预先声明的集合
+     * @param beanClass        指定类
+     * @param parentInsertBack 是否追加到集合后面
      */
-    private static void getFieldList(List<Field> fields, Class<?> beanClass, boolean insertBack) {
+    private static void getColumnFieldList(List<Field> fields, Class<?> beanClass, boolean isParent, boolean parentInsertBack) {
 
         Field[] declaredFields = beanClass.getDeclaredFields();
         // 获取当前class的所有fields的name列表
@@ -81,9 +81,15 @@ public class BeanClassUtil {
         List<Field> newFields = Arrays.stream(declaredFields)
                 // 避免重载属性
                 .filter(field -> !fieldNames.contains(field.getName()))
+                // 忽略静态变量
+                .filter(field -> !Modifier.isStatic(field.getModifiers()))
+                // 忽略final字段
+                .filter(field -> !Modifier.isFinal(field.getModifiers()))
+                // 父类字段，必须声明字段为protected或者public
+                .filter(field -> !isParent || (Modifier.isProtected(field.getModifiers()) || Modifier.isPublic(field.getModifiers())))
                 .collect(Collectors.toList());
 
-        if (insertBack) {
+        if (parentInsertBack) {
             fields.addAll(newFields);
         } else {
             fields.addAll(0, newFields);
@@ -91,7 +97,7 @@ public class BeanClassUtil {
 
         Class<?> superclass = beanClass.getSuperclass();
         if (superclass != null) {
-            getFieldList(fields, superclass, insertBack);
+            getColumnFieldList(fields, superclass, true, parentInsertBack);
         }
     }
 }

@@ -7,8 +7,8 @@ import lombok.Data;
  */
 @Data
 public class BaseEntity {
-    private String createBy;
-    private Long createTime;
-    private String modifyBy;
-    private Long modifyTime;
+    protected String createBy;
+    protected Long createTime;
+    protected String modifyBy;
+    protected Long modifyTime;
 }
