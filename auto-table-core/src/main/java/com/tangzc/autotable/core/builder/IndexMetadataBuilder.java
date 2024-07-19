@@ -113,38 +113,15 @@ public class IndexMetadataBuilder {
 
     protected String encryptIndexName(String prefix, String tableNamePart, String filedNamePart) {
         String indexName = prefix + tableNamePart + "_" + filedNamePart;
-        if (indexName.length() > 63) {
-
-            // 当只是字段名超长了的情况下
-            String onePart = prefix + tableNamePart + "_";
-            int partSurplusLength = 63 - 32 - onePart.length();
-            if (partSurplusLength >= 0) {
-                String md5 = generateMD5(filedNamePart);
-                if (partSurplusLength != 0) {
-                    md5 = filedNamePart.substring(0, partSurplusLength) + md5;
-                }
-                indexName = onePart + md5;
-                return indexName;
-            }
-
-            // 当表名+字段名超长的情况下
-            String endPart = tableNamePart + "_" + filedNamePart;
-            String md5 = generateMD5(endPart);
-            partSurplusLength = 63 - 32 - prefix.length();
-            if (partSurplusLength >= 0) {
-                if (partSurplusLength > 0) {
-                    md5 = endPart.substring(0, partSurplusLength) + md5;
-                }
-                indexName = prefix + md5;
-                return indexName;
-            }
-
-            // 当算上前缀，仍然超长的情况下
-            if (32 + partSurplusLength < 0) {
+        int maxLength = 63;
+        if (indexName.length() > maxLength) {
+            String md5 = generateMD5(indexName);
+            if (prefix.length() + md5.length() > maxLength) {
                 throw new RuntimeException("索引名前缀[" + prefix + "]超长，无法生成有效索引名称，请手动指定索引名称");
             }
-            // 截断md5的值，保留长度，控制总长度在63
-            indexName = prefix + generateMD5(endPart).substring(0, 32 + partSurplusLength);
+            // 截取前半部分长度的字符，空余足够的位置，给“_”和MD5值
+            String onePart = indexName.substring(0, maxLength - md5.length());
+            return onePart + md5;
         }
         return indexName;
     }
@@ -223,11 +200,5 @@ public class IndexMetadataBuilder {
         }
 
         return columnParams;
-    }
-
-    public static void main(String[] args) {
-        IndexMetadataBuilder indexMetadataBuilder = new IndexMetadataBuilder();
-        String indexName = indexMetadataBuilder.encryptIndexName("idx_idx_idx_idx_idx_idx_idx_idx_idx_idx_idx_idx_idx_idx_idx_idx", "table", "test_test_test_test_test_test_test_test_test_test_test_test_test_test_test_test_test");
-        System.out.println(indexName);
     }
 }
