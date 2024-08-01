@@ -136,7 +136,7 @@ public interface IStrategy<TABLE_META extends TableMetadata, COMPARE_TABLE_INFO 
         if (compareTableInfo.needModify()) {
             log.warn(compareTableInfo.validateFailedMessage());
             AutoTableGlobalConfig.getValidateFinishCallback().validateFinish(false, this.databaseDialect(), compareTableInfo);
-            throw new RuntimeException("启动失败，" + this.databaseDialect() + "数据表" + tableMetadata.getTableName() + "与实体不匹配");
+            throw new RuntimeException(String.format("启动失败，%s数据表%s与实体不匹配", this.databaseDialect(), tableMetadata.getTableName()));
         }
         AutoTableGlobalConfig.getValidateFinishCallback().validateFinish(true, this.databaseDialect(), compareTableInfo);
     }
@@ -244,7 +244,7 @@ public interface IStrategy<TABLE_META extends TableMetadata, COMPARE_TABLE_INFO 
                 connection.commit();
             } catch (Exception e) {
                 connection.rollback();
-                throw new RuntimeException("执行SQL: \n" + String.join("\n", sqlList) + "\n期间出错", e);
+                throw new RuntimeException(String.format("执行SQL: \n%s\n期间出错", String.join("\n", sqlList)), e);
             }
 
             // 记录SQL

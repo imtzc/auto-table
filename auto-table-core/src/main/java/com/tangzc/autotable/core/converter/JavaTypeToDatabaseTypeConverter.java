@@ -98,7 +98,7 @@ public interface JavaTypeToDatabaseTypeConverter {
 
         Map<Class<?>, DefaultTypeEnumInterface> typeMap = JAVA_TO_DB_TYPE_MAPPING.getOrDefault(databaseDialect, Collections.emptyMap());
         if (typeMap.isEmpty()) {
-            log.warn("数据库方言" + databaseDialect + "没有找到对应的数据库类型映射关系");
+            log.warn("数据库方言{}没有找到对应的数据库类型映射关系", databaseDialect);
         }
 
         DefaultTypeEnumInterface sqlType = typeMap.get(fieldClass);
