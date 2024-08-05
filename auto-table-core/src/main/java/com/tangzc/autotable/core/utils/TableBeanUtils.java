@@ -120,6 +120,13 @@ public class TableBeanUtils {
         if (autoTable != null) {
             return autoTable.comment();
         }
+
+        AutoTableOrmFrameAdapter autoTableOrmFrameAdapter = AutoTableGlobalConfig.getAutoTableOrmFrameAdapter();
+        String adapterTableComment = autoTableOrmFrameAdapter.getTableComment(clazz);
+        if(adapterTableComment != null) {
+            return adapterTableComment;
+        }
+
         return null;
     }
 
@@ -160,7 +167,7 @@ public class TableBeanUtils {
         return false;
     }
 
-    public static String getComment(Field field) {
+    public static String getComment(Field field, Class<?> clazz) {
         ColumnComment column = AutoTableGlobalConfig.getAutoTableAnnotationFinder().find(field, ColumnComment.class);
         if (column != null) {
             return column.value();
@@ -169,6 +176,13 @@ public class TableBeanUtils {
         if (autoColumn != null) {
             return autoColumn.comment();
         }
+
+        AutoTableOrmFrameAdapter autoTableOrmFrameAdapter = AutoTableGlobalConfig.getAutoTableOrmFrameAdapter();
+        String adapterColumnComment = autoTableOrmFrameAdapter.getColumnComment(field, clazz);
+        if(adapterColumnComment != null) {
+            return adapterColumnComment;
+        }
+
         return "";
     }
 

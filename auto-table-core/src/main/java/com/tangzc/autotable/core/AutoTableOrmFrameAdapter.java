@@ -87,6 +87,16 @@ public interface AutoTableOrmFrameAdapter {
     }
 
     /**
+     * 获取表注释
+     *
+     * @param clazz 实体类
+     * @return 标注释
+     */
+    default String getTableComment(Class<?> clazz) {
+        return null;
+    }
+
+    /**
      * 获取表schema
      *
      * @param clazz 实体类
@@ -104,6 +114,17 @@ public interface AutoTableOrmFrameAdapter {
      * @return 字段名
      */
     default String getRealColumnName(Class<?> clazz, Field field) {
+        return null;
+    }
+
+    /**
+     * 获取字段注释
+     *
+     * @param field 字段
+     * @param clazz 实体类
+     * @return 字段注释
+     */
+    default String getColumnComment(Field field, Class<?> clazz) {
         return null;
     }
 }

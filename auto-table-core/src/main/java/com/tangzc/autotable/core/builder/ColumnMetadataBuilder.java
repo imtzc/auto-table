@@ -47,7 +47,7 @@ public class ColumnMetadataBuilder {
         ColumnMetadata columnMetadata = newColumnMetadata();
         DatabaseTypeAndLength typeAndLength = getTypeAndLength(databaseDialect, clazz, field);
         columnMetadata.setName(TableBeanUtils.getRealColumnName(clazz, field))
-                .setComment(TableBeanUtils.getComment(field))
+                .setComment(TableBeanUtils.getComment(field, clazz))
                 .setType(typeAndLength)
                 .setNotNull(TableBeanUtils.isNotNull(field, clazz))
                 .setPrimary(TableBeanUtils.isPrimary(field, clazz))
