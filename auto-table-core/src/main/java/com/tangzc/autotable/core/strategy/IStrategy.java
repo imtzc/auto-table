@@ -134,7 +134,7 @@ public interface IStrategy<TABLE_META extends TableMetadata, COMPARE_TABLE_INFO 
         // 对比数据库表结构与新的表元数据的差异
         COMPARE_TABLE_INFO compareTableInfo = this.compareTable(tableMetadata);
         if (compareTableInfo.needModify()) {
-            log.warn(compareTableInfo.validateFailedMessage());
+            log.warn("{}表结构不一致：\n{}", tableMetadata.getTableName(), compareTableInfo.validateFailedMessage());
             AutoTableGlobalConfig.getValidateFinishCallback().validateFinish(false, this.databaseDialect(), compareTableInfo);
             throw new RuntimeException(String.format("启动失败，%s数据表%s与实体不匹配", this.databaseDialect(), tableMetadata.getTableName()));
         }
