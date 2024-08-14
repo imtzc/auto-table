@@ -39,6 +39,10 @@ public class PropertyConfig {
      */
     private Boolean autoDropIndex = true;
     /**
+     * 子类继承父类的字段的配置，是否开启严格继承的模式：只继承public、protected修饰的字段
+     */
+    private Boolean strictExtends = true;
+    /**
      * <p>建表的时候，父类的字段排序是在子类后面还是前面
      * <p>默认为after，跟在子类的后面
      */

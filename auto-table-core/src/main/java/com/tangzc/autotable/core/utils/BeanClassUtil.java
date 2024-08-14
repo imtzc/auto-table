@@ -58,10 +58,11 @@ public class BeanClassUtil {
     public static List<Field> listAllFieldForColumn(Class<?> beanClass) {
 
         // 获取父类追加到子类位置的配置
-        PropertyConfig.SuperInsertPosition superInsertPosition = AutoTableGlobalConfig.getAutoTableProperties().getSuperInsertPosition();
+        PropertyConfig autoTableProperties = AutoTableGlobalConfig.getAutoTableProperties();
+        PropertyConfig.SuperInsertPosition superInsertPosition = autoTableProperties.getSuperInsertPosition();
 
         List<Field> fieldList = new ArrayList<>();
-        getColumnFieldList(fieldList, beanClass, false, superInsertPosition == PropertyConfig.SuperInsertPosition.after);
+        getColumnFieldList(fieldList, beanClass, false, superInsertPosition == PropertyConfig.SuperInsertPosition.after, autoTableProperties.getStrictExtends());
         return fieldList;
     }
 
@@ -72,7 +73,7 @@ public class BeanClassUtil {
      * @param beanClass        指定类
      * @param parentInsertBack 是否追加到集合后面
      */
-    private static void getColumnFieldList(List<Field> fields, Class<?> beanClass, boolean isParent, boolean parentInsertBack) {
+    private static void getColumnFieldList(List<Field> fields, Class<?> beanClass, boolean isParent, boolean parentInsertBack, boolean strictExtends) {
 
         Field[] declaredFields = beanClass.getDeclaredFields();
         // 获取当前class的所有fields的name列表
@@ -86,7 +87,7 @@ public class BeanClassUtil {
                 // 忽略final字段
                 .filter(field -> !Modifier.isFinal(field.getModifiers()))
                 // 父类字段，必须声明字段为protected或者public
-                .filter(field -> !isParent || (Modifier.isProtected(field.getModifiers()) || Modifier.isPublic(field.getModifiers())))
+                .filter(field -> !isParent || (strictExtends && (Modifier.isProtected(field.getModifiers()) || Modifier.isPublic(field.getModifiers()))))
                 .collect(Collectors.toList());
 
         if (parentInsertBack) {
@@ -97,7 +98,7 @@ public class BeanClassUtil {
 
         Class<?> superclass = beanClass.getSuperclass();
         if (superclass != null) {
-            getColumnFieldList(fields, superclass, true, parentInsertBack);
+            getColumnFieldList(fields, superclass, true, parentInsertBack, strictExtends);
         }
     }
 }
