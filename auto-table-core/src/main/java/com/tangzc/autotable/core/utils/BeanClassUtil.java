@@ -87,7 +87,7 @@ public class BeanClassUtil {
                 // 忽略final字段
                 .filter(field -> !Modifier.isFinal(field.getModifiers()))
                 // 父类字段，必须声明字段为protected或者public
-                .filter(field -> !isParent || (strictExtends && (Modifier.isProtected(field.getModifiers()) || Modifier.isPublic(field.getModifiers()))))
+                .filter(field -> !isParent || !strictExtends || Modifier.isProtected(field.getModifiers()) || Modifier.isPublic(field.getModifiers()))
                 .collect(Collectors.toList());
 
         if (parentInsertBack) {
