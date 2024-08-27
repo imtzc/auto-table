@@ -7,6 +7,7 @@ import com.tangzc.autotable.annotation.TableName;
 import com.tangzc.autotable.core.config.PropertyConfig;
 import com.tangzc.autotable.core.dynamicds.IDataSourceHandler;
 import com.tangzc.autotable.core.strategy.IStrategy;
+import com.tangzc.autotable.core.strategy.h2.H2Strategy;
 import com.tangzc.autotable.core.strategy.mysql.MysqlStrategy;
 import com.tangzc.autotable.core.strategy.pgsql.PgsqlStrategy;
 import com.tangzc.autotable.core.strategy.sqlite.SqliteStrategy;
@@ -50,6 +51,7 @@ public class AutoTableBootstrap {
         AutoTableGlobalConfig.addStrategy(new MysqlStrategy());
         AutoTableGlobalConfig.addStrategy(new PgsqlStrategy());
         AutoTableGlobalConfig.addStrategy(new SqliteStrategy());
+        AutoTableGlobalConfig.addStrategy(new H2Strategy());
 
         // 获取扫描包路径
         String[] packs = getModelPackage(autoTableProperties);
