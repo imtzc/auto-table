@@ -58,7 +58,7 @@ public class ModifyTableSqlBuilder {
             // 修改字段
             String columnName = columnMetadata.getName();
             // 类型
-            alterTableSqlList.add("  ALTER COLUMN " + columnName + " TYPE " + PgsqlTypeHelper.getFullType(columnMetadata.getType()));
+            alterTableSqlList.add("  ALTER COLUMN " + columnName + " TYPE " + columnMetadata.getType().getDefaultFullType());
             // 非空
             alterTableSqlList.add("  ALTER COLUMN " + columnName + " " + (columnMetadata.isNotNull() ? "SET" : "DROP") + " NOT NULL");
             // 默认值

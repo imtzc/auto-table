@@ -64,13 +64,11 @@ public class H2Strategy implements IStrategy<DefaultTableMetadata, H2CompareTabl
             put(LocalDate.class, H2DefaultTypeEnum.DATE);
             put(java.util.Date.class, H2DefaultTypeEnum.TIMESTAMP);
             put(LocalDateTime.class, H2DefaultTypeEnum.TIMESTAMP);
-
         }};
     }
 
     @Override
     public String dropTable(String schema, String tableName) {
-
         return String.format("DROP TABLE IF EXISTS `%s`", tableName);
     }
 
@@ -91,27 +89,27 @@ public class H2Strategy implements IStrategy<DefaultTableMetadata, H2CompareTabl
         String schema = tableMetadata.getSchema();
         H2CompareTableInfo compareTableInfo = new H2CompareTableInfo(tableName, schema);
 
-        InformationSchemaTable informationSchemaTable = executeReturn(mapper -> mapper.findTableByTableName(tableName));
-
-        // 对比表配置有无变化
-        compareTableProperties(tableMetadata, informationSchemaTable, compareTableInfo);
-
-        // 开始比对列的变化: 新增、修改、删除
-        compareColumns(tableMetadata, tableName, compareTableInfo);
-
-        // 开始比对 主键 和 索引 的变化
-        List<InformationSchemaStatistics> informationSchemaStatistics = executeReturn(mysqlTablesMapper -> mysqlTablesMapper.queryTablePrimaryAndIndex(tableName));
-        // 按照主键（固定值：PRIMARY）、索引名字，对所有列进行分组
-        Map<String, List<InformationSchemaStatistics>> keyColumnGroupByName = informationSchemaStatistics.stream()
-                .collect(Collectors.groupingBy(InformationSchemaStatistics::getIndexName));
-
-        // 对比主键
-        List<InformationSchemaStatistics> tablePrimaries = keyColumnGroupByName.remove("PRIMARY");
-        comparePrimary(tableMetadata, compareTableInfo, tablePrimaries);
-
-        // 对比索引, informationSchemaKeyColumnUsages中剩余的都是索引数据了
-        Map<String, List<InformationSchemaStatistics>> tableIndexes = keyColumnGroupByName;
-        compareIndexes(tableMetadata, compareTableInfo, tableIndexes);
+        // InformationSchemaTable informationSchemaTable = executeReturn(mapper -> mapper.findTableByTableName(tableName));
+        //
+        // // 对比表配置有无变化
+        // compareTableProperties(tableMetadata, informationSchemaTable, compareTableInfo);
+        //
+        // // 开始比对列的变化: 新增、修改、删除
+        // compareColumns(tableMetadata, tableName, compareTableInfo);
+        //
+        // // 开始比对 主键 和 索引 的变化
+        // List<InformationSchemaStatistics> informationSchemaStatistics = executeReturn(mysqlTablesMapper -> mysqlTablesMapper.queryTablePrimaryAndIndex(tableName));
+        // // 按照主键（固定值：PRIMARY）、索引名字，对所有列进行分组
+        // Map<String, List<InformationSchemaStatistics>> keyColumnGroupByName = informationSchemaStatistics.stream()
+        //         .collect(Collectors.groupingBy(InformationSchemaStatistics::getIndexName));
+        //
+        // // 对比主键
+        // List<InformationSchemaStatistics> tablePrimaries = keyColumnGroupByName.remove("PRIMARY");
+        // comparePrimary(tableMetadata, compareTableInfo, tablePrimaries);
+        //
+        // // 对比索引, informationSchemaKeyColumnUsages中剩余的都是索引数据了
+        // Map<String, List<InformationSchemaStatistics>> tableIndexes = keyColumnGroupByName;
+        // compareIndexes(tableMetadata, compareTableInfo, tableIndexes);
 
         return compareTableInfo;
     }

@@ -7,22 +7,6 @@ import com.tangzc.autotable.core.converter.DatabaseTypeAndLength;
  */
 public class PgsqlTypeHelper {
 
-    public static String getFullType(DatabaseTypeAndLength databaseTypeAndLength) {
-        String type = databaseTypeAndLength.getType();
-        // 类型具备长度属性 且 自定义长度不为空
-        Integer length = databaseTypeAndLength.getLength();
-        Integer decimalLength = databaseTypeAndLength.getDecimalLength();
-        if (length != null) {
-            type += "(" + length;
-            if (decimalLength != null) {
-                type += "," + decimalLength;
-            }
-            type += ")";
-        }
-
-        return type;
-    }
-
     public static boolean isCharString(DatabaseTypeAndLength databaseTypeAndLength) {
         String type = databaseTypeAndLength.getType();
         return PgsqlDefaultTypeEnum.CHAR.getTypeName().equalsIgnoreCase(type) ||

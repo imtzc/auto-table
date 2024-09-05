@@ -2,17 +2,20 @@ package com.tangzc.autotable.core.strategy.h2.builder;
 
 import com.tangzc.autotable.annotation.enums.DefaultValueEnum;
 import com.tangzc.autotable.annotation.enums.IndexTypeEnum;
+import com.tangzc.autotable.core.converter.DatabaseTypeAndLength;
 import com.tangzc.autotable.core.strategy.ColumnMetadata;
 import com.tangzc.autotable.core.strategy.DefaultTableMetadata;
 import com.tangzc.autotable.core.strategy.IndexMetadata;
 import com.tangzc.autotable.core.strategy.h2.H2Strategy;
-import com.tangzc.autotable.core.strategy.mysql.data.MysqlTypeHelper;
+import com.tangzc.autotable.core.strategy.pgsql.builder.ColumnSqlBuilder;
+import com.tangzc.autotable.core.strategy.pgsql.data.PgsqlTypeHelper;
 import com.tangzc.autotable.core.utils.StringConnectHelper;
 import com.tangzc.autotable.core.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -24,23 +27,108 @@ public class CreateTableSqlBuilder {
     /**
      * 构建创建新表的SQL
      *
-     * @param defaultTableMetadata 参数
+     * @param tableMetadata 参数
      * @return sql
      */
-    public static String buildSql(DefaultTableMetadata defaultTableMetadata) {
+    public static String buildSql(DefaultTableMetadata tableMetadata) {
 
-        String name = defaultTableMetadata.getTableName();
-        String schema = defaultTableMetadata.getSchema();
-        List<ColumnMetadata> mysqlColumnMetadataList = defaultTableMetadata.getColumnMetadataList();
-        List<IndexMetadata> indexMetadataList = defaultTableMetadata.getIndexMetadataList();
-        String comment = defaultTableMetadata.getComment();
+        String schema = tableMetadata.getSchema();
+        String tableName = tableMetadata.getTableName();
+
+        // 建表语句
+        String createTableSql = getCreateTableSql(tableMetadata);
+
+        // 创建索引语句
+        List<IndexMetadata> indexMetadataList = tableMetadata.getIndexMetadataList();
+        String createIndexSql = getCreateIndexSql(schema, tableName, indexMetadataList);
+
+        // 为 表、字段、索引 添加注释
+        String addCommentSql = getAddColumnCommentSql(tableMetadata);
+
+        // 组合最终建表语句
+        return createTableSql + "\n" + createIndexSql + "\n" + addCommentSql;
+    }
+
+    /**
+     * CREATE UNIQUE INDEX "uni_name" ON "表名" (
+     * "name"
+     * );
+     */
+    public static String getCreateIndexSql(String schema, String tableName, List<IndexMetadata> indexMetadataList) {
+
+        return indexMetadataList.stream()
+                .map(pgsqlIndexMetadata -> StringConnectHelper.newInstance("CREATE {indexType} INDEX {indexName} ON {tableName} ({columns});")
+                        .replace("{indexType}", pgsqlIndexMetadata.getType() == IndexTypeEnum.UNIQUE ? "UNIQUE" : "")
+                        .replace("{indexName}", pgsqlIndexMetadata.getName())
+                        .replace("{tableName}", H2Strategy.withSchemaName(schema, tableName))
+                        .replace("{columns}", () -> {
+                            List<IndexMetadata.IndexColumnParam> columnParams = pgsqlIndexMetadata.getColumns();
+                            return columnParams.stream().map(column ->
+                                    // 例："name" ASC
+                                    "{column} {sortMode}"
+                                            .replace("{column}", column.getColumn())
+                                            .replace("{sortMode}", column.getSort() != null ? column.getSort().name() : "")
+                            ).collect(Collectors.joining(","));
+                        })
+                        .toString()
+                ).collect(Collectors.joining("\n"));
+    }
+
+    private static String getAddColumnCommentSql(DefaultTableMetadata tableMetadata) {
+
+        String schema = tableMetadata.getSchema();
+        String tableName = tableMetadata.getTableName();
+        String comment = tableMetadata.getComment();
+        List<ColumnMetadata> columnMetadataList = tableMetadata.getColumnMetadataList();
+        List<IndexMetadata> indexMetadataList = tableMetadata.getIndexMetadataList();
+
+        return getAddColumnCommentSql(schema, tableName, comment,
+                columnMetadataList.stream().collect(Collectors.toMap(ColumnMetadata::getName, ColumnMetadata::getComment)),
+                indexMetadataList.stream().collect(Collectors.toMap(IndexMetadata::getName, IndexMetadata::getComment)));
+    }
+
+    public static String getAddColumnCommentSql(String schema, String tableName, String tableComment, Map<String, String> columnCommentMap, Map<String, String> indexCommentMap) {
+
+        List<String> commentList = new ArrayList<>();
+
+        // 表备注
+        if (StringUtils.hasText(tableComment)) {
+            String addTableComment = "COMMENT ON TABLE {tableName} IS '{comment}';"
+                    .replace("{tableName}", H2Strategy.withSchemaName(schema, tableName))
+                    .replace("{comment}", tableComment);
+            commentList.add(addTableComment);
+        }
+
+        // 字段备注
+        columnCommentMap.entrySet().stream()
+                .map(columnComment -> "COMMENT ON COLUMN {tableName}.{name} IS '{comment}';"
+                        .replace("{tableName}", H2Strategy.withSchemaName(schema, tableName))
+                        .replace("{name}", columnComment.getKey())
+                        .replace("{comment}", columnComment.getValue()))
+                .forEach(commentList::add);
+
+        // 索引备注
+        indexCommentMap.entrySet().stream()
+                .map(indexComment -> "COMMENT ON INDEX {name} IS '{comment}';"
+                        .replace("{name}", H2Strategy.withSchemaName(schema, indexComment.getKey()))
+                        .replace("{comment}", indexComment.getValue()))
+                .forEach(commentList::add);
+
+        return String.join("\n", commentList);
+    }
+
+    private static String getCreateTableSql(DefaultTableMetadata tableMetadata) {
+
+        String schema = tableMetadata.getSchema();
+        String name = tableMetadata.getTableName();
+        List<ColumnMetadata> columnMetadataList = tableMetadata.getColumnMetadataList();
 
         // 记录所有修改项，（利用数组结构，便于添加,分割）
-        List<String> addItems = new ArrayList<>();
+        List<String> columnList = new ArrayList<>();
 
         // 获取所有主键（至于表字段处理之前，为了主键修改notnull）
         List<String> primaries = new ArrayList<>();
-        mysqlColumnMetadataList.forEach(columnData -> {
+        columnMetadataList.forEach(columnData -> {
             // 判断是主键，自动设置为NOT NULL，并记录
             if (columnData.isPrimary()) {
                 columnData.setNotNull(true);
@@ -49,59 +137,44 @@ public class CreateTableSqlBuilder {
         });
 
         // 表字段处理
-        addItems.add(
-                mysqlColumnMetadataList.stream()
+        columnList.add(
+                columnMetadataList.stream()
                         // 拼接每个字段的sql片段
-                        .map(CreateTableSqlBuilder::getColumnSql)
+                        .map(CreateTableSqlBuilder::buildSql)
                         .collect(Collectors.joining(","))
         );
-
 
         // 主键
         if (!primaries.isEmpty()) {
             String primaryKeySql = getPrimaryKeySql(primaries);
-            addItems.add(primaryKeySql);
-        }
-
-        // 索引
-        addItems.add(
-                indexMetadataList.stream()
-                        // 例子： UNIQUE INDEX `unique_name_age`(`name` ASC, `age` DESC) COMMENT '姓名、年龄索引' USING BTREE
-                        .map(CreateTableSqlBuilder::getIndexSql)
-                        // 同类型的索引，排在一起，SQL美化
-                        .sorted()
-                        .collect(Collectors.joining(","))
-        );
-
-        // 备注
-        String propertiesSql = "";
-        if (StringUtils.hasText(comment)) {
-            propertiesSql = "COMMENT = '{comment}'"
-                    .replace("{comment}", comment);
+            columnList.add(primaryKeySql);
         }
 
         // 组合sql: 过滤空字符项，逗号拼接
-        String addSql = addItems.stream()
+        String addSql = columnList.stream()
                 .filter(StringUtils::hasText)
                 .collect(Collectors.joining(","));
 
-        return "CREATE TABLE `{tableName}` ({addItems}) {tableProperties};"
+        return "CREATE TABLE {tableName} ({columnList});"
                 .replace("{tableName}", H2Strategy.withSchemaName(schema, name))
-                .replace("{addItems}", addSql)
-                .replace("{tableProperties}", propertiesSql);
+                .replace("{columnList}", addSql);
     }
+
 
 
     /**
      * 生成字段相关的SQL片段
+     * @param columnMetadata 列元数据
+     * @return 列相关的sql
      */
-    public static String getColumnSql(ColumnMetadata columnMetadata) {
-        // 例子：`name` varchar(100) NULL DEFAULT '张三' COMMENT '名称'
-        // 例子：`id` int(32) NOT NULL AUTO_INCREMENT COMMENT '主键'
-        return StringConnectHelper.newInstance("`{columnName}` {typeAndLength} {character} {collate} {null} {default} {autoIncrement} {columnComment} {position}")
+    public static String buildSql(ColumnMetadata columnMetadata) {
+        // 例子："name" varchar(100) NULL DEFAULT '张三' COMMENT '名称'
+        // 例子："id" int4(32) NOT NULL AUTO_INCREMENT COMMENT '主键'
+        return StringConnectHelper.newInstance("{columnName} {typeAndLength} {null} {default} {autoIncrement}")
                 .replace("{columnName}", columnMetadata.getName())
-                .replace("{typeAndLength}", MysqlTypeHelper.getFullType(columnMetadata.getType()))
-                .replace("{null}", columnMetadata.isNotNull() ? "NOT NULL" : "NULL")
+                .replace("{typeAndLength}", columnMetadata.getType().getDefaultFullType())
+                .replace("{autoIncrement}", columnMetadata.isAutoIncrement() ? "auto_increment" : "")
+                .replace("{null}", columnMetadata.isNotNull() ? "NOT NULL" : "")
                 .replace("{default}", () -> {
                     // 指定NULL
                     DefaultValueEnum defaultValueType = columnMetadata.getDefaultValueType();
@@ -119,36 +192,14 @@ public class CreateTableSqlBuilder {
                     }
                     return "";
                 })
-                .replace("{autoIncrement}", columnMetadata.isAutoIncrement() ? "AUTO_INCREMENT" : "")
-                .replace("{columnComment}", StringUtils.hasText(columnMetadata.getComment()) ? "COMMENT '" + columnMetadata.getComment() + "'" : "")
                 .toString();
     }
 
-    public static String getIndexSql(IndexMetadata indexMetadata) {
-        // 例子： UNIQUE INDEX `unique_name_age`(`name` ASC, `age` DESC) COMMENT '姓名、年龄索引',
-        return StringConnectHelper.newInstance("{indexType} INDEX `{indexName}`({columns}) {indexComment}")
-                .replace("{indexType}", indexMetadata.getType() == IndexTypeEnum.UNIQUE ? "UNIQUE" : "")
-                .replace("{indexName}", indexMetadata.getName())
-                .replace("{columns}", () -> {
-                    List<IndexMetadata.IndexColumnParam> columnParams = indexMetadata.getColumns();
-                    return columnParams.stream().map(column ->
-                            // 例：`name` ASC
-                            "`{column}` {sortMode}"
-                                    .replace("{column}", column.getColumn())
-                                    .replace("{sortMode}", column.getSort() != null ? column.getSort().name() : "")
-                    ).collect(Collectors.joining(","));
-                })
-                .replace("{indexComment}", StringUtils.hasText(indexMetadata.getComment()) ? "COMMENT '" + indexMetadata.getComment() + "'" : "")
-                .toString();
-    }
-
-    public static String getPrimaryKeySql(List<String> primaries) {
+    private static String getPrimaryKeySql(List<String> primaries) {
         return "PRIMARY KEY ({primaries})"
                 .replace(
                         "{primaries}",
-                        primaries.stream()
-                                .map(fieldName -> "`" + fieldName + "`")
-                                .collect(Collectors.joining(","))
+                        String.join(",", primaries)
                 );
     }
 }

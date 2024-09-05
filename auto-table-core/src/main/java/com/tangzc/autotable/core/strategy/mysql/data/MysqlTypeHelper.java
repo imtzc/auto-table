@@ -49,22 +49,13 @@ public class MysqlTypeHelper {
     ));
 
     public static String getFullType(DatabaseTypeAndLength databaseTypeAndLength) {
-        // 例：double(4,2) unsigned zerofill
-        String typeAndLength = databaseTypeAndLength.getType();
-        // 类型具备长度属性 且 自定义长度不为空
-        Integer length = databaseTypeAndLength.getLength();
-        Integer decimalLength = databaseTypeAndLength.getDecimalLength();
-        if (MysqlTypeHelper.isEnum(databaseTypeAndLength)) {
-            typeAndLength += "('" + String.join("','", databaseTypeAndLength.getValues()) + "')";
-        } else if (length != null) {
-            typeAndLength += "(" + length;
-            if (decimalLength != null) {
-                typeAndLength += "," + decimalLength;
-            }
-            typeAndLength += ")";
-        }
 
-        return typeAndLength;
+        // 枚举类型，罗列枚举值，并需要用单引号括起来
+        if (MysqlTypeHelper.isEnum(databaseTypeAndLength)) {
+            return databaseTypeAndLength.getType() + "('" + String.join("','", databaseTypeAndLength.getValues()) + "')";
+        } else {
+            return databaseTypeAndLength.getDefaultFullType();
+        }
     }
 
     public static boolean isCharString(DatabaseTypeAndLength databaseTypeAndLength) {

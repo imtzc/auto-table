@@ -4,7 +4,7 @@ import com.tangzc.autotable.annotation.ColumnDefault;
 import com.tangzc.autotable.core.builder.ColumnMetadataBuilder;
 import com.tangzc.autotable.core.constants.DatabaseDialect;
 import com.tangzc.autotable.core.converter.DatabaseTypeAndLength;
-import com.tangzc.autotable.core.strategy.sqlite.SqliteTypeHelper;
+import com.tangzc.autotable.core.strategy.sqlite.data.SqliteTypeHelper;
 import com.tangzc.autotable.core.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 

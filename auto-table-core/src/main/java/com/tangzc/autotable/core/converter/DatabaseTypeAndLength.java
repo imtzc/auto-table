@@ -6,6 +6,7 @@ import java.util.List;
 
 /**
  * 统一的数据类型描述对象
+ *
  * @author don
  */
 @Data
@@ -36,5 +37,19 @@ public class DatabaseTypeAndLength {
             this.decimalLength = decimalLength;
         }
         this.values = values;
+    }
+
+    public String getDefaultFullType() {
+
+        String fullType = type;
+        if (length != null) {
+            fullType += "(" + length;
+            if (decimalLength != null) {
+                fullType += "," + decimalLength;
+            }
+            fullType += ")";
+        }
+
+        return fullType;
     }
 }

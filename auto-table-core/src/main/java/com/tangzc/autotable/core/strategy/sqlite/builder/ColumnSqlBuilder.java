@@ -2,7 +2,7 @@ package com.tangzc.autotable.core.strategy.sqlite.builder;
 
 import com.tangzc.autotable.annotation.enums.DefaultValueEnum;
 import com.tangzc.autotable.core.strategy.ColumnMetadata;
-import com.tangzc.autotable.core.strategy.sqlite.SqliteTypeHelper;
+import com.tangzc.autotable.core.strategy.sqlite.data.SqliteTypeHelper;
 import com.tangzc.autotable.core.utils.StringConnectHelper;
 import com.tangzc.autotable.core.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;

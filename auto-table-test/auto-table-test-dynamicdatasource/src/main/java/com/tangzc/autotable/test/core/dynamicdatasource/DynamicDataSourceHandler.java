@@ -19,6 +19,7 @@ public class DynamicDataSourceHandler implements IDataSourceHandler {
         put("mysql", "mybatis-config.xml");
         put("pgsql", "mybatis-config-pgsql.xml");
         put("sqlite", "mybatis-config-sqlite.xml");
+        put("h2", "mybatis-config-h2.xml");
     }};
     private static final Map<String, SqlSessionFactory> STRING_SQL_SESSION_FACTORY_MAP = new HashMap<>();
 

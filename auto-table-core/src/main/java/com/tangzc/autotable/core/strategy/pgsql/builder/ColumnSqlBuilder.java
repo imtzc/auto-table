@@ -28,7 +28,7 @@ public class ColumnSqlBuilder {
                     if (columnMetadata.isAutoIncrement()) {
                         return "serial";
                     }
-                    return PgsqlTypeHelper.getFullType(columnMetadata.getType());
+                    return columnMetadata.getType().getDefaultFullType();
                 })
                 .replace("{null}", columnMetadata.isNotNull() ? "NOT NULL" : "")
                 .replace("{default}", () -> {

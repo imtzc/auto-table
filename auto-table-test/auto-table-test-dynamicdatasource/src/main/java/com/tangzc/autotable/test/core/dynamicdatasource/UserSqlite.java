@@ -13,7 +13,7 @@ import lombok.Data;
 @Data
 @Ds("sqlite")
 @AutoTable("sys_user")
-public class User3 {
+public class UserSqlite {
 
     @PrimaryKey(true)
     @ColumnComment("用户id")
@@ -26,6 +26,5 @@ public class User3 {
     @ColumnComment("备注")
     @ColumnType(MysqlTypeConstant.TEXT)
     @ColumnDefault(type = DefaultValueEnum.NULL)
-    @MysqlColumnCharset(value = "utf8mb4", collate = "utf8mb4_0900_ai_ci")
     private String mark;
 }
