@@ -15,7 +15,6 @@ import com.tangzc.autotable.core.strategy.pgsql.builder.ModifyTableSqlBuilder;
 import com.tangzc.autotable.core.strategy.pgsql.builder.PgsqlTableMetadataBuilder;
 import com.tangzc.autotable.core.strategy.pgsql.data.PgsqlCompareTableInfo;
 import com.tangzc.autotable.core.strategy.pgsql.data.PgsqlDefaultTypeEnum;
-import com.tangzc.autotable.core.strategy.pgsql.data.PgsqlTypeHelper;
 import com.tangzc.autotable.core.strategy.pgsql.data.dbdata.PgsqlDbColumn;
 import com.tangzc.autotable.core.strategy.pgsql.data.dbdata.PgsqlDbIndex;
 import com.tangzc.autotable.core.strategy.pgsql.data.dbdata.PgsqlDbPrimary;
@@ -28,9 +27,11 @@ import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -196,13 +197,11 @@ public class PgsqlStrategy implements IStrategy<DefaultTableMetadata, PgsqlCompa
                 pgsqlCompareTableInfo.addNewColumn(columnMetadata);
                 continue;
             }
+            /* 修改的字段 */
             // 修改了字段注释
             if (!Objects.equals(pgsqlDbColumn.getDescription(), columnMetadata.getComment())) {
                 pgsqlCompareTableInfo.addColumnComment(columnName, columnMetadata.getComment());
             }
-            /* 修改的字段 */
-            String columnDefault = pgsqlDbColumn.getColumnDefault();
-
             // 主键忽略判断，单独处理
             if (!columnMetadata.isPrimary()) {
                 // 字段类型不同
@@ -210,7 +209,7 @@ public class PgsqlStrategy implements IStrategy<DefaultTableMetadata, PgsqlCompa
                 // 非null不同
                 boolean isNotnullDiff = columnMetadata.isNotNull() != Objects.equals(pgsqlDbColumn.getIsNullable(), "NO");
                 // 默认值不同
-                boolean isDefaultDiff = isDefaultDiff(columnMetadata, columnDefault);
+                boolean isDefaultDiff = isDefaultDiff(columnMetadata, pgsqlDbColumn);
                 if (isTypeDiff || isNotnullDiff || isDefaultDiff) {
                     pgsqlCompareTableInfo.addModifyColumn(columnMetadata);
                 }
@@ -228,13 +227,13 @@ public class PgsqlStrategy implements IStrategy<DefaultTableMetadata, PgsqlCompa
         /* 处理主键 */
         // 获取所有主键
         List<ColumnMetadata> primaryColumnList = columnMetadataList.stream().filter(ColumnMetadata::isPrimary).collect(Collectors.toList());
+        Set<String> newPrimaryColumns = primaryColumnList.stream().map(ColumnMetadata::getName).collect(Collectors.toSet());
         // 查询数据库主键信息
         PgsqlDbPrimary pgsqlDbPrimary = executeReturn(pgsqlTablesMapper -> pgsqlTablesMapper.selectPrimaryKeyName(schema, tableName));
+        HashSet<String> dbPrimaryColumns = pgsqlDbPrimary == null ? new HashSet<>() : new HashSet<>(Arrays.asList(pgsqlDbPrimary.getColumns().split(",")));
 
-        boolean removePrimary = primaryColumnList.isEmpty() && pgsqlDbPrimary != null;
-        String newPrimaryColumns = primaryColumnList.stream().map(ColumnMetadata::getName).collect(Collectors.joining(","));
-        boolean primaryChange = pgsqlDbPrimary != null && !Objects.equals(pgsqlDbPrimary.getColumns(), newPrimaryColumns);
-        if (removePrimary || primaryChange) {
+        boolean primaryChange = !dbPrimaryColumns.equals(newPrimaryColumns);
+        if (primaryChange) {
             // 标记待删除的主键
             pgsqlCompareTableInfo.setDropPrimaryKeyName(pgsqlDbPrimary.getPrimaryName());
         }
@@ -255,8 +254,9 @@ public class PgsqlStrategy implements IStrategy<DefaultTableMetadata, PgsqlCompa
         return !Objects.equals(fullType, dataTypeFormat);
     }
 
-    private static boolean isDefaultDiff(ColumnMetadata columnMetadata, String columnDefault) {
+    private static boolean isDefaultDiff(ColumnMetadata columnMetadata, PgsqlDbColumn pgsqlDbColumn) {
 
+        String columnDefault = pgsqlDbColumn.getColumnDefault();
         // 纠正default值，去掉类型转换
         if (columnDefault != null) {
             int castChart = columnDefault.indexOf("::");
