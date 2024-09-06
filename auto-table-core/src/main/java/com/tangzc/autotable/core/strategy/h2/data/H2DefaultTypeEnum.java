@@ -19,23 +19,22 @@ public enum H2DefaultTypeEnum implements DefaultTypeEnumInterface {
     /**
      * 整数
      */
-    INT(H2TypeConstant.INT, null, null),
+    INTEGER(H2TypeConstant.INTEGER, null, null),
     TINYINT(H2TypeConstant.TINYINT, null, null),
     SMARTINT(H2TypeConstant.SMARTINT, null, null),
     BIGINT(H2TypeConstant.BIGINT, null, null),
     /**
      * 小数
      */
-    REAL(H2TypeConstant.REAL, 4, 2),
-    DOUBLE(H2TypeConstant.DOUBLE, 6, 2),
-    DECIMAL(H2TypeConstant.DECIMAL, 10, 4),
+    REAL(H2TypeConstant.REAL, null, null),
+    NUMERIC(H2TypeConstant.NUMERIC, 10, 4),
     /**
      * 字符串
      */
-    CHAR(H2TypeConstant.CHAR, 255, null),
+    CHARACTER(H2TypeConstant.CHARACTER, 125, null),
     VARCHAR_IGNORECASE(H2TypeConstant.VARCHAR_IGNORECASE, 255, null),
-    VARCHAR(H2TypeConstant.VARCHAR, 255, null),
-    CLOB(H2TypeConstant.CLOB, null, null),
+    CHARACTER_VARYING(H2TypeConstant.CHARACTER_VARYING, 1000000000, null),
+    CHARACTER_LARGE_OBJECT(H2TypeConstant.CHARACTER_LARGE_OBJECT, null, null),
     /**
      * 日期
      */

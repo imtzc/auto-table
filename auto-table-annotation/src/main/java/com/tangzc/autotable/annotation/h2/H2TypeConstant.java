@@ -8,43 +8,41 @@ public interface H2TypeConstant {
     /**
      * 整数
      */
-    String INT = "int";
-    String TINYINT = "tinyint";
-    String SMARTINT = "smartint";
-    String BIGINT = "bigint";
-    String IDENTITY = "identity";
+    String INTEGER = "INTEGER";
+    String TINYINT = "TINYINT";
+    String SMARTINT = "SMARTINT";
+    String BIGINT = "BIGINT";
     /**
      * 小数
      */
-    String REAL = "real";
-    String DOUBLE = "double";
-    String DECIMAL = "decimal";
+    String NUMERIC = "NUMERIC";
+    String REAL = "REAL";
     /**
      * 字符串
      */
-    String CHAR = "char";
-    String VARCHAR = "varchar";
-    String VARCHAR_IGNORECASE = "varchar_ignorecase";
-    String UUID = "uuid";
-    String CLOB = "clob";
+    String CHARACTER = "CHARACTER";
+    String CHARACTER_VARYING = "CHARACTER VARYING";
+    String VARCHAR_IGNORECASE = "VARCHAR_IGNORECASE";
+    String UUID = "UUID";
+    String CHARACTER_LARGE_OBJECT = "CHARACTER LARGE OBJECT";
     /**
      * 日期
      */
-    String TIME = "time";
-    String DATE = "date";
-    String TIMESTAMP = "timestamp";
+    String TIME = "TIME";
+    String DATE = "DATE";
+    String TIMESTAMP = "TIMESTAMP";
     /**
      * 二进制
      */
-    String BINARY = "binary";
-    String BLOB = "blob";
+    String BINARY = "BINARY";
+    String BLOB = "BLOB";
     /**
      * 布尔
      */
-    String BOOLEAN = "boolean";
+    String BOOLEAN = "BOOLEAN";
     /**
      * 其他
      */
-    String OTHER = "other";
-    String ARRAY = "array";
+    String OTHER = "OTHER";
+    String ARRAY = "ARRAY";
 }

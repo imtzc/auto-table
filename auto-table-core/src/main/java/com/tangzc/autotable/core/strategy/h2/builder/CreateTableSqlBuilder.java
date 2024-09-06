@@ -2,18 +2,16 @@ package com.tangzc.autotable.core.strategy.h2.builder;
 
 import com.tangzc.autotable.annotation.enums.DefaultValueEnum;
 import com.tangzc.autotable.annotation.enums.IndexTypeEnum;
-import com.tangzc.autotable.core.converter.DatabaseTypeAndLength;
 import com.tangzc.autotable.core.strategy.ColumnMetadata;
 import com.tangzc.autotable.core.strategy.DefaultTableMetadata;
 import com.tangzc.autotable.core.strategy.IndexMetadata;
 import com.tangzc.autotable.core.strategy.h2.H2Strategy;
-import com.tangzc.autotable.core.strategy.pgsql.builder.ColumnSqlBuilder;
-import com.tangzc.autotable.core.strategy.pgsql.data.PgsqlTypeHelper;
 import com.tangzc.autotable.core.utils.StringConnectHelper;
 import com.tangzc.autotable.core.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -30,7 +28,7 @@ public class CreateTableSqlBuilder {
      * @param tableMetadata 参数
      * @return sql
      */
-    public static String buildSql(DefaultTableMetadata tableMetadata) {
+    public static List<String> buildColumnSql(DefaultTableMetadata tableMetadata) {
 
         String schema = tableMetadata.getSchema();
         String tableName = tableMetadata.getTableName();
@@ -40,13 +38,17 @@ public class CreateTableSqlBuilder {
 
         // 创建索引语句
         List<IndexMetadata> indexMetadataList = tableMetadata.getIndexMetadataList();
-        String createIndexSql = getCreateIndexSql(schema, tableName, indexMetadataList);
+        List<String> createIndexSql = getCreateIndexSql(schema, tableName, indexMetadataList);
 
         // 为 表、字段、索引 添加注释
-        String addCommentSql = getAddColumnCommentSql(tableMetadata);
+        List<String> addCommentSql = getAddColumnCommentSql(tableMetadata);
 
         // 组合最终建表语句
-        return createTableSql + "\n" + createIndexSql + "\n" + addCommentSql;
+        List<String> sqlList = new ArrayList<>();
+        sqlList.add(createTableSql);
+        sqlList.addAll(createIndexSql);
+        sqlList.addAll(addCommentSql);
+        return sqlList;
     }
 
     /**
@@ -54,7 +56,7 @@ public class CreateTableSqlBuilder {
      * "name"
      * );
      */
-    public static String getCreateIndexSql(String schema, String tableName, List<IndexMetadata> indexMetadataList) {
+    public static List<String> getCreateIndexSql(String schema, String tableName, List<IndexMetadata> indexMetadataList) {
 
         return indexMetadataList.stream()
                 .map(pgsqlIndexMetadata -> StringConnectHelper.newInstance("CREATE {indexType} INDEX {indexName} ON {tableName} ({columns});")
@@ -71,10 +73,10 @@ public class CreateTableSqlBuilder {
                             ).collect(Collectors.joining(","));
                         })
                         .toString()
-                ).collect(Collectors.joining("\n"));
+                ).collect(Collectors.toList());
     }
 
-    private static String getAddColumnCommentSql(DefaultTableMetadata tableMetadata) {
+    private static List<String> getAddColumnCommentSql(DefaultTableMetadata tableMetadata) {
 
         String schema = tableMetadata.getSchema();
         String tableName = tableMetadata.getTableName();
@@ -87,16 +89,16 @@ public class CreateTableSqlBuilder {
                 indexMetadataList.stream().collect(Collectors.toMap(IndexMetadata::getName, IndexMetadata::getComment)));
     }
 
-    public static String getAddColumnCommentSql(String schema, String tableName, String tableComment, Map<String, String> columnCommentMap, Map<String, String> indexCommentMap) {
+    public static List<String> getAddColumnCommentSql(String schema, String tableName, String tableComment, Map<String, String> columnCommentMap, Map<String, String> indexCommentMap) {
 
-        List<String> commentList = new ArrayList<>();
+        List<String> commentSqlList = new ArrayList<>();
 
         // 表备注
         if (StringUtils.hasText(tableComment)) {
             String addTableComment = "COMMENT ON TABLE {tableName} IS '{comment}';"
                     .replace("{tableName}", H2Strategy.withSchemaName(schema, tableName))
                     .replace("{comment}", tableComment);
-            commentList.add(addTableComment);
+            commentSqlList.add(addTableComment);
         }
 
         // 字段备注
@@ -105,16 +107,16 @@ public class CreateTableSqlBuilder {
                         .replace("{tableName}", H2Strategy.withSchemaName(schema, tableName))
                         .replace("{name}", columnComment.getKey())
                         .replace("{comment}", columnComment.getValue()))
-                .forEach(commentList::add);
+                .forEach(commentSqlList::add);
 
         // 索引备注
         indexCommentMap.entrySet().stream()
                 .map(indexComment -> "COMMENT ON INDEX {name} IS '{comment}';"
                         .replace("{name}", H2Strategy.withSchemaName(schema, indexComment.getKey()))
                         .replace("{comment}", indexComment.getValue()))
-                .forEach(commentList::add);
+                .forEach(commentSqlList::add);
 
-        return String.join("\n", commentList);
+        return commentSqlList;
     }
 
     private static String getCreateTableSql(DefaultTableMetadata tableMetadata) {
@@ -140,7 +142,7 @@ public class CreateTableSqlBuilder {
         columnList.add(
                 columnMetadataList.stream()
                         // 拼接每个字段的sql片段
-                        .map(CreateTableSqlBuilder::buildSql)
+                        .map(CreateTableSqlBuilder::buildColumnSql)
                         .collect(Collectors.joining(","))
         );
 
@@ -167,7 +169,7 @@ public class CreateTableSqlBuilder {
      * @param columnMetadata 列元数据
      * @return 列相关的sql
      */
-    public static String buildSql(ColumnMetadata columnMetadata) {
+    public static String buildColumnSql(ColumnMetadata columnMetadata) {
         // 例子："name" varchar(100) NULL DEFAULT '张三' COMMENT '名称'
         // 例子："id" int4(32) NOT NULL AUTO_INCREMENT COMMENT '主键'
         return StringConnectHelper.newInstance("{columnName} {typeAndLength} {null} {default} {autoIncrement}")

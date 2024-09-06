@@ -15,7 +15,7 @@ import lombok.Data;
  */
 @Data
 @AutoTable(value = "sys_user", comment = "用户表")
-public class User {
+public class UserMysql {
 
     @PrimaryKey(true)
     @ColumnComment("用户id")

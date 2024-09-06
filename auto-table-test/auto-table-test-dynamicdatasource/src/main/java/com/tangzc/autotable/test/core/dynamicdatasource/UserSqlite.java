@@ -24,7 +24,7 @@ public class UserSqlite {
     private String name;
 
     @ColumnComment("备注")
-    @ColumnType(MysqlTypeConstant.TEXT)
+    @ColumnType("text")
     @ColumnDefault(type = DefaultValueEnum.NULL)
     private String mark;
 }

@@ -1,8 +1,8 @@
 package com.tangzc.autotable.core.strategy.h2.mapper;
 
-import com.tangzc.autotable.core.strategy.mysql.data.dbdata.InformationSchemaColumn;
-import com.tangzc.autotable.core.strategy.mysql.data.dbdata.InformationSchemaStatistics;
-import com.tangzc.autotable.core.strategy.mysql.data.dbdata.InformationSchemaTable;
+import com.tangzc.autotable.core.strategy.h2.data.dbdata.InformationSchemaColumns;
+import com.tangzc.autotable.core.strategy.h2.data.dbdata.InformationSchemaIndexes;
+import com.tangzc.autotable.core.strategy.h2.data.dbdata.InformationSchemaTables;
 import org.apache.ibatis.annotations.Result;
 import org.apache.ibatis.annotations.Results;
 import org.apache.ibatis.annotations.Select;
@@ -12,6 +12,7 @@ import java.util.List;
 
 /**
  * 创建更新表结构的Mapper
+ *
  * @author don
  */
 public interface H2TablesMapper {
@@ -19,94 +20,109 @@ public interface H2TablesMapper {
     /**
      * 根据表名查询表在库中是否存在
      *
-     * @param tableName 表结构的map
-     * @return InformationSchemaTable
+     * @param tableSchema schema名
+     * @param tableName   表名
+     * @return InformationSchemaTables
      */
     @Results({
-            @Result(column = "table_catalog", property = "tableCatalog"),
-            @Result(column = "table_schema", property = "tableSchema"),
-            @Result(column = "table_name", property = "tableName"),
-            @Result(column = "table_type", property = "tableType"),
-            @Result(column = "engine", property = "engine"),
-            @Result(column = "version", property = "version"),
-            @Result(column = "row_format", property = "rowFormat"),
-            @Result(column = "table_rows", property = "tableRows"),
-            @Result(column = "avg_row_length", property = "avgRowLength"),
-            @Result(column = "data_length", property = "dataLength"),
-            @Result(column = "max_data_length", property = "maxDataLength"),
-            @Result(column = "index_length", property = "indexLength"),
-            @Result(column = "data_free", property = "dataFree"),
-            @Result(column = "auto_increment", property = "autoIncrement"),
-            @Result(column = "create_time", property = "createTime"),
-            @Result(column = "update_time", property = "updateTime"),
-            @Result(column = "check_time", property = "checkTime"),
-            @Result(column = "table_collation", property = "tableCollation"),
-            @Result(column = "checksum", property = "checksum"),
-            @Result(column = "create_options", property = "createOptions"),
-            @Result(column = "table_comment", property = "tableComment"),
+            @Result(column = "TABLE_CATALOG", property = "tableCatalog"),
+            @Result(column = "TABLE_SCHEMA", property = "tableSchema"),
+            @Result(column = "TABLE_NAME", property = "tableName"),
+            @Result(column = "TABLE_TYPE", property = "tableType"),
+            @Result(column = "IS_INSERTABLE_INTO", property = "isInsertableInto"),
+            @Result(column = "COMMIT_ACTION", property = "commitAction"),
+            @Result(column = "STORAGE_TYPE", property = "storageType"),
+            @Result(column = "REMARKS", property = "remarks"),
+            @Result(column = "LAST_MODIFICATION", property = "lastModification"),
+            @Result(column = "TABLE_CLASS", property = "tableClass"),
+            @Result(column = "ROW_COUNT_ESTIMATE", property = "rowCountEstimate"),
     })
-    @Select("select * from information_schema.tables where table_name = #{tableName} and table_schema = (select database())")
-    InformationSchemaTable findTableByTableName(String tableName);
+    @Select("SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = UPPER(#{tableSchema}) and TABLE_NAME = UPPER(#{tableName});")
+    InformationSchemaTables findTableInformation(String tableSchema, String tableName);
 
     /**
      * 根据表名查询库中该表的字段结构等信息
      *
-     * @param tableName 表结构的map
+     * @param tableSchema schema名
+     * @param tableName   表名
      * @return 表的字段结构等信息
      */
     @Results({
-            @Result(column = "character_maximum_length", property = "characterMaximumLength"),
-            @Result(column = "character_octet_length", property = "characterOctetLength"),
-            @Result(column = "character_set_name", property = "characterSetName"),
-            @Result(column = "collation_name", property = "collationName"),
-            @Result(column = "column_comment", property = "columnComment"),
-            @Result(column = "column_default", property = "columnDefault"),
-            @Result(column = "column_key", property = "columnKey"),
-            @Result(column = "column_name", property = "columnName"),
-            @Result(column = "column_type", property = "columnType"),
-            @Result(column = "data_type", property = "dataType"),
-            @Result(column = "datetime_precision", property = "datetimePrecision"),
-            @Result(column = "extra", property = "extra"),
-            @Result(column = "generation_expression", property = "generationExpression"),
-            @Result(column = "is_nullable", property = "isNullable"),
-            @Result(column = "numeric_precision", property = "numericPrecision"),
-            @Result(column = "numeric_scale", property = "numericScale"),
-            @Result(column = "ordinal_position", property = "ordinalPosition"),
-            @Result(column = "privileges", property = "privileges"),
-            @Result(column = "srs_id", property = "srsId"),
-            @Result(column = "table_catalog", property = "tableCatalog"),
-            @Result(column = "table_name", property = "tableName"),
-            @Result(column = "table_schema", property = "tableSchema"),
+            @Result(column = "TABLE_CATALOG", property = "tableCatalog"),
+            @Result(column = "TABLE_SCHEMA", property = "tableSchema"),
+            @Result(column = "TABLE_NAME", property = "tableName"),
+            @Result(column = "COLUMN_NAME", property = "columnName"),
+            @Result(column = "ORDINAL_POSITION", property = "ordinalPosition"),
+            @Result(column = "COLUMN_DEFAULT", property = "columnDefault"),
+            @Result(column = "IS_NULLABLE", property = "isNullable"),
+            @Result(column = "DATA_TYPE", property = "dataType"),
+            @Result(column = "CHARACTER_MAXIMUM_LENGTH", property = "characterMaximumLength"),
+            @Result(column = "CHARACTER_OCTET_LENGTH", property = "characterOctetLength"),
+            @Result(column = "NUMERIC_PRECISION", property = "numericPrecision"),
+            @Result(column = "NUMERIC_PRECISION_RADIX", property = "numericPrecisionRadix"),
+            @Result(column = "NUMERIC_SCALE", property = "numericScale"),
+            @Result(column = "DATETIME_PRECISION", property = "datetimePrecision"),
+            @Result(column = "INTERVAL_TYPE", property = "intervalType"),
+            @Result(column = "INTERVAL_PRECISION", property = "intervalPrecision"),
+            @Result(column = "CHARACTER_SET_CATALOG", property = "characterSetCatalog"),
+            @Result(column = "CHARACTER_SET_SCHEMA", property = "characterSetSchema"),
+            @Result(column = "CHARACTER_SET_NAME", property = "characterSetName"),
+            @Result(column = "COLLATION_CATALOG", property = "collationCatalog"),
+            @Result(column = "COLLATION_SCHEMA", property = "collationSchema"),
+            @Result(column = "COLLATION_NAME", property = "collationName"),
+            @Result(column = "DOMAIN_CATALOG", property = "domainCatalog"),
+            @Result(column = "DOMAIN_SCHEMA", property = "domainSchema"),
+            @Result(column = "DOMAIN_NAME", property = "domainName"),
+            @Result(column = "MAXIMUM_CARDINALITY", property = "maximumCardinality"),
+            @Result(column = "DTD_IDENTIFIER", property = "dtdIdentifier"),
+            @Result(column = "IS_IDENTITY", property = "isIdentity"),
+            @Result(column = "IDENTITY_GENERATION", property = "identityGeneration"),
+            @Result(column = "IDENTITY_START", property = "identityStart"),
+            @Result(column = "IDENTITY_INCREMENT", property = "identityIncrement"),
+            @Result(column = "IDENTITY_MAXIMUM", property = "identityMaximum"),
+            @Result(column = "IDENTITY_MINIMUM", property = "identityMinimum"),
+            @Result(column = "IDENTITY_CYCLE", property = "identityCycle"),
+            @Result(column = "IS_GENERATED", property = "isGenerated"),
+            @Result(column = "GENERATION_EXPRESSION", property = "generationExpression"),
+            @Result(column = "DECLARED_DATA_TYPE", property = "declaredDataType"),
+            @Result(column = "DECLARED_NUMERIC_PRECISION", property = "declaredNumericPrecision"),
+            @Result(column = "DECLARED_NUMERIC_SCALE", property = "declaredNumericScale"),
+            @Result(column = "GEOMETRY_TYPE", property = "geometryType"),
+            @Result(column = "GEOMETRY_SRID", property = "geometrySrid"),
+            @Result(column = "IDENTITY_BASE", property = "identityBase"),
+            @Result(column = "IDENTITY_CACHE", property = "identityCache"),
+            @Result(column = "COLUMN_ON_UPDATE", property = "columnOnUpdate"),
+            @Result(column = "IS_VISIBLE", property = "isVisible"),
+            @Result(column = "DEFAULT_ON_NULL", property = "defaultOnNull"),
+            @Result(column = "SELECTIVITY", property = "selectivity"),
+            @Result(column = "REMARKS", property = "remarks"),
     })
-    @Select("select * from information_schema.columns where table_name = #{tableName} and table_schema = (select database()) order by ordinal_position asc")
-    List<InformationSchemaColumn> findTableEnsembleByTableName(String tableName);
+    @Select("SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = UPPER(#{tableSchema}) and TABLE_NAME = UPPER(#{tableName});")
+    List<InformationSchemaColumns> findColumnInformation(String tableSchema, String tableName);
 
     /**
      * 查询指定表的所有主键和索引信息
      *
-     * @param tableName 表名
+     * @param tableSchema schema名
+     * @param tableName   表名
      * @return 所有主键和索引信息
      */
     @Results({
-            @Result(column = "cardinality", property = "cardinality"),
-            @Result(column = "collation", property = "collation"),
-            @Result(column = "column_name", property = "columnName"),
-            @Result(column = "comment", property = "comment"),
-            @Result(column = "expression", property = "expression"),
-            @Result(column = "index_comment", property = "indexComment"),
-            @Result(column = "index_name", property = "indexName"),
-            @Result(column = "index_schema", property = "indexSchema"),
-            @Result(column = "index_type", property = "indexType"),
-            @Result(column = "is_visible", property = "isVisible"),
-            @Result(column = "non_unique", property = "nonUnique"),
-            @Result(column = "nullable", property = "nullable"),
-            @Result(column = "packed", property = "packed"),
-            @Result(column = "seq_in_index", property = "seqInIndex"),
-            @Result(column = "sub_part", property = "subPart"),
-            @Result(column = "table_catalog", property = "tableCatalog"),
-            @Result(column = "table_name", property = "tableName"),
-            @Result(column = "table_schema", property = "tableSchema"),
+            @Result(column = "INDEX_CATALOG", property = "indexCatalog"),
+            @Result(column = "INDEX_SCHEMA", property = "indexSchema"),
+            @Result(column = "INDEX_NAME", property = "indexName"),
+            @Result(column = "TABLE_CATALOG", property = "tableCatalog"),
+            @Result(column = "TABLE_SCHEMA", property = "tableSchema"),
+            @Result(column = "TABLE_NAME", property = "tableName"),
+            @Result(column = "COLUMN_NAME", property = "columnName"),
+            @Result(column = "ORDINAL_POSITION", property = "ordinalPosition"),
+            @Result(column = "ORDERING_SPECIFICATION", property = "orderingSpecification"),
+            @Result(column = "NULL_ORDERING", property = "nullOrdering"),
+            @Result(column = "IS_UNIQUE", property = "isUnique"),
+            @Result(column = "REMARKS", property = "remarks"),
     })
-    @Select("SELECT * FROM information_schema.statistics WHERE table_name = #{tableName} and table_schema = (select database())")
-    List<InformationSchemaStatistics> queryTablePrimaryAndIndex(String tableName);
+    @Select("SELECT IC.*, I.REMARKS FROM INFORMATION_SCHEMA.INDEX_COLUMNS IC " +
+            "LEFT JOIN INFORMATION_SCHEMA.INDEXES I ON I.INDEX_NAME = IC.INDEX_NAME AND IC.TABLE_SCHEMA = I.TABLE_SCHEMA AND IC.TABLE_NAME = I.TABLE_NAME " +
+            "WHERE IC.TABLE_SCHEMA = UPPER(#{tableSchema}) AND IC.TABLE_NAME = UPPER(#{tableName}) AND I.INDEX_TYPE_NAME != 'PRIMARY KEY';")
+    List<InformationSchemaIndexes> findIndexInformation(String tableSchema, String tableName);
 }

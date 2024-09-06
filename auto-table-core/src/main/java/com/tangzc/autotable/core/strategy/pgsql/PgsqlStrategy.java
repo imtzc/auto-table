@@ -244,7 +244,7 @@ public class PgsqlStrategy implements IStrategy<DefaultTableMetadata, PgsqlCompa
         }
     }
 
-    private static boolean isTypeDiff(ColumnMetadata columnMetadata, PgsqlDbColumn pgsqlDbColumn) {
+    private boolean isTypeDiff(ColumnMetadata columnMetadata, PgsqlDbColumn pgsqlDbColumn) {
         String dataTypeFormat = pgsqlDbColumn.getDataTypeFormat();
         String fullType = columnMetadata.getType().getDefaultFullType().toLowerCase();
         // 数字类型的，默认没有长度，但是数据库查询出来的有长度。 "int4(32)".startWith("int4")
@@ -254,7 +254,7 @@ public class PgsqlStrategy implements IStrategy<DefaultTableMetadata, PgsqlCompa
         return !Objects.equals(fullType, dataTypeFormat);
     }
 
-    private static boolean isDefaultDiff(ColumnMetadata columnMetadata, PgsqlDbColumn pgsqlDbColumn) {
+    private boolean isDefaultDiff(ColumnMetadata columnMetadata, PgsqlDbColumn pgsqlDbColumn) {
 
         String columnDefault = pgsqlDbColumn.getColumnDefault();
         // 纠正default值，去掉类型转换

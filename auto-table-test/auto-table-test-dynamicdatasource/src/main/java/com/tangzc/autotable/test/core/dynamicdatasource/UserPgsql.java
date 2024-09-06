@@ -9,6 +9,7 @@ import com.tangzc.autotable.annotation.PrimaryKey;
 import com.tangzc.autotable.annotation.enums.DefaultValueEnum;
 import com.tangzc.autotable.annotation.mysql.MysqlColumnCharset;
 import com.tangzc.autotable.annotation.mysql.MysqlTypeConstant;
+import com.tangzc.autotable.annotation.pgsql.PgsqlTypeConstant;
 import lombok.Data;
 
 /**
@@ -16,7 +17,7 @@ import lombok.Data;
  */
 @Data
 @Ds("pgsql")
-@AutoTable(value = "sys_user", schema = "my_schema", comment = "用户表")
+@AutoTable(value = "sys_user", comment = "用户表")
 public class UserPgsql {
 
     @PrimaryKey(true)
@@ -28,7 +29,7 @@ public class UserPgsql {
     private String name;
 
     @ColumnComment("备注")
-    @ColumnType(MysqlTypeConstant.TEXT)
+    @ColumnType(PgsqlTypeConstant.TEXT)
     @ColumnDefault(type = DefaultValueEnum.NULL)
     private String mark;
 }
