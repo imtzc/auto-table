@@ -33,7 +33,7 @@ public enum H2DefaultTypeEnum implements DefaultTypeEnumInterface {
      */
     CHARACTER(H2TypeConstant.CHARACTER, 125, null),
     VARCHAR_IGNORECASE(H2TypeConstant.VARCHAR_IGNORECASE, 255, null),
-    CHARACTER_VARYING(H2TypeConstant.CHARACTER_VARYING, 1000000000, null),
+    CHARACTER_VARYING(H2TypeConstant.CHARACTER_VARYING, 255, null),
     CHARACTER_LARGE_OBJECT(H2TypeConstant.CHARACTER_LARGE_OBJECT, null, null),
     /**
      * 日期

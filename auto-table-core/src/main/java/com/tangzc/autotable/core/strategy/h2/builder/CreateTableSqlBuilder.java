@@ -11,7 +11,6 @@ import com.tangzc.autotable.core.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -41,7 +40,7 @@ public class CreateTableSqlBuilder {
         List<String> createIndexSql = getCreateIndexSql(schema, tableName, indexMetadataList);
 
         // 为 表、字段、索引 添加注释
-        List<String> addCommentSql = getAddColumnCommentSql(tableMetadata);
+        List<String> addCommentSql = getAllCommentSql(tableMetadata);
 
         // 组合最终建表语句
         List<String> sqlList = new ArrayList<>();
@@ -59,12 +58,12 @@ public class CreateTableSqlBuilder {
     public static List<String> getCreateIndexSql(String schema, String tableName, List<IndexMetadata> indexMetadataList) {
 
         return indexMetadataList.stream()
-                .map(pgsqlIndexMetadata -> StringConnectHelper.newInstance("CREATE {indexType} INDEX {indexName} ON {tableName} ({columns});")
-                        .replace("{indexType}", pgsqlIndexMetadata.getType() == IndexTypeEnum.UNIQUE ? "UNIQUE" : "")
-                        .replace("{indexName}", pgsqlIndexMetadata.getName())
+                .map(indexMetadataType -> StringConnectHelper.newInstance("CREATE {indexType} INDEX {indexName} ON {tableName} ({columns});")
+                        .replace("{indexType}", indexMetadataType.getType() == IndexTypeEnum.UNIQUE ? "UNIQUE" : "")
+                        .replace("{indexName}", indexMetadataType.getName())
                         .replace("{tableName}", H2Strategy.withSchemaName(schema, tableName))
                         .replace("{columns}", () -> {
-                            List<IndexMetadata.IndexColumnParam> columnParams = pgsqlIndexMetadata.getColumns();
+                            List<IndexMetadata.IndexColumnParam> columnParams = indexMetadataType.getColumns();
                             return columnParams.stream().map(column ->
                                     // 例："name" ASC
                                     "{column} {sortMode}"
@@ -76,7 +75,7 @@ public class CreateTableSqlBuilder {
                 ).collect(Collectors.toList());
     }
 
-    private static List<String> getAddColumnCommentSql(DefaultTableMetadata tableMetadata) {
+    private static List<String> getAllCommentSql(DefaultTableMetadata tableMetadata) {
 
         String schema = tableMetadata.getSchema();
         String tableName = tableMetadata.getTableName();
@@ -84,36 +83,44 @@ public class CreateTableSqlBuilder {
         List<ColumnMetadata> columnMetadataList = tableMetadata.getColumnMetadataList();
         List<IndexMetadata> indexMetadataList = tableMetadata.getIndexMetadataList();
 
-        return getAddColumnCommentSql(schema, tableName, comment,
+        return getAllCommentSql(schema, tableName, comment,
                 columnMetadataList.stream().collect(Collectors.toMap(ColumnMetadata::getName, ColumnMetadata::getComment)),
                 indexMetadataList.stream().collect(Collectors.toMap(IndexMetadata::getName, IndexMetadata::getComment)));
     }
 
-    public static List<String> getAddColumnCommentSql(String schema, String tableName, String tableComment, Map<String, String> columnCommentMap, Map<String, String> indexCommentMap) {
+    public static List<String> getAllCommentSql(String schema, String tableName, String tableComment, Map<String, String> columnCommentMap, Map<String, String> indexCommentMap) {
 
         List<String> commentSqlList = new ArrayList<>();
 
         // 表备注
-        if (StringUtils.hasText(tableComment)) {
-            String addTableComment = "COMMENT ON TABLE {tableName} IS '{comment}';"
+        if (tableComment != null) {
+            String addTableComment = StringConnectHelper.newInstance("COMMENT ON TABLE {tableName} IS {comment};")
                     .replace("{tableName}", H2Strategy.withSchemaName(schema, tableName))
-                    .replace("{comment}", tableComment);
+                    .replace("{comment}", tableComment.isEmpty() ? "null" : "'" + tableComment + "'")
+                    .toString();
             commentSqlList.add(addTableComment);
         }
 
         // 字段备注
         columnCommentMap.entrySet().stream()
-                .map(columnComment -> "COMMENT ON COLUMN {tableName}.{name} IS '{comment}';"
+                .map(columnComment -> StringConnectHelper.newInstance("COMMENT ON COLUMN {tableName}.{name} IS {comment};")
                         .replace("{tableName}", H2Strategy.withSchemaName(schema, tableName))
                         .replace("{name}", columnComment.getKey())
-                        .replace("{comment}", columnComment.getValue()))
+                        .replace("{comment}", () -> {
+                            String value = columnComment.getValue();
+                            return value == null || value.isEmpty() ? "null" : "'" + value + "'";
+                        })
+                        .toString())
                 .forEach(commentSqlList::add);
 
         // 索引备注
         indexCommentMap.entrySet().stream()
-                .map(indexComment -> "COMMENT ON INDEX {name} IS '{comment}';"
+                .map(indexComment -> StringConnectHelper.newInstance("COMMENT ON INDEX {name} IS {comment};")
                         .replace("{name}", H2Strategy.withSchemaName(schema, indexComment.getKey()))
-                        .replace("{comment}", indexComment.getValue()))
+                        .replace("{comment}", () -> {
+                            String value = indexComment.getValue();
+                            return value == null || value.isEmpty() ? "null" : "'" + value + "'";
+                        }).toString())
                 .forEach(commentSqlList::add);
 
         return commentSqlList;
@@ -153,19 +160,19 @@ public class CreateTableSqlBuilder {
         }
 
         // 组合sql: 过滤空字符项，逗号拼接
-        String addSql = columnList.stream()
+        String columnSql = columnList.stream()
                 .filter(StringUtils::hasText)
                 .collect(Collectors.joining(","));
 
         return "CREATE TABLE {tableName} ({columnList});"
                 .replace("{tableName}", H2Strategy.withSchemaName(schema, name))
-                .replace("{columnList}", addSql);
+                .replace("{columnList}", columnSql);
     }
-
 
 
     /**
      * 生成字段相关的SQL片段
+     *
      * @param columnMetadata 列元数据
      * @return 列相关的sql
      */
@@ -190,6 +197,11 @@ public class CreateTableSqlBuilder {
                     // 自定义
                     String defaultValue = columnMetadata.getDefaultValue();
                     if (DefaultValueEnum.isCustom(defaultValueType) && StringUtils.hasText(defaultValue)) {
+                        // 字符串字段补单引号
+                        // if (!defaultValue.startsWith("'") && !defaultValue.endsWith("'") && H2TypeHelper.isCharString(columnMetadata.getType())) {
+                        //     defaultValue = "'" + defaultValue + "'";
+                        // }
+                        defaultValue = H2Strategy.encodeChinese(defaultValue);
                         return "DEFAULT " + defaultValue;
                     }
                     return "";
