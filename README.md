@@ -26,7 +26,8 @@ AutoTable分别在表名、字段名、主键、主键策略、枚举处理、�
 
 ### mybatis-flex拓展包
 
-<a href="https://gitee.com/tangzc/mybatis-flex-ext" target="_blank">mybatis-flex-ext</a>是mybatis-flex框架的拓展包，在框架原有基础上做了进一步的轻度封装，增强内容：多数据源自动建表(auto-table)、数据自动填充（类似JPA中的审计）。
+<a href="https://gitee.com/tangzc/mybatis-flex-ext" target="_blank">mybatis-flex-ext</a>
+是mybatis-flex框架的拓展包，在框架原有基础上做了进一步的轻度封装，增强内容：多数据源自动建表(auto-table)、数据自动填充（类似JPA中的审计）。
 
 ## 支持的数据库
 
@@ -38,10 +39,8 @@ AutoTable分别在表名、字段名、主键、主键策略、枚举处理、�
 | ✅ MariaDB    | 对应MySQL的版本 | 协议使用MySQL，即`jdbc:mysql://` |
 | ✅ PostgreSQL | 15.5       |                            |
 | ✅ SQLite     | 3.35.5     |                            |
-| ☑️ H2        | 敬请期待       | 🔥 火热开发中~~~                |
-| Oracle       | 暂未支持       | 期待你的PR😉                   |
-| SQLServer    | 暂未支持       | 期待你的PR😉                   |
-| DB2          | 暂未支持       | 期待你的PR😉                   |
+| ✅ H2         | 2.2.220    |                            |
+| 其他数据库        | 暂未支持       | 期待你的PR😉                   |
 
 ## 流程图
 
