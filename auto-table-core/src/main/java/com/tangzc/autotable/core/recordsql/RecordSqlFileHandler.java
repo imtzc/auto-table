@@ -17,17 +17,20 @@ public class RecordSqlFileHandler implements RecordSqlHandler {
     @Override
     public void record(AutoTableExecuteSqlLog autoTableExecuteSqlLog) {
 
-        PropertyConfig.RecordSqlProperties recordSql = AutoTableGlobalConfig.getAutoTableProperties().getRecordSql();
+        Path path = getFilePath(autoTableExecuteSqlLog);
+        if (path != null && !Files.exists(path)) {
+            try {
+                Files.createDirectories(path.getParent());
+                Files.createFile(path);
+            } catch (IOException e) {
+                log.error("创建日志文件{}出错", path, e);
+                path = null;
+            }
+        }
 
-        String folderPath = recordSql.getFolderPath();
-        Path path = getFilePath(folderPath, autoTableExecuteSqlLog);
         if (path != null) {
             try {
                 String sqlStatement = autoTableExecuteSqlLog.getSqlStatement();
-                // 末尾添加;
-                if (!sqlStatement.endsWith(";")) {
-                    sqlStatement = sqlStatement + ";";
-                }
                 // 末尾添加换行符
                 if (!sqlStatement.endsWith(System.lineSeparator())) {
                     sqlStatement = sqlStatement + System.lineSeparator();
@@ -39,7 +42,14 @@ public class RecordSqlFileHandler implements RecordSqlHandler {
         }
     }
 
-    protected Path getFilePath(String folderPath, AutoTableExecuteSqlLog autoTableExecuteSqlLog) {
+    /**
+     * 希望自定义文件全路径的话，可以重写此方法
+     */
+    protected Path getFilePath(AutoTableExecuteSqlLog autoTableExecuteSqlLog) {
+
+        PropertyConfig.RecordSqlProperties recordSql = AutoTableGlobalConfig.getAutoTableProperties().getRecordSql();
+
+        String folderPath = recordSql.getFolderPath();
 
         if (StringUtils.noText(folderPath)) {
             log.error("没有指定SQL日志文件目录，无法记录SQL执行记录");
@@ -48,20 +58,13 @@ public class RecordSqlFileHandler implements RecordSqlHandler {
 
         String fileName = getFileName(autoTableExecuteSqlLog);
 
-        Path path = Paths.get(folderPath, fileName);
-        if (!Files.exists(path)) {
-            try {
-                Files.createDirectories(path.getParent());
-                Files.createFile(path);
-            } catch (IOException e) {
-                log.error("创建日志文件{}出错", path, e);
-                return null;
-            }
-        }
-        return path;
+        return Paths.get(folderPath, fileName);
     }
 
-    protected String getFileName(AutoTableExecuteSqlLog autoTableExecuteSqlLog) {
+    /**
+     * 希望自定义文件名称的话，可以重写此方法
+     */
+    private String getFileName(AutoTableExecuteSqlLog autoTableExecuteSqlLog) {
 
         StringBuilder fileName = new StringBuilder();
         // 添加版本号
@@ -75,7 +78,7 @@ public class RecordSqlFileHandler implements RecordSqlHandler {
         }
         // 添加tableSchema
         String tableSchema = autoTableExecuteSqlLog.getTableSchema();
-        if(StringUtils.hasText(tableSchema)) {
+        if (StringUtils.hasText(tableSchema)) {
             fileName.append(tableSchema).append("_");
         }
         // 添加表名

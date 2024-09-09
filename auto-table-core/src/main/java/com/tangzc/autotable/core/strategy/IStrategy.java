@@ -143,8 +143,8 @@ public interface IStrategy<TABLE_META extends TableMetadata, COMPARE_TABLE_INFO 
 
     /**
      * 创建模式
-     * 1. 删除表
-     * 2. 新建表
+     * <p>1. 删除表
+     * <p>2. 新建表
      *
      * @param tableMetadata 表元数据
      */
@@ -232,6 +232,10 @@ public interface IStrategy<TABLE_META extends TableMetadata, COMPARE_TABLE_INFO 
             List<AutoTableExecuteSqlLog> autoTableExecuteSqlLogs = new ArrayList<>();
             try (Statement statement = connection.createStatement()) {
                 for (String sql : sqlList) {
+                    // sql末尾添加;
+                    if (!sql.endsWith(";")) {
+                        sql += ";";
+                    }
                     long executionTime = System.currentTimeMillis();
                     statement.execute(sql);
                     long executionEndTime = System.currentTimeMillis();
