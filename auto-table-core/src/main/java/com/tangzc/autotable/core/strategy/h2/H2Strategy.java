@@ -80,7 +80,7 @@ public class H2Strategy implements IStrategy<DefaultTableMetadata, H2CompareTabl
     @Override
     public String dropTable(String schema, String tableName) {
         // 删除表，并同时删除外键
-        return String.format("DROP TABLE IF EXISTS `%s` CASCADE", tableName);
+        return String.format("DROP TABLE IF EXISTS `%s`.`%s` CASCADE", schema, tableName);
     }
 
     @Override
