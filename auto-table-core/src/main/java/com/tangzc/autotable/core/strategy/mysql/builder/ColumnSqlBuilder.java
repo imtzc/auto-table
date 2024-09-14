@@ -7,6 +7,9 @@ import com.tangzc.autotable.core.utils.StringConnectHelper;
 import com.tangzc.autotable.core.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * @author don
  */
@@ -19,9 +22,21 @@ public class ColumnSqlBuilder {
     public static String buildSql(MysqlColumnMetadata columnMetadata) {
         // 例子：`name` varchar(100) NULL DEFAULT '张三' COMMENT '名称'
         // 例子：`id` int(32) NOT NULL AUTO_INCREMENT COMMENT '主键'
-        return StringConnectHelper.newInstance("`{columnName}` {typeAndLength} {character} {collate} {null} {default} {autoIncrement} {columnComment} {position}")
+        return StringConnectHelper.newInstance("`{columnName}` {typeAndLength} {qualifier} {character} {collate} {null} {default} {autoIncrement} {columnComment} {position}")
                 .replace("{columnName}", columnMetadata.getName())
                 .replace("{typeAndLength}", MysqlTypeHelper.getFullType(columnMetadata.getType()))
+                // 添加二进制、无符号、补零 等修饰符
+                .replace("{qualifier}", () -> {
+                    Set<String> qualifiers = new HashSet<>();
+                    if (columnMetadata.isUnsigned()) {
+                        qualifiers.add("UNSIGNED");
+                    }
+                    if (columnMetadata.isZerofill()) {
+                        qualifiers.add("UNSIGNED");
+                        qualifiers.add("ZEROFILL");
+                    }
+                    return String.join(" ", qualifiers);
+                })
                 .replace("{character}", () -> {
                     String characterSet = columnMetadata.getCharacterSet();
                     if (StringUtils.hasText(characterSet)) {

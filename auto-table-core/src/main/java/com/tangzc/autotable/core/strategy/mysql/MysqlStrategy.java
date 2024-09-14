@@ -24,11 +24,13 @@ import com.tangzc.autotable.core.utils.StringUtils;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
+import java.awt.geom.AffineTransform;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -349,21 +351,52 @@ public class MysqlStrategy implements IStrategy<MysqlTableMetadata, MysqlCompare
     private static boolean isFieldTypeChanged(InformationSchemaColumn informationSchemaColumn, MysqlColumnMetadata mysqlColumnMetadata) {
 
         DatabaseTypeAndLength fieldType = mysqlColumnMetadata.getType();
-        // 整数类型，只对比类型，不对比长度
-        if (MysqlTypeHelper.isNoLengthNumber(fieldType)) {
-            return !fieldType.getType().equalsIgnoreCase(informationSchemaColumn.getDataType());
-        }
 
         // 非整数类型，类型全文匹配：varchar(255) double(6,2) enum('A','B')
         String fullType = MysqlTypeHelper.getFullType(fieldType);
 
+        // bigint(20) unsigned zerofill
+        String dbColumnTypeStr = informationSchemaColumn.getColumnType();
+        List<String> dbColumnTypeArr = Arrays.asList(dbColumnTypeStr.split(" "));
+        String dbColumnType = dbColumnTypeArr.get(0);
+
+        /* 判断其他类型是否相同 */
+        boolean isTypeDiff;
         // 枚举类的，不忽略大小写比较
         if (MysqlTypeHelper.isEnum(fieldType)) {
-            return !fullType.equals(informationSchemaColumn.getColumnType());
+            isTypeDiff = !fullType.equals(dbColumnType);
+        }
+        // 整数类型，先对比完整的类型是否相同（比如：int(10) == int(10)，或者int == int(10)），据观察
+        // 正常情况下int后面是没有长度的，但是使用了zerofill后，需要长度，因此，存在两种情况：
+        // 1、注解：int(10)，数据库：int(10)，该情况是注解显示的指定了类型长度
+        // 2、注解：int，数据库：int(10)，该情况是注解没有指定类型长度，数据库可能是默认的长度（指定了zerofill会默认配置长度），也可能是手动指定的
+        else if (MysqlTypeHelper.isNoLengthNumber(fieldType)) {
+            // dbColumnType是全类型，informationSchemaColumn.getDataType()只有数据类型
+            // 所以，当注解指定的类型，既不是int(10)这种的，也不是int这种的，说明类型的确不一样
+            isTypeDiff = !fullType.equalsIgnoreCase(dbColumnType) && !fullType.equalsIgnoreCase(informationSchemaColumn.getDataType());
+        } else {
+            // 剩下的忽略大小写进行比较
+            isTypeDiff = !fullType.equalsIgnoreCase(dbColumnType);
         }
 
-        // 剩下的忽略大小写进行比较
-        return !fullType.equalsIgnoreCase(informationSchemaColumn.getColumnType());
+
+        /* 判断限定符是否相同 */
+        boolean dbHasQualifier = dbColumnTypeArr.size() > 1;
+        // 设置初始值
+        boolean isQualifierDiff = false;;
+        // 任何一方有限定符的话，则进行比较
+        if (mysqlColumnMetadata.hasQualifier() || dbHasQualifier) {
+            // 无符号比较
+            if (mysqlColumnMetadata.isUnsigned() != dbColumnTypeArr.stream().anyMatch("unsigned"::equalsIgnoreCase)) {
+                isQualifierDiff = true;
+            }
+            // 零填充比较
+            else if (mysqlColumnMetadata.isZerofill() != dbColumnTypeArr.stream().anyMatch("zerofill"::equalsIgnoreCase)) {
+                isQualifierDiff = true;
+            }
+        }
+
+        return isTypeDiff || isQualifierDiff;
     }
 
     private static boolean isCommentChanged(InformationSchemaColumn informationSchemaColumn, MysqlColumnMetadata mysqlColumnMetadata) {

@@ -35,7 +35,7 @@ public class TestApplication {
         // 配置信息
         PropertyConfig autoTableProperties = new PropertyConfig();
         // create模式
-        autoTableProperties.setMode(RunMode.create);
+        autoTableProperties.setMode(RunMode.update);
         // 指定扫描包
         autoTableProperties.setModelPackage(new String[]{"com.**.test.core"});
         // 开启 删除不存在的列

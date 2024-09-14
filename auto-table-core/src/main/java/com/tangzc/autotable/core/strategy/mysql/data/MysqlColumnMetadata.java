@@ -16,6 +16,16 @@ import lombok.extern.slf4j.Slf4j;
 public class MysqlColumnMetadata extends ColumnMetadata {
 
     /**
+     * 无符号：数字类型不允许负数，其范围从 0 开始
+     */
+    private boolean unsigned;
+
+    /**
+     * 零填充: 数字类型，位数不足的前面补0
+     */
+    private boolean zerofill;
+
+    /**
      * 默认字符集
      */
     private String characterSet;
@@ -31,10 +41,14 @@ public class MysqlColumnMetadata extends ColumnMetadata {
     private int position;
 
     /**
-     * <p>表示前一列的列名:
-     * <p>if 非空，生成“AFTER [列名]”，表示位于某列之后；
+     * <p>表示前一列的列名，该值的使用规则如下:
+     * <p>if 非空，生成“AFTER [newPreColumn]”，表示位于某列之后；
      * <p>else if 空字符，生成“FIRST”，表示第一列；
-     * <p>else 表示没有变动；
+     * <p>else 生成空字符串，表示没有变动；
      */
     private String newPreColumn;
+
+    public boolean hasQualifier() {
+        return unsigned || zerofill;
+    }
 }

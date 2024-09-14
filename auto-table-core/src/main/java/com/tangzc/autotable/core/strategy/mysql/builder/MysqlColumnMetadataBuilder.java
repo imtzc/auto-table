@@ -3,6 +3,8 @@ package com.tangzc.autotable.core.strategy.mysql.builder;
 import com.tangzc.autotable.annotation.ColumnDefault;
 import com.tangzc.autotable.annotation.ColumnType;
 import com.tangzc.autotable.annotation.mysql.MysqlColumnCharset;
+import com.tangzc.autotable.annotation.mysql.MysqlColumnUnsigned;
+import com.tangzc.autotable.annotation.mysql.MysqlColumnZerofill;
 import com.tangzc.autotable.core.AutoTableGlobalConfig;
 import com.tangzc.autotable.core.builder.ColumnMetadataBuilder;
 import com.tangzc.autotable.core.config.PropertyConfig;
@@ -48,6 +50,9 @@ public class MysqlColumnMetadataBuilder extends ColumnMetadataBuilder {
         // 提取并设置字符集和排序规则
         extractCharsetAndCollate(field, mysqlColumnMetadata);
 
+        // 提取列修饰符
+        extractColumnQualifier(field, mysqlColumnMetadata);
+
         /* 基础的校验逻辑 */
         ParamValidChecker.checkColumnParam(clazz, field, mysqlColumnMetadata);
     }
@@ -86,7 +91,7 @@ public class MysqlColumnMetadataBuilder extends ColumnMetadataBuilder {
             if (enumType.isEnum()) {
                 // 调用第三方框架获取枚举的可选值
                 List<String> values = AutoTableGlobalConfig.getAutoTableOrmFrameAdapter().getEnumValues(enumType);
-                if(values.isEmpty()) {
+                if (values.isEmpty()) {
                     values = Arrays.stream(enumType.getEnumConstants()).map(Object::toString).collect(Collectors.toList());
                 }
                 typeAndLength.setValues(values);
@@ -129,6 +134,22 @@ public class MysqlColumnMetadataBuilder extends ColumnMetadataBuilder {
             mysqlColumnMetadata.setCharacterSet(charset);
             // 字符排序
             mysqlColumnMetadata.setCollate(collate);
+        }
+    }
+
+    private void extractColumnQualifier(Field field, MysqlColumnMetadata mysqlColumnMetadata) {
+
+        // 无符号
+        MysqlColumnUnsigned mysqlColumnUnsigned = AutoTableGlobalConfig.getAutoTableAnnotationFinder().find(field, MysqlColumnUnsigned.class);
+        if (mysqlColumnUnsigned != null) {
+            mysqlColumnMetadata.setUnsigned(true);
+        }
+
+        // 零填充（自带无符号）
+        MysqlColumnZerofill mysqlColumnZerofill = AutoTableGlobalConfig.getAutoTableAnnotationFinder().find(field, MysqlColumnZerofill.class);
+        if (mysqlColumnZerofill != null) {
+            mysqlColumnMetadata.setUnsigned(true);
+            mysqlColumnMetadata.setZerofill(true);
         }
     }
 }

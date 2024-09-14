@@ -129,8 +129,6 @@ public class PgsqlStrategy implements IStrategy<DefaultTableMetadata, PgsqlCompa
 
         List<PgsqlDbIndex> pgsqlDbIndices = executeReturn(pgsqlTablesMapper -> pgsqlTablesMapper.selectTableIndexesDetail(schema, tableName));
         Map<String, PgsqlDbIndex> pgsqlDbIndexMap = pgsqlDbIndices.stream()
-                // 仅仅处理自定义的索引
-                .filter(idx -> idx.getIndexName().startsWith(AutoTableGlobalConfig.getAutoTableProperties().getIndexPrefix()))
                 .collect(Collectors.toMap(PgsqlDbIndex::getIndexName, Function.identity()));
 
         List<IndexMetadata> indexMetadataList = tableMetadata.getIndexMetadataList();

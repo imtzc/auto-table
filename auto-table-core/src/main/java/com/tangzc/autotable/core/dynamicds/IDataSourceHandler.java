@@ -40,7 +40,7 @@ public interface IDataSourceHandler {
             DatasourceNameManager.setDatasourceName(dataSource);
             try {
                 String databaseDialect = this.getDatabaseDialect(dataSource);
-                log.info("数据库方言（" + databaseDialect + "）");
+                log.info("数据库方言（{}）", databaseDialect);
                 consumer.accept(databaseDialect, entityClasses);
             } finally {
                 log.info("清理数据源：{}", dataSource);

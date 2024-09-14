@@ -12,6 +12,8 @@ import com.tangzc.autotable.annotation.enums.DefaultValueEnum;
 import com.tangzc.autotable.annotation.enums.IndexSortTypeEnum;
 import com.tangzc.autotable.annotation.enums.IndexTypeEnum;
 import com.tangzc.autotable.annotation.mysql.MysqlColumnCharset;
+import com.tangzc.autotable.annotation.mysql.MysqlColumnUnsigned;
+import com.tangzc.autotable.annotation.mysql.MysqlColumnZerofill;
 import com.tangzc.autotable.annotation.mysql.MysqlTypeConstant;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -38,7 +40,13 @@ public class User extends BaseEntity {
     private String name;
 
     @ColumnComment("年龄")
+    @MysqlColumnUnsigned
     private Integer age;
+
+    @ColumnComment("电话")
+    @MysqlColumnZerofill
+    @ColumnType(length = 13)
+    private Integer phone;
 
     @ColumnComment("备注")
     @ColumnType(MysqlTypeConstant.TEXT)
