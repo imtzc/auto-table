@@ -93,7 +93,13 @@ public interface PgsqlTablesMapper {
     List<PgsqlDbColumn> selectTableFieldDetail(String schema, String tableName);
 
     /**
-     * 查询所有索引信息
+     * <p>查询所有索引信息
+     * <p>关于pg_constraint表的contype值有以下几种：
+     * <p>主键约束（PRIMARY KEY）：contype 字段的值为 'p'
+     * <p>唯一约束（UNIQUE）：contype 字段的值为 'u'
+     * <p>检查约束（CHECK）：contype 字段的值为 'c'
+     * <p>外键约束（FOREIGN KEY）：contype 字段的值为 'f'
+     * <p>排他约束（EXCLUDE）：contype 字段的值为 'x'
      *
      * @param tableName 表名
      * @return 索引信息
@@ -110,7 +116,8 @@ public interface PgsqlTablesMapper {
             "FROM pg_catalog.pg_indexes idxs " +
             "LEFT JOIN pg_catalog.pg_class clas ON idxs.indexname = clas.relname " +
             "LEFT JOIN pg_catalog.pg_description des ON clas.oid = des.objoid " +
-            "WHERE idxs.schemaname = #{schema} AND idxs.tablename = #{tableName};")
+            "LEFT JOIN pg_catalog.pg_constraint cst ON idxs.indexname = cst.conname " +
+            "WHERE idxs.schemaname = #{schema} AND idxs.tablename = #{tableName} AND cst.contype is null;")
     List<PgsqlDbIndex> selectTableIndexesDetail(String schema, String tableName);
 
     /**
