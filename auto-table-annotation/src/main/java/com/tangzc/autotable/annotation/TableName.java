@@ -20,7 +20,7 @@ import java.lang.annotation.Target;
 public @interface TableName {
 
     /**
-     * 表名，为空默认取类名
+     * @return 表名，为空默认取类名
      */
     String value();
 }

@@ -18,12 +18,12 @@ import java.lang.annotation.Target;
 public @interface IndexField {
 
     /**
-     * 字段名
+     * @return 字段名
      */
     String field();
 
     /**
-     * 字段排序方式
+     * @return 字段排序方式
      */
     IndexSortTypeEnum sort();
 }

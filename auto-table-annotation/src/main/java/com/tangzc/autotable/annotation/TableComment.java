@@ -20,7 +20,7 @@ import java.lang.annotation.Target;
 public @interface TableComment {
 
     /**
-     * 表注释
+     * @return 表注释
      */
     String value();
 }

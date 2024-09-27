@@ -17,7 +17,7 @@ import java.lang.annotation.Target;
 public @interface MysqlEngine {
 
     /**
-     * 引擎名称
+     * @return 引擎名称
      */
     String value();
 }

@@ -19,17 +19,17 @@ import java.lang.annotation.Target;
 public @interface AutoTable {
 
     /**
-     * 表名，为空默认取类名
+     * @return 表名，为空默认取类名
      */
     String value() default "";
 
     /**
-     * 表schema
+     * @return 表schema
      */
     String schema() default "";
 
     /**
-     * 表注释，为空默认取类名
+     * @return 表注释，为空默认取类名
      */
     String comment() default "";
 }

@@ -18,7 +18,7 @@ import java.lang.annotation.Target;
 public @interface PrimaryKey {
 
     /**
-     * 自增
+     * @return 自增
      */
     boolean value();
 }

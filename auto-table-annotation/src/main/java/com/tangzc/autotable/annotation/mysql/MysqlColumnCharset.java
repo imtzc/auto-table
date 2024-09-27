@@ -17,12 +17,12 @@ import java.lang.annotation.Target;
 public @interface MysqlColumnCharset {
 
     /**
-     * 字符集
+     * @return 字符集
      */
     String value();
 
     /**
-     * 字符排序
+     * @return 字符排序
      */
     String collate();
 }

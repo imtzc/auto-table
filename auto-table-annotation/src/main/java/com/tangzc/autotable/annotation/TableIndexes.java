@@ -17,7 +17,7 @@ import java.lang.annotation.Target;
 public @interface TableIndexes {
 
     /**
-     * 索引集合
+     * @return 索引集合
      */
     TableIndex[] value();
 
