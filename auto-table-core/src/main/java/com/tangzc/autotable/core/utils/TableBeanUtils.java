@@ -10,10 +10,8 @@ import com.tangzc.autotable.annotation.ColumnType;
 import com.tangzc.autotable.annotation.Ignore;
 import com.tangzc.autotable.annotation.Index;
 import com.tangzc.autotable.annotation.PrimaryKey;
-import com.tangzc.autotable.annotation.TableComment;
 import com.tangzc.autotable.annotation.TableIndex;
 import com.tangzc.autotable.annotation.TableIndexes;
-import com.tangzc.autotable.annotation.TableName;
 import com.tangzc.autotable.annotation.enums.DefaultValueEnum;
 import com.tangzc.autotable.core.AutoTableAnnotationFinder;
 import com.tangzc.autotable.core.AutoTableGlobalConfig;
@@ -67,12 +65,6 @@ public class TableBeanUtils {
 
         AutoTableAnnotationFinder autoTableAnnotationFinder = AutoTableGlobalConfig.getAutoTableAnnotationFinder();
 
-        // TODO 将要删除的逻辑，仅供兼容
-        TableName tableNameAnno = autoTableAnnotationFinder.find(clazz, TableName.class);
-        if (tableNameAnno != null && StringUtils.hasText(tableNameAnno.value())) {
-            tableName = tableNameAnno.value();
-        }
-
         AutoTable autoTable = autoTableAnnotationFinder.find(clazz, AutoTable.class);
         if (autoTable != null && StringUtils.hasText(autoTable.value())) {
             tableName = autoTable.value();
@@ -110,11 +102,6 @@ public class TableBeanUtils {
 
     public static String getTableComment(Class<?> clazz) {
         AutoTableAnnotationFinder autoTableAnnotationFinder = AutoTableGlobalConfig.getAutoTableAnnotationFinder();
-
-        TableComment tableComment = autoTableAnnotationFinder.find(clazz, TableComment.class);
-        if (tableComment != null) {
-            return tableComment.value();
-        }
 
         AutoTable autoTable = autoTableAnnotationFinder.find(clazz, AutoTable.class);
         if (autoTable != null) {

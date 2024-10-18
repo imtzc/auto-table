@@ -2,8 +2,6 @@ package com.tangzc.autotable.core;
 
 import com.tangzc.autotable.annotation.AutoTable;
 import com.tangzc.autotable.annotation.Ignore;
-import com.tangzc.autotable.annotation.TableComment;
-import com.tangzc.autotable.annotation.TableName;
 import com.tangzc.autotable.core.config.PropertyConfig;
 import com.tangzc.autotable.core.dynamicds.IDataSourceHandler;
 import com.tangzc.autotable.core.strategy.IStrategy;
@@ -58,7 +56,7 @@ public class AutoTableBootstrap {
 
         // 从包package中获取所有的Class
         Set<Class<? extends Annotation>> includeAnnotations = new HashSet<>(
-                Arrays.asList(TableName.class, TableComment.class, AutoTable.class)
+                Collections.singletonList(AutoTable.class)
         );
         // 添加自定义的注解
         includeAnnotations.addAll(AutoTableGlobalConfig.getAutoTableOrmFrameAdapter().scannerAnnotations());
