@@ -9,6 +9,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -94,20 +97,70 @@ public interface JavaTypeToDatabaseTypeConverter {
     default DatabaseTypeAndLength getDatabaseTypeAndLength(String databaseDialect, Class<?> clazz, Field field) {
 
         DatabaseTypeAndLength typeAndLength;
-        Class<?> fieldClass = TableBeanUtils.getFieldType(clazz, field);
 
         Map<Class<?>, DefaultTypeEnumInterface> typeMap = JAVA_TO_DB_TYPE_MAPPING.getOrDefault(databaseDialect, Collections.emptyMap());
         if (typeMap.isEmpty()) {
             log.warn("数据库方言{}没有找到对应的数据库类型映射关系", databaseDialect);
         }
 
-        DefaultTypeEnumInterface sqlType = typeMap.get(fieldClass);
+        Class<?> fieldClass;
+        // 处理泛型
+        if (field.getGenericType() instanceof TypeVariable) {
+            // 无法通过直接获取类型，真是字段类型需要从实现类的接口泛型中获取
+            fieldClass = getFieldGenericType(clazz, field);
+        } else {
+            fieldClass = TableBeanUtils.getFieldType(clazz, field);
+        }
 
+        DefaultTypeEnumInterface sqlType = typeMap.get(fieldClass);
         if (sqlType == null) {
             log.warn("{}下的字段{}在{}下找不到对应的数据库类型，默认使用了字符串类型，如果想自定义，请调用JavaTypeToDatabaseTypeConverter.addTypeMap(DatabaseDialect.{}, {}.class, ?)添加映射关系", clazz.getName(), fieldClass.getSimpleName(), databaseDialect, databaseDialect, fieldClass.getSimpleName());
             sqlType = typeMap.get(String.class);
         }
         typeAndLength = new DatabaseTypeAndLength(sqlType.getTypeName(), sqlType.getDefaultLength(), sqlType.getDefaultDecimalLength(), Collections.emptyList());
         return typeAndLength;
+    }
+
+    /**
+     * 获取指定类中某字段的泛型类型
+     *
+     * @param clazz 子类的Class对象
+     * @param field 要获取的字段
+     * @return 字段的泛型类型
+     */
+    default Class<?> getFieldGenericType(Class<?> clazz, Field field) {
+        // 获取父类的泛型类型信息
+        Type genericSuperclass = clazz.getGenericSuperclass();
+
+        if (!(genericSuperclass instanceof ParameterizedType)) {
+            return null; // 如果没有泛型信息，则返回null
+        }
+
+        ParameterizedType parameterizedType = (ParameterizedType) genericSuperclass;
+
+        // 获取BaseEntity的泛型参数列表
+        Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
+
+        // 获取字段的泛型类型
+        Type genericFieldType = field.getGenericType();
+
+        // 在父类的泛型参数中找到对应的实际类型
+        String typeVariableName = ((TypeVariable<?>) genericFieldType).getName();
+        // 遍历父类的泛型参数，找到对应的具体类型
+        Class<?> declaringClass = field.getDeclaringClass();
+        TypeVariable<? extends Class<?>>[] typeParameters = declaringClass.getTypeParameters();
+        for (int i = 0; i < typeParameters.length; i++) {
+            if (typeParameters[i].getName().equals(typeVariableName)) {
+                genericFieldType = actualTypeArguments[i];
+                break;
+            }
+        }
+
+        // 如果字段不是泛型变量，直接返回它的类型
+        if (genericFieldType instanceof Class<?>) {
+            return ((Class<?>) genericFieldType);
+        }
+
+        return field.getType();
     }
 }
