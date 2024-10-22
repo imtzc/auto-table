@@ -6,9 +6,9 @@ import lombok.Data;
  * @author don
  */
 @Data
-public class BaseEntity {
-    protected String createBy;
-    protected Long createTime;
-    protected String modifyBy;
-    protected Long modifyTime;
+public class BaseEntity<USER, TIME> {
+    protected USER createBy;
+    protected TIME createTime;
+    protected USER modifyBy;
+    protected TIME modifyTime;
 }

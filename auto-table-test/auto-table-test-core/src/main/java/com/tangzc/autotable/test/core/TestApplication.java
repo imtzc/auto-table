@@ -35,7 +35,7 @@ public class TestApplication {
         // 配置信息
         PropertyConfig autoTableProperties = new PropertyConfig();
         // create模式
-        autoTableProperties.setMode(RunMode.update);
+        autoTableProperties.setMode(RunMode.create);
         // 指定扫描包
         autoTableProperties.setModelPackage(new String[]{"com.**.test.core"});
         // 开启 删除不存在的列
@@ -45,11 +45,17 @@ public class TestApplication {
         // 记录sql
         PropertyConfig.RecordSqlProperties recordSqlProperties = new PropertyConfig.RecordSqlProperties();
         recordSqlProperties.setEnable(true);
-        recordSqlProperties.setRecordType(PropertyConfig.RecordSqlProperties.TypeEnum.file);
-        // 指定记录方式为PropertyConfig.RecordSqlProperties.TypeEnum.file的情况下的文件路径
-        recordSqlProperties.setFolderPath("/Users/don/Downloads/sqlLogs");
         recordSqlProperties.setVersion(Version.VALUE);
         autoTableProperties.setRecordSql(recordSqlProperties);
+
+        // 自定义，以Flyway的格式记录sql
+        recordSqlProperties.setRecordType(PropertyConfig.RecordSqlProperties.TypeEnum.custom);
+        AutoTableGlobalConfig.setCustomRecordSqlHandler(new RecordSqlFlywayHandler("/Users/don/Downloads/sqlLogs"));
+
+        // 以文件的形式，记录sql
+        // recordSqlProperties.setRecordType(PropertyConfig.RecordSqlProperties.TypeEnum.file);
+        // 指定记录方式为PropertyConfig.RecordSqlProperties.TypeEnum.file的情况下的文件路径
+        // recordSqlProperties.setFolderPath("/Users/don/Downloads/sqlLogs");
 
         AutoTableGlobalConfig.setAutoTableProperties(autoTableProperties);
 

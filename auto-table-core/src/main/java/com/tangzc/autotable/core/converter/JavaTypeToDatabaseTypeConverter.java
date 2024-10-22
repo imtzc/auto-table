@@ -7,11 +7,13 @@ import com.tangzc.autotable.core.utils.StringUtils;
 import com.tangzc.autotable.core.utils.TableBeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import sun.reflect.generics.reflectiveObjects.TypeVariableImpl;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -112,9 +114,14 @@ public interface JavaTypeToDatabaseTypeConverter {
             fieldClass = TableBeanUtils.getFieldType(clazz, field);
         }
 
+        if (fieldClass == null) {
+            fieldClass = field.getType();
+        }
+
         DefaultTypeEnumInterface sqlType = typeMap.get(fieldClass);
         if (sqlType == null) {
-            log.warn("{}下的字段{}在{}下找不到对应的数据库类型，默认使用了字符串类型，如果想自定义，请调用JavaTypeToDatabaseTypeConverter.addTypeMap(DatabaseDialect.{}, {}.class, ?)添加映射关系", clazz.getName(), fieldClass.getSimpleName(), databaseDialect, databaseDialect, fieldClass.getSimpleName());
+            log.warn("{}下的字段{}在{}下找不到对应的数据库类型，默认使用了字符串类型，如果想自定义，请调用JavaTypeToDatabaseTypeConverter.addTypeMap(DatabaseDialect.{}, {}.class, ?)添加映射关系",
+                    clazz.getName(), fieldClass.getSimpleName(), databaseDialect, databaseDialect, fieldClass.getSimpleName());
             sqlType = typeMap.get(String.class);
         }
         typeAndLength = new DatabaseTypeAndLength(sqlType.getTypeName(), sqlType.getDefaultLength(), sqlType.getDefaultDecimalLength(), Collections.emptyList());
@@ -128,37 +135,47 @@ public interface JavaTypeToDatabaseTypeConverter {
      * @param field 要获取的字段
      * @return 字段的泛型类型
      */
-    default Class<?> getFieldGenericType(Class<?> clazz, Field field) {
-        // 获取父类的泛型类型信息
-        Type genericSuperclass = clazz.getGenericSuperclass();
+    default Class<?> getFieldGenericType(final Class<?> clazz, final Field field) {
 
-        if (!(genericSuperclass instanceof ParameterizedType)) {
-            return null; // 如果没有泛型信息，则返回null
+        // 所有父类，按照顺序排序
+        List<Class<?>> classList = new ArrayList<>();
+        List<Type> typeList = new ArrayList<>();
+        for (Class<?> clas = clazz; clas != field.getDeclaringClass(); clas = clas.getSuperclass()) {
+            classList.add(clas);
+            typeList.add(clas.getGenericSuperclass());
         }
 
-        ParameterizedType parameterizedType = (ParameterizedType) genericSuperclass;
-
-        // 获取BaseEntity的泛型参数列表
-        Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
-
-        // 获取字段的泛型类型
-        Type genericFieldType = field.getGenericType();
-
-        // 在父类的泛型参数中找到对应的实际类型
-        String typeVariableName = ((TypeVariable<?>) genericFieldType).getName();
-        // 遍历父类的泛型参数，找到对应的具体类型
+        // T 或者 A 等泛型表示字符
+        String genericTypeName = ((TypeVariableImpl) field.getGenericType()).getName();
         Class<?> declaringClass = field.getDeclaringClass();
         TypeVariable<? extends Class<?>>[] typeParameters = declaringClass.getTypeParameters();
-        for (int i = 0; i < typeParameters.length; i++) {
-            if (typeParameters[i].getName().equals(typeVariableName)) {
-                genericFieldType = actualTypeArguments[i];
+        int index;
+        for (index = 0; index < typeParameters.length; index++) {
+            if (typeParameters[index].getName().equals(genericTypeName)) {
                 break;
             }
         }
 
-        // 如果字段不是泛型变量，直接返回它的类型
-        if (genericFieldType instanceof Class<?>) {
-            return ((Class<?>) genericFieldType);
+        for (int i = typeList.size() - 1; i >= 0; i--) {
+            Type genericSuperclass = typeList.get(i);
+            // 带泛型
+            if (genericSuperclass instanceof ParameterizedType) {
+                // 获取BaseEntity的泛型参数列表
+                Type[] actualTypeArguments = ((ParameterizedType) genericSuperclass).getActualTypeArguments();
+                Type actualTypeArgument = actualTypeArguments[index];
+
+                // 是Class类型，说明指定了泛型类型，直接返回
+                if(actualTypeArgument instanceof Class) {
+                    return (Class<?>) actualTypeArgument;
+                } else {
+                    typeParameters = classList.get(i).getTypeParameters();
+                    for (index = 0; index < typeParameters.length; index++) {
+                        if (typeParameters[index].getName().equals(genericTypeName)) {
+                            break;
+                        }
+                    }
+                }
+            }
         }
 
         return field.getType();

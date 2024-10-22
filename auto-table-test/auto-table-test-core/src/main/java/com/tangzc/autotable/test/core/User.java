@@ -30,7 +30,7 @@ import lombok.experimental.FieldNameConstants;
         @TableIndex(indexFields = @IndexField(field = User.Fields.age, sort = IndexSortTypeEnum.DESC), type = IndexTypeEnum.NORMAL, comment = "年龄普通索引")
 })
 @FieldNameConstants
-public class User extends BaseEntity {
+public class User extends FatherEntity<String> {
 
     @PrimaryKey(true)
     @ColumnComment("用户id")
