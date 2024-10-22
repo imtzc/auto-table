@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.tangzc</groupId>
         <artifactId>auto-table</artifactId>
-        <version>1.9.3</version>
+        <version>1.9.3.1</version>
     </parent>
 
     <artifactId>auto-table-test</artifactId>
