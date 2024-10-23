@@ -7,7 +7,6 @@ import com.tangzc.autotable.core.utils.StringUtils;
 import com.tangzc.autotable.core.utils.TableBeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sun.reflect.generics.reflectiveObjects.TypeVariableImpl;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
@@ -146,7 +145,7 @@ public interface JavaTypeToDatabaseTypeConverter {
         }
 
         // T 或者 A 等泛型表示字符
-        String genericTypeName = ((TypeVariableImpl) field.getGenericType()).getName();
+        String genericTypeName = ((TypeVariable<?>) field.getGenericType()).getName();
         Class<?> declaringClass = field.getDeclaringClass();
         TypeVariable<? extends Class<?>>[] typeParameters = declaringClass.getTypeParameters();
         int index;
@@ -168,6 +167,7 @@ public interface JavaTypeToDatabaseTypeConverter {
                 if(actualTypeArgument instanceof Class) {
                     return (Class<?>) actualTypeArgument;
                 } else {
+                    genericTypeName = actualTypeArgument.getTypeName();
                     typeParameters = classList.get(i).getTypeParameters();
                     for (index = 0; index < typeParameters.length; index++) {
                         if (typeParameters[index].getName().equals(genericTypeName)) {

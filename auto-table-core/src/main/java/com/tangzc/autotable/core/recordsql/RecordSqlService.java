@@ -22,15 +22,12 @@ public class RecordSqlService {
         PropertyConfig.RecordSqlProperties.TypeEnum recordType = recordSql.getRecordType();
         switch (recordType) {
             case db:
-                log.info("开启数据库记录执行SQL");
                 recordSqlHandler = new RecordSqlDbHandler();
                 break;
             case file:
-                log.info("开启文件记录执行SQL");
                 recordSqlHandler = new RecordSqlFileHandler();
                 break;
             case custom:
-                log.info("开启自定义记录执行SQL");
             default:
                 recordSqlHandler = AutoTableGlobalConfig.getCustomRecordSqlHandler();
                 break;

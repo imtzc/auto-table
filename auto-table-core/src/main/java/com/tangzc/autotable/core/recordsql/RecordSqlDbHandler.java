@@ -39,13 +39,15 @@ public class RecordSqlDbHandler implements RecordSqlHandler {
         SqlSessionFactory sqlSessionFactory = SqlSessionFactoryManager.getSqlSessionFactory();
         try (SqlSession sqlSession = sqlSessionFactory.openSession();
              Connection connection = sqlSession.getConnection()) {
-            boolean tableNotExit = !connection.getMetaData().getTables(null, null, tableName, null).next();
+            String catalog = connection.getCatalog();
+            String schema = StringUtils.hasText(autoTableExecuteSqlLog.getTableSchema()) ? autoTableExecuteSqlLog.getTableSchema() : connection.getSchema();
+            boolean tableNotExit = !connection.getMetaData().getTables(catalog, schema, tableName, new String[]{"TABLE"}).next();
             connection.setAutoCommit(false);
             if (tableNotExit) {
                 // 初始化表
                 initTable(connection);
+                log.info("初始化sql记录表：{}", tableName);
             }
-
             // 插入数据
             insertLog(tableName, autoTableExecuteSqlLog, connection);
             connection.commit();
@@ -93,10 +95,13 @@ public class RecordSqlDbHandler implements RecordSqlHandler {
 
         IStrategy<?, ?, ?> createTableStrategy = AutoTableGlobalConfig.getStrategy(databaseDialect);
         List<String> initTableSql = createTableStrategy.createTable(AutoTableExecuteSqlLog.class);
+
         try (Statement statement = connection.createStatement()) {
             for (String sql : initTableSql) {
                 statement.execute(sql);
             }
+        } catch (SQLException e) {
+            throw new RuntimeException("初始化sql记录表失败", e);
         }
     }
 }

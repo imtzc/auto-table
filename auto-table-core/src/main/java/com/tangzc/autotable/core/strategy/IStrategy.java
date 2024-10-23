@@ -274,7 +274,7 @@ public interface IStrategy<TABLE_META extends TableMetadata, COMPARE_TABLE_INFO 
             DatabaseMetaData metaData = connection.getMetaData();
             String connectionCatalog = connection.getCatalog();
             String connectionSchema = connection.getSchema();
-            boolean exist = metaData.getTables(connectionCatalog, StringUtils.hasText(schema) ? schema : connectionSchema, tableName, null).next();
+            boolean exist = metaData.getTables(connectionCatalog, StringUtils.hasText(schema) ? schema : connectionSchema, tableName, new String[]{"TABLE"}).next();
             return !exist;
         } catch (SQLException e) {
             throw new RuntimeException("判断数据库是否存在出错", e);
