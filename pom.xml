@@ -164,7 +164,7 @@
                     <charset>UTF-8</charset><!-- utf-8读取文件 -->
                     <encoding>UTF-8</encoding><!-- utf-8进行编码代码 -->
                     <docencoding>UTF-8</docencoding><!-- utf-8进行编码文档 -->
-                    <skip>true</skip>
+<!--                    <skip>true</skip>-->
                 </configuration>
                 <executions>
                     <execution>
