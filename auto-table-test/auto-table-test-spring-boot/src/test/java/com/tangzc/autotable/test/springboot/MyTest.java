@@ -1,8 +1,10 @@
 package com.tangzc.autotable.test.springboot;
 
+import com.tangzc.autotable.springboot.EnableAutoTableTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
+@EnableAutoTableTest
 @SpringBootTest
 public class MyTest {
 

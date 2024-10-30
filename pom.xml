@@ -48,6 +48,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <mybatis.version>3.5.14</mybatis.version>
+        <spring.version>5.3.31</spring.version>
         <spring-boot.version>2.7.18</spring-boot.version>
         <mybatis-spring.version>2.1.2</mybatis-spring.version>
         <lombok.version>1.18.30</lombok.version>
@@ -163,6 +164,7 @@
                     <charset>UTF-8</charset><!-- utf-8读取文件 -->
                     <encoding>UTF-8</encoding><!-- utf-8进行编码代码 -->
                     <docencoding>UTF-8</docencoding><!-- utf-8进行编码文档 -->
+                    <skip>true</skip>
                 </configuration>
                 <executions>
                     <execution>

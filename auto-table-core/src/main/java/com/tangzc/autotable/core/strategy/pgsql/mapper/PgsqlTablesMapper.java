@@ -87,7 +87,7 @@ public interface PgsqlTablesMapper {
     @Select("SELECT DISTINCT key_col.column_name IS NOT NULL AS primary, des.description, cols.* " +
             "FROM information_schema.columns cols " +
             "LEFT JOIN information_schema.key_column_usage key_col ON key_col.column_name = cols.column_name " +
-            "LEFT JOIN pg_catalog.pg_class clas ON clas.relname = cols.table_name " +
+            "LEFT JOIN pg_catalog.pg_class clas ON clas.relname = cols.table_name AND clas.relnamespace = ( SELECT oid FROM pg_namespace WHERE nspname = cols.table_schema ) " +
             "LEFT JOIN pg_catalog.pg_description des ON des.objoid = clas.oid AND cols.ordinal_position = des.objsubid " +
             "WHERE cols.table_schema = #{schema} AND cols.table_name = #{tableName};")
     List<PgsqlDbColumn> selectTableFieldDetail(String schema, String tableName);

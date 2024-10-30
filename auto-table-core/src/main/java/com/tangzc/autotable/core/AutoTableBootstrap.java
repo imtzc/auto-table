@@ -97,7 +97,7 @@ public class AutoTableBootstrap {
 
     private static String[] getModelPackage(PropertyConfig autoTableProperties) {
         String[] packs = autoTableProperties.getModelPackage();
-        if (packs == null) {
+        if (packs == null || packs.length == 0) {
             packs = new String[]{getBootPackage()};
         }
         return packs;
