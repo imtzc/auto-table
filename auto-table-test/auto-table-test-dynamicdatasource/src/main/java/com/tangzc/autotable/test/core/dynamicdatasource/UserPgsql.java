@@ -7,8 +7,6 @@ import com.tangzc.autotable.annotation.ColumnType;
 import com.tangzc.autotable.annotation.Index;
 import com.tangzc.autotable.annotation.PrimaryKey;
 import com.tangzc.autotable.annotation.enums.DefaultValueEnum;
-import com.tangzc.autotable.annotation.mysql.MysqlColumnCharset;
-import com.tangzc.autotable.annotation.mysql.MysqlTypeConstant;
 import com.tangzc.autotable.annotation.pgsql.PgsqlTypeConstant;
 import lombok.Data;
 
@@ -29,7 +27,7 @@ public class UserPgsql {
     private String name;
 
     @ColumnComment("备注")
-    @ColumnType(PgsqlTypeConstant.TEXT)
+    @ColumnType(PgsqlTypeConstant.VARCHAR)
     @ColumnDefault(type = DefaultValueEnum.NULL)
     private String mark;
 }

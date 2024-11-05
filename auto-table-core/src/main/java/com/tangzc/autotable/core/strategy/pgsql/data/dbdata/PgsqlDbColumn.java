@@ -1,5 +1,6 @@
 package com.tangzc.autotable.core.strategy.pgsql.data.dbdata;
 
+import com.tangzc.autotable.core.utils.StringUtils;
 import lombok.Data;
 
 /**
@@ -114,7 +115,10 @@ public class PgsqlDbColumn {
                 return this.udtName + "(" + this.numericPrecision + "," + this.numericScale + ")";
             // 字符串
             case "varchar":
-                return this.udtName + "(" + this.characterMaximumLength + ")";
+                if(StringUtils.hasText(this.characterMaximumLength)) {
+                    return this.udtName + "(" + this.characterMaximumLength + ")";
+                }
+                return this.udtName;
             case "bpchar":
                 return "char(" + this.characterMaximumLength + ")";
             // 其他的没有长度
