@@ -1,13 +1,13 @@
 package com.tangzc.autotable.springboot;
 
 import com.tangzc.autotable.core.AutoTableAnnotationFinder;
-import com.tangzc.autotable.core.AutoTableBootstrap;
 import com.tangzc.autotable.core.AutoTableGlobalConfig;
 import com.tangzc.autotable.core.AutoTableOrmFrameAdapter;
 import com.tangzc.autotable.core.callback.CreateTableFinishCallback;
 import com.tangzc.autotable.core.callback.ModifyTableFinishCallback;
 import com.tangzc.autotable.core.callback.RunStateCallback;
 import com.tangzc.autotable.core.callback.ValidateFinishCallback;
+import com.tangzc.autotable.core.config.PropertyConfig;
 import com.tangzc.autotable.core.converter.JavaTypeToDatabaseTypeConverter;
 import com.tangzc.autotable.core.dynamicds.IDataSourceHandler;
 import com.tangzc.autotable.core.dynamicds.SqlSessionFactoryManager;
@@ -24,14 +24,10 @@ import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.context.event.EventListener;
 
 /**
  * @author don
  */
-@Configuration
 @AutoConfigureAfter({DataSourceAutoConfiguration.class})
 public class AutoTableAutoConfig {
 
@@ -60,7 +56,12 @@ public class AutoTableAutoConfig {
         SqlSessionFactoryManager.setSqlSessionFactory(sqlSessionTemplate.getSqlSessionFactory());
 
         // 设置全局的配置
-        AutoTableGlobalConfig.setAutoTableProperties(autoTableProperties.toConfig());
+        PropertyConfig propertiesConfig = autoTableProperties.toConfig();
+        // 假如有注解扫描的包，就覆盖设置
+        if (AutoTableImportRegister.basePackagesFromAnno != null) {
+            propertiesConfig.setModelPackage(AutoTableImportRegister.basePackagesFromAnno);
+        }
+        AutoTableGlobalConfig.setAutoTableProperties(propertiesConfig);
 
         // 假如有自定的注解扫描器，就使用自定义的注解扫描器。没有，则设置内置的注解扫描器
         AutoTableGlobalConfig.setAutoTableAnnotationFinder(autoTableAnnotationFinder.getIfAvailable(CustomAnnotationFinder::new));
@@ -99,24 +100,5 @@ public class AutoTableAutoConfig {
 
         // 假如有自定义的java到数据库的转换器，就使用自定义的java到数据库的转换器
         javaTypeToDatabaseTypeConverter.ifAvailable(AutoTableGlobalConfig::setJavaTypeToDatabaseTypeConverter);
-    }
-
-    @EventListener(ContextRefreshedEvent.class)
-    public void run() {
-
-        // 启动AutoTable
-        if(!isTestEnvironment()) {
-            AutoTableBootstrap.start();
-        }
-    }
-
-    public boolean isTestEnvironment() {
-        try {
-            // 尝试加载JUnit测试类
-            Class.forName("org.junit.jupiter.api.Test");
-            return true; // 如果找到则表示在测试环境中
-        } catch (ClassNotFoundException e) {
-            return false; // 否则是正常启动环境
-        }
     }
 }

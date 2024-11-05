@@ -1,5 +1,6 @@
 package com.tangzc.autotable.springboot;
 
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestExecutionListeners;
 
 import java.lang.annotation.Documented;
@@ -18,5 +19,8 @@ import java.lang.annotation.Target;
         listeners = {AutoTableTestExecutionListener.class},
         mergeMode = TestExecutionListeners.MergeMode.MERGE_WITH_DEFAULTS
 )
+@Import(AutoTableImportRegister.class)
 public @interface EnableAutoTableTest {
+
+    String[] basePackages() default {};
 }
