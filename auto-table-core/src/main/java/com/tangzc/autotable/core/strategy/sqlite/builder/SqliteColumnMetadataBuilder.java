@@ -9,6 +9,7 @@ import com.tangzc.autotable.core.utils.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Field;
+import java.util.HashSet;
 
 /**
  * 用于存放创建表的字段信息
@@ -17,6 +18,14 @@ import java.lang.reflect.Field;
  */
 @Slf4j
 public class SqliteColumnMetadataBuilder extends ColumnMetadataBuilder {
+
+    private final HashSet<String> defaultValueFuncs = new HashSet<>();
+
+    {
+        defaultValueFuncs.add("CURRENT_DATE");
+        defaultValueFuncs.add("CURRENT_TIME");
+        defaultValueFuncs.add("CURRENT_TIMESTAMP");
+    }
 
     public SqliteColumnMetadataBuilder() {
         super(DatabaseDialect.SQLite);
@@ -45,6 +54,12 @@ public class SqliteColumnMetadataBuilder extends ColumnMetadataBuilder {
                     defaultValue = "0";
                 }
             }
+
+            // 特殊函数，直接跳过
+            if (defaultValueFuncs.contains(defaultValue)) {
+                return defaultValue;
+            }
+
             // 补偿逻辑：字符串类型，前后自动添加'
             if (SqliteTypeHelper.isText(typeAndLength) && !defaultValue.isEmpty() && !defaultValue.startsWith("'") && !defaultValue.endsWith("'")) {
                 defaultValue = "'" + defaultValue + "'";
