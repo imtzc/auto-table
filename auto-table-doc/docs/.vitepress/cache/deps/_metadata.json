@@ -1,0 +1,58 @@
+{
+  "hash": "47702013",
+  "configHash": "28146a16",
+  "lockfileHash": "332bd1cf",
+  "browserHash": "54e1ef1d",
+  "optimized": {
+    "vue": {
+      "src": "../../../../node_modules/.pnpm/vitepress@1.0.1_@algolia+client-search@4.23.2_search-insights@2.13.0/node_modules/vue/dist/vue.runtime.esm-bundler.js",
+      "file": "vue.js",
+      "fileHash": "c0f35496",
+      "needsInterop": false
+    },
+    "vitepress > @vue/devtools-api": {
+      "src": "../../../../node_modules/.pnpm/vitepress@1.0.1_@algolia+client-search@4.23.2_search-insights@2.13.0/node_modules/@vue/devtools-api/dist/index.js",
+      "file": "vitepress___@vue_devtools-api.js",
+      "fileHash": "67ee8420",
+      "needsInterop": false
+    },
+    "vitepress > @vueuse/core": {
+      "src": "../../../../node_modules/.pnpm/vitepress@1.0.1_@algolia+client-search@4.23.2_search-insights@2.13.0/node_modules/@vueuse/core/index.mjs",
+      "file": "vitepress___@vueuse_core.js",
+      "fileHash": "83528a40",
+      "needsInterop": false
+    },
+    "vitepress > @vueuse/integrations/useFocusTrap": {
+      "src": "../../../../node_modules/.pnpm/vitepress@1.0.1_@algolia+client-search@4.23.2_search-insights@2.13.0/node_modules/@vueuse/integrations/useFocusTrap.mjs",
+      "file": "vitepress___@vueuse_integrations_useFocusTrap.js",
+      "fileHash": "4aac7563",
+      "needsInterop": false
+    },
+    "vitepress > mark.js/src/vanilla.js": {
+      "src": "../../../../node_modules/.pnpm/vitepress@1.0.1_@algolia+client-search@4.23.2_search-insights@2.13.0/node_modules/mark.js/src/vanilla.js",
+      "file": "vitepress___mark__js_src_vanilla__js.js",
+      "fileHash": "50333872",
+      "needsInterop": false
+    },
+    "vitepress > minisearch": {
+      "src": "../../../../node_modules/.pnpm/vitepress@1.0.1_@algolia+client-search@4.23.2_search-insights@2.13.0/node_modules/minisearch/dist/es/index.js",
+      "file": "vitepress___minisearch.js",
+      "fileHash": "e723cffa",
+      "needsInterop": false
+    },
+    "@theme/index": {
+      "src": "../../../../node_modules/.pnpm/vitepress@1.0.1_@algolia+client-search@4.23.2_search-insights@2.13.0/node_modules/vitepress/dist/client/theme-default/index.js",
+      "file": "@theme_index.js",
+      "fileHash": "8b6d4994",
+      "needsInterop": false
+    }
+  },
+  "chunks": {
+    "chunk-UYAEY3VQ": {
+      "file": "chunk-UYAEY3VQ.js"
+    },
+    "chunk-OMPFJ5IV": {
+      "file": "chunk-OMPFJ5IV.js"
+    }
+  }
+}
