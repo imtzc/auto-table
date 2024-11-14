@@ -48,7 +48,7 @@ public class AutoTableImportRegister implements ImportBeanDefinitionRegistrar {
     private Map<String, Object> getAutoTableAttributes(AnnotationMetadata importingClassMetadata) {
         Map<String, Object> autoTableAttributes = importingClassMetadata.getAnnotationAttributes(EnableAutoTableTest.class.getName());
         if (autoTableAttributes == null) {
-            importingClassMetadata.getAnnotationAttributes(EnableAutoTable.class.getName());
+            autoTableAttributes = importingClassMetadata.getAnnotationAttributes(EnableAutoTable.class.getName());
         }
         return autoTableAttributes;
     }
