@@ -3,6 +3,7 @@ package com.tangzc.autotable.springboot;
 import com.tangzc.autotable.core.AutoTableAnnotationFinder;
 import com.tangzc.autotable.core.AutoTableGlobalConfig;
 import com.tangzc.autotable.core.AutoTableOrmFrameAdapter;
+import com.tangzc.autotable.core.callback.AutoTableFinishCallback;
 import com.tangzc.autotable.core.callback.CreateTableFinishCallback;
 import com.tangzc.autotable.core.callback.ModifyTableFinishCallback;
 import com.tangzc.autotable.core.callback.RunStateCallback;
@@ -49,6 +50,7 @@ public class AutoTableAutoConfig {
             ObjectProvider<ModifyTableFinishCallback> modifyTableFinishCallback,
             ObjectProvider<RunStateCallback> runStateCallback,
             ObjectProvider<ValidateFinishCallback> validateFinishCallback,
+            ObjectProvider<AutoTableFinishCallback> autoTableFinishCallbacks,
 
             ObjectProvider<JavaTypeToDatabaseTypeConverter> javaTypeToDatabaseTypeConverter) {
 
@@ -97,6 +99,8 @@ public class AutoTableAutoConfig {
         runStateCallback.ifAvailable(AutoTableGlobalConfig::setRunStateCallback);
         // 假如有自定义的验证表回调，就使用自定义的验证表回调
         validateFinishCallback.ifAvailable(AutoTableGlobalConfig::setValidateFinishCallback);
+        // 假如有自定义的全局执行前后回调，就使用自定义的全局执行前后回调
+        autoTableFinishCallbacks.ifAvailable(AutoTableGlobalConfig::setAutoTableFinishCallback);
 
         // 假如有自定义的java到数据库的转换器，就使用自定义的java到数据库的转换器
         javaTypeToDatabaseTypeConverter.ifAvailable(AutoTableGlobalConfig::setJavaTypeToDatabaseTypeConverter);

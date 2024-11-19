@@ -91,6 +91,7 @@ public class AutoTableBootstrap {
                 log.warn("没有找到对应的数据库（{}）方言策略，无法自动维护表结构", databaseDialect);
             }
         });
+        AutoTableGlobalConfig.getAutoTableFinishCallback().finish(classes);
         log.info("AutoTable执行结束。耗时：{}ms", System.currentTimeMillis() - start);
     }
 

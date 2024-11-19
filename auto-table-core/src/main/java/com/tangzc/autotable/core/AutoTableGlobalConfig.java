@@ -1,5 +1,6 @@
 package com.tangzc.autotable.core;
 
+import com.tangzc.autotable.core.callback.AutoTableFinishCallback;
 import com.tangzc.autotable.core.callback.CreateTableFinishCallback;
 import com.tangzc.autotable.core.callback.ModifyTableFinishCallback;
 import com.tangzc.autotable.core.callback.RunStateCallback;
@@ -145,6 +146,15 @@ public class AutoTableGlobalConfig {
         @Override
         public void after(Class<?> tableClass) {
         }
+    };
+
+    /**
+     * 修改表回调
+     */
+    @Setter
+    @Getter
+    private static AutoTableFinishCallback autoTableFinishCallback = (classes) -> {
+
     };
 
     private final static Map<String, IStrategy<? extends TableMetadata, ? extends CompareTableInfo, ?>> STRATEGY_MAP = new HashMap<>();
