@@ -1,15 +1,18 @@
 version: '1.0'
-name: pipeline-20241124
-displayName: pipeline-20241124
+name: publish-doc
+displayName: 发布文档
 triggers:
   trigger: auto
   push:
     branches:
-      prefix:
-        - ''
+      precise:
+        - main
+    paths:
+      precise:
+        - auto-table-doc/
 stages:
-  - name: stage-09a764d4
-    displayName: 未命名
+  - name: stage-06ad1ff6
+    displayName: 构建
     strategy: naturally
     trigger: auto
     executor: []
