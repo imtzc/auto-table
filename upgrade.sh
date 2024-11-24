@@ -1,9 +1,9 @@
 # 版本升级
-version=1.9.7
+version=2.0.0
 
 # 以下不动
 template=$(cat << EOF
-package com.tangzc.autotable.core.constants;
+package org.dromara.autotable.core.constants;
 
 public interface Version {
     String VALUE = "${version}";
@@ -12,8 +12,8 @@ EOF
 )
 
 echo "开始替换Version.java的版本号：${version}"
-# 替换 com.tangzc.autotable.core.constants.Version 的版本号
-echo ${template} > ./auto-table-core/src/main/java/com/tangzc/autotable/core/constants/Version.java
+# 替换 org.dromara.autotable.core.constants.Version 的版本号
+echo ${template} > ./auto-table-core/src/main/java/org/dromara/autotable/core/constants/Version.java
 
 echo "开始替换pom.xml的版本号：${version}"
 mvn versions:set -DnewVersion=${version}

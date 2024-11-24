@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>com.tangzc</groupId>
+        <groupId>org.dromara.autotable</groupId>
         <artifactId>auto-table-test</artifactId>
         <version>1.9.7</version>
     </parent>
@@ -19,7 +19,7 @@
         </dependency>
 
         <dependency>
-            <groupId>com.tangzc</groupId>
+            <groupId>org.dromara.autotable</groupId>
             <artifactId>auto-table-core</artifactId>
             <version>${project.version}</version>
         </dependency>

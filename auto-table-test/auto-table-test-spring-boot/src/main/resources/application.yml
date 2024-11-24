@@ -20,4 +20,4 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
 logging:
   level:
-    com.tangzc: info
+    org.dromara: info
