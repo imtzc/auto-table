@@ -1,5 +1,6 @@
 package org.dromara.autotable.core.strategy.pgsql;
 
+import lombok.NonNull;
 import org.dromara.autotable.annotation.enums.DefaultValueEnum;
 import org.dromara.autotable.annotation.enums.IndexSortTypeEnum;
 import org.dromara.autotable.annotation.enums.IndexTypeEnum;
@@ -20,13 +21,13 @@ import org.dromara.autotable.core.strategy.pgsql.data.dbdata.PgsqlDbIndex;
 import org.dromara.autotable.core.strategy.pgsql.data.dbdata.PgsqlDbPrimary;
 import org.dromara.autotable.core.strategy.pgsql.mapper.PgsqlTablesMapper;
 import org.dromara.autotable.core.utils.StringUtils;
-import lombok.NonNull;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.OffsetTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -56,12 +57,13 @@ public class PgsqlStrategy implements IStrategy<DefaultTableMetadata, PgsqlCompa
             put(Character.class, PgsqlDefaultTypeEnum.CHAR);
             put(char.class, PgsqlDefaultTypeEnum.CHAR);
 
-            put(BigInteger.class, PgsqlDefaultTypeEnum.INT8);
+            put(Short.class, PgsqlDefaultTypeEnum.INT2);
+            put(short.class, PgsqlDefaultTypeEnum.INT2);
+            put(int.class, PgsqlDefaultTypeEnum.INT4);
+            put(Integer.class, PgsqlDefaultTypeEnum.INT4);
             put(Long.class, PgsqlDefaultTypeEnum.INT8);
             put(long.class, PgsqlDefaultTypeEnum.INT8);
-
-            put(Integer.class, PgsqlDefaultTypeEnum.INT4);
-            put(int.class, PgsqlDefaultTypeEnum.INT4);
+            put(BigInteger.class, PgsqlDefaultTypeEnum.INT8);
 
             put(Boolean.class, PgsqlDefaultTypeEnum.BOOL);
             put(boolean.class, PgsqlDefaultTypeEnum.BOOL);
@@ -75,13 +77,13 @@ public class PgsqlStrategy implements IStrategy<DefaultTableMetadata, PgsqlCompa
             put(Date.class, PgsqlDefaultTypeEnum.TIMESTAMP);
             put(java.sql.Date.class, PgsqlDefaultTypeEnum.TIMESTAMP);
             put(java.sql.Timestamp.class, PgsqlDefaultTypeEnum.TIMESTAMP);
-            put(java.sql.Time.class, PgsqlDefaultTypeEnum.TIME);
             put(LocalDateTime.class, PgsqlDefaultTypeEnum.TIMESTAMP);
             put(LocalDate.class, PgsqlDefaultTypeEnum.DATE);
             put(LocalTime.class, PgsqlDefaultTypeEnum.TIME);
+            put(java.sql.Time.class, PgsqlDefaultTypeEnum.TIME);
+            put(OffsetTime.class, PgsqlDefaultTypeEnum.TIMETZ);
 
-            put(Short.class, PgsqlDefaultTypeEnum.INT2);
-            put(short.class, PgsqlDefaultTypeEnum.INT2);
+            put(java.util.UUID.class, PgsqlDefaultTypeEnum.UUID);
         }};
     }
 
