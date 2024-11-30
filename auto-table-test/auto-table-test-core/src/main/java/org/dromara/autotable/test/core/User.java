@@ -32,7 +32,7 @@ import lombok.experimental.FieldNameConstants;
 @FieldNameConstants
 public class User extends FatherEntity<String> {
 
-    @PrimaryKey(true)
+    @PrimaryKey(autoIncrement = true)
     @ColumnComment("用户id")
     private Long id;
 

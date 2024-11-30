@@ -22,7 +22,7 @@ import java.time.LocalDateTime;
 @TableIndex(fields = {UserH2.Fields.phone, UserH2.Fields.name})
 public class UserH2 {
 
-    @PrimaryKey(true)
+    @PrimaryKey(autoIncrement = true)
     @ColumnComment("用户id")
     private Long id;
 

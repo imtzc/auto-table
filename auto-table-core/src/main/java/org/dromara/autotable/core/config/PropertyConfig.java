@@ -25,7 +25,11 @@ public class PropertyConfig {
      * 您的model包路径，多个路径可以用分号或者逗号隔开，会递归这个目录下的全部目录中的java对象，支持类似com.bz.**.entity
      * 缺省值：[Spring启动类所在包]
      */
-    private String[] modelPackage;
+    private String[] modelPackage = new String[]{};
+    /**
+     * 您的model类，多个可以用分号或者逗号隔开
+     */
+    private Class<?>[] modelClass = new Class[]{};
     /**
      * 自己定义的索引前缀
      */

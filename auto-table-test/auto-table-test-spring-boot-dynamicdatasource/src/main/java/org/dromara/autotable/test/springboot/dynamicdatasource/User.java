@@ -11,7 +11,7 @@ import lombok.Data;
 @AutoTable("sys_user")
 public class User {
 
-    @PrimaryKey(true)
+    @PrimaryKey(autoIncrement = true)
     @ColumnComment("用户id")
     private Long id;
 

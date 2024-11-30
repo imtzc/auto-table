@@ -131,7 +131,7 @@ public class TableBeanUtils {
     public static boolean isAutoIncrement(Field field, Class<?> clazz) {
         PrimaryKey isPrimary = AutoTableGlobalConfig.getAutoTableAnnotationFinder().find(field, PrimaryKey.class);
         if (isPrimary != null) {
-            return isPrimary.value();
+            return isPrimary.autoIncrement();
         }
         AutoTableOrmFrameAdapter autoTableOrmFrameAdapter = AutoTableGlobalConfig.getAutoTableOrmFrameAdapter();
         return autoTableOrmFrameAdapter.isAutoIncrement(field, clazz);

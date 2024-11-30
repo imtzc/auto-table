@@ -21,4 +21,6 @@ import java.lang.annotation.Target;
 public @interface EnableAutoTable {
 
     String[] basePackages() default {};
+
+    Class[] classes() default {};
 }

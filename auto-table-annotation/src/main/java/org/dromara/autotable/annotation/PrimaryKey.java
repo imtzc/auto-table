@@ -20,5 +20,5 @@ public @interface PrimaryKey {
     /**
      * @return 自增
      */
-    boolean value();
+    boolean autoIncrement();
 }

@@ -20,6 +20,10 @@ public class AutoTableImportRegister implements ImportBeanDefinitionRegistrar {
      * 提取注解的basePackages
      */
     public static volatile String[] basePackagesFromAnno;
+    /**
+     * 提取注解的classes
+     */
+    public static volatile Class<?>[] classesFromAnno;
 
     @Override
     public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
@@ -38,6 +42,12 @@ public class AutoTableImportRegister implements ImportBeanDefinitionRegistrar {
                     .toArray(String[]::new);
             if (basePackages.length > 0) {
                 basePackagesFromAnno = basePackages;
+            }
+            Class<?>[] classes = Arrays.stream(annotationAttributes.getClassArray("classes"))
+                    .distinct()
+                    .toArray(Class[]::new);
+            if (classes.length > 0) {
+                classesFromAnno = classes;
             }
         }
     }

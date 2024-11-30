@@ -36,6 +36,10 @@ public class AutoTableProperties {
      */
     private String[] modelPackage;
     /**
+     * 您的model类，多个可以用分号或者逗号隔开
+     */
+    private Class<?>[] modelClass;
+    /**
      * 自己定义的索引前缀
      */
     private String indexPrefix = "auto_idx_";
@@ -73,6 +77,7 @@ public class AutoTableProperties {
         propertyConfig.setEnable(this.enable);
         propertyConfig.setMode(this.mode);
         propertyConfig.setModelPackage(this.modelPackage);
+        propertyConfig.setModelClass(this.modelClass);
         propertyConfig.setIndexPrefix(this.indexPrefix);
         propertyConfig.setAutoDropColumn(this.autoDropColumn);
         propertyConfig.setAutoDropIndex(this.autoDropIndex);

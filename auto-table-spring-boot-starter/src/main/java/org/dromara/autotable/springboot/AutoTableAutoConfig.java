@@ -63,6 +63,10 @@ public class AutoTableAutoConfig {
         if (AutoTableImportRegister.basePackagesFromAnno != null) {
             propertiesConfig.setModelPackage(AutoTableImportRegister.basePackagesFromAnno);
         }
+        // 假如有注解扫描的类，就覆盖设置
+        if (AutoTableImportRegister.classesFromAnno != null) {
+            propertiesConfig.setModelClass(AutoTableImportRegister.classesFromAnno);
+        }
         AutoTableGlobalConfig.setAutoTableProperties(propertiesConfig);
 
         // 假如有自定的注解扫描器，就使用自定义的注解扫描器。没有，则设置内置的注解扫描器

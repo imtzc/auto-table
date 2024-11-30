@@ -19,12 +19,14 @@ public class AutoTableTestExecutionListener implements TestExecutionListener {
     }
 
     private void initBasePackages(TestContext testContext) {
-        // 初始化应用上下文，会阻塞等待上下文加载完
+        // 初始化应用上下文，会阻塞等待上下文加载完，此处会优先加载注解的配置
         ApplicationContext applicationContext = testContext.getApplicationContext();
 
         PropertyConfig autoTableProperties = AutoTableGlobalConfig.getAutoTableProperties();
         String[] modelPackage = autoTableProperties.getModelPackage();
-        if (modelPackage == null || modelPackage.length == 0) {
+        Class<?>[] modelClass = autoTableProperties.getModelClass();
+        // 当注解没有相关的配置的时候，则使用启动类的包名
+        if (modelPackage.length == 0 && modelClass.length == 0) {
             // 获取启动类（带有@SpringBootApplication注解的类）
             Object mainClass = applicationContext.getBeansWithAnnotation(org.springframework.boot.autoconfigure.SpringBootApplication.class)
                     .values()

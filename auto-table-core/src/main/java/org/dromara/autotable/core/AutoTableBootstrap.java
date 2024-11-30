@@ -1,5 +1,6 @@
 package org.dromara.autotable.core;
 
+import lombok.extern.slf4j.Slf4j;
 import org.dromara.autotable.annotation.AutoTable;
 import org.dromara.autotable.annotation.Ignore;
 import org.dromara.autotable.core.config.PropertyConfig;
@@ -11,9 +12,9 @@ import org.dromara.autotable.core.strategy.pgsql.PgsqlStrategy;
 import org.dromara.autotable.core.strategy.sqlite.SqliteStrategy;
 import org.dromara.autotable.core.utils.ClassScanner;
 import org.dromara.autotable.core.utils.TableBeanUtils;
-import lombok.extern.slf4j.Slf4j;
 
 import java.lang.annotation.Annotation;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -50,9 +51,6 @@ public class AutoTableBootstrap {
         AutoTableGlobalConfig.addStrategy(new SqliteStrategy());
         AutoTableGlobalConfig.addStrategy(new H2Strategy());
 
-        // 获取扫描包路径
-        String[] packs = getModelPackage(autoTableProperties);
-
         // 从包package中获取所有的Class
         Set<Class<? extends Annotation>> includeAnnotations = new HashSet<>(
                 Collections.singletonList(AutoTable.class)
@@ -62,8 +60,13 @@ public class AutoTableBootstrap {
         Set<Class<? extends Annotation>> ignoreAnnotations = new HashSet<>(Collections.singleton(Ignore.class));
         // 经过自定义的拦截器，修改最终影响自动建表的注解
         AutoTableGlobalConfig.getAutoTableAnnotationInterceptor().intercept(includeAnnotations, ignoreAnnotations);
+
         // 扫描所有的类，过滤出指定注解的实体
-        Set<Class<?>> classes = ClassScanner.scan(packs, includeAnnotations, ignoreAnnotations);
+        Class<?>[] modelClass = autoTableProperties.getModelClass();
+        Set<Class<?>> classes = new HashSet<>(Arrays.asList(modelClass));
+        String[] packs = getModelPackage(autoTableProperties);
+        Set<Class<?>> packClasses = ClassScanner.scan(packs, includeAnnotations, ignoreAnnotations);
+        classes.addAll(packClasses);
 
         // 获取对应的数据源，根据不同数据库方言，执行不同的处理
         IDataSourceHandler datasourceHandler = AutoTableGlobalConfig.getDatasourceHandler();
@@ -97,7 +100,9 @@ public class AutoTableBootstrap {
 
     private static String[] getModelPackage(PropertyConfig autoTableProperties) {
         String[] packs = autoTableProperties.getModelPackage();
-        if (packs == null || packs.length == 0) {
+        Class<?>[] modelClass = autoTableProperties.getModelClass();
+        // 没有指定实体的class，则使用根包扫描
+        if (packs.length == 0 && modelClass.length == 0) {
             packs = new String[]{getBootPackage()};
         }
         return packs;
