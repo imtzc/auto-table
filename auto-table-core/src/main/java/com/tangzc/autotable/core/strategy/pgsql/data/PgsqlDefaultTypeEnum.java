@@ -54,6 +54,7 @@ public enum PgsqlDefaultTypeEnum implements DefaultTypeEnumInterface {
      * 日期
      */
     TIME(PgsqlTypeConstant.TIME, null, null), // java.sql.Time、LocalTime
+    TIMETZ(PgsqlTypeConstant.TIMETZ, null, null), // java.sql.Time、LocalTime
 
     DATE(PgsqlTypeConstant.DATE, null, null), // LocalDate
 
@@ -63,10 +64,7 @@ public enum PgsqlDefaultTypeEnum implements DefaultTypeEnumInterface {
      * 二进制
      */
     BIT(PgsqlTypeConstant.BIT, 1, null), //
-
-    BLOB(PgsqlTypeConstant.BLOB, null, null), // Blob
-
-    CLOB(PgsqlTypeConstant.CLOB, null, null), // Clob
+    UUID(PgsqlTypeConstant.UUID, 1, null), //
 
     ;
 
