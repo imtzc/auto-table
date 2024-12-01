@@ -36,7 +36,7 @@ echo "新建标签：${tagName}"
 git tag -a ${tagName} -m "版本号：${version}"
 
 echo "开始提交到远程git仓库：${version}"
-git push origin main --tags
+git push origin com.tangzc --tags
 
 echo "开始发布新的版本到maven仓库：${version}"
 mvn clean deploy -Dmaven.test.skip=true -pl auto-table-annotation,auto-table-core,auto-table-spring-boot-starter -am
