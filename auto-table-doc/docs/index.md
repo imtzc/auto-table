@@ -33,6 +33,7 @@ features:
 ---
 
 <style>
+
 .VPHome {
 
     margin-bottom: 0 !important;
@@ -57,6 +58,23 @@ features:
         flex-direction: column;
         justify-content: center;
         align-items: flex-end;
+    }
+
+    /* 针对手机端的样式 */
+    @media (max-width: 768px) {
+        .VPHomeHero {
+            .container {
+                margin-top: unset;
+            }
+        }
+
+        .VPHomeFeatures {
+            height: calc(100vh - 200px);
+        }
+
+        .name {
+            line-height: 64px;
+        }
     }
 }
 
