@@ -1,7 +1,9 @@
 package org.dromara.autotable.core.strategy.sqlite;
 
+import lombok.NonNull;
 import org.dromara.autotable.core.constants.DatabaseDialect;
 import org.dromara.autotable.core.converter.DefaultTypeEnumInterface;
+import org.dromara.autotable.core.strategy.ColumnMetadata;
 import org.dromara.autotable.core.strategy.DefaultTableMetadata;
 import org.dromara.autotable.core.strategy.IStrategy;
 import org.dromara.autotable.core.strategy.IndexMetadata;
@@ -9,10 +11,10 @@ import org.dromara.autotable.core.strategy.sqlite.builder.CreateTableSqlBuilder;
 import org.dromara.autotable.core.strategy.sqlite.builder.SqliteTableMetadataBuilder;
 import org.dromara.autotable.core.strategy.sqlite.data.SqliteCompareTableInfo;
 import org.dromara.autotable.core.strategy.sqlite.data.SqliteDefaultTypeEnum;
+import org.dromara.autotable.core.strategy.sqlite.data.dbdata.SqliteColumns;
 import org.dromara.autotable.core.strategy.sqlite.data.dbdata.SqliteMaster;
 import org.dromara.autotable.core.strategy.sqlite.mapper.SqliteTablesMapper;
 import org.dromara.autotable.core.utils.StringUtils;
-import lombok.NonNull;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -26,6 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -107,9 +110,18 @@ public class SqliteStrategy implements IStrategy<DefaultTableMetadata, SqliteCom
 
         // 判断表是否需要重建
         String orgBuildTableSql = executeReturn(sqliteTablesMapper -> sqliteTablesMapper.queryBuildTableSql(tableName));
-        String newBuildTableSql = CreateTableSqlBuilder.buildTableSql(tableMetadata.getTableName(), tableMetadata.getComment(), tableMetadata.getColumnMetadataList());
+        List<ColumnMetadata> columnMetadataList = tableMetadata.getColumnMetadataList();
+        String newBuildTableSql = CreateTableSqlBuilder.buildTableSql(tableMetadata.getTableName(), tableMetadata.getComment(), columnMetadataList);
         boolean needRebuildTable = !Objects.equals(orgBuildTableSql + ";", newBuildTableSql);
         if (needRebuildTable) {
+
+            // 筛选出数据迁移的列
+            List<SqliteColumns> oldColumns = executeReturn(sqliteTablesMapper -> sqliteTablesMapper.queryTableColumns(tableName));
+            Set<String> oldColumnNames = oldColumns.stream().map(SqliteColumns::getName).collect(Collectors.toSet());
+            Set<String> newColumnNames = columnMetadataList.stream().map(ColumnMetadata::getName).collect(Collectors.toSet());
+            List<String> validColumnNames = newColumnNames.stream().filter(oldColumnNames::contains).collect(Collectors.toList());
+            sqliteCompareTableInfo.setDataMigrationColumnList(validColumnNames);
+
             // 该情况下无需单独分析索引了，因为sqlite的表修改方式为重建整个表，索引需要全部删除，重新创建
             sqliteCompareTableInfo.setRebuildTableSql(newBuildTableSql);
             // 删除当前所有索引
@@ -180,7 +192,8 @@ public class SqliteStrategy implements IStrategy<DefaultTableMetadata, SqliteCom
             // 重新建表
             sqlList.add(rebuildTableSql);
             // 迁移数据
-            sqlList.add(String.format("INSERT INTO \"%s\" SELECT * FROM \"%s\";", orgTableName, backupTableName));
+            String columns = String.join(",", sqliteCompareTableInfo.getDataMigrationColumnList());
+            sqlList.add(String.format("INSERT INTO \"%s\" (%s) SELECT %s FROM \"%s\";", orgTableName, columns, columns, backupTableName));
         }
 
         // 创建索引

@@ -23,6 +23,11 @@ public class SqliteCompareTableInfo extends CompareTableInfo {
     private String rebuildTableSql;
 
     /**
+     * merge后，可迁移的有效字段
+     */
+    private List<String> dataMigrationColumnList = new ArrayList<>();
+
+    /**
      * 新构建索引的sql
      */
     private List<String> buildIndexSqlList = new ArrayList<>();
