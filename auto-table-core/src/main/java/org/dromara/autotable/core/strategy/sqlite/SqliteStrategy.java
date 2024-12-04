@@ -191,9 +191,12 @@ public class SqliteStrategy implements IStrategy<DefaultTableMetadata, SqliteCom
             sqlList.add(String.format("ALTER TABLE \"%s\" RENAME TO \"%s\";", orgTableName, backupTableName));
             // 重新建表
             sqlList.add(rebuildTableSql);
-            // 迁移数据
-            String columns = String.join(",", sqliteCompareTableInfo.getDataMigrationColumnList());
-            sqlList.add(String.format("INSERT INTO \"%s\" (%s) SELECT %s FROM \"%s\";", orgTableName, columns, columns, backupTableName));
+            List<String> dataMigrationColumnList = sqliteCompareTableInfo.getDataMigrationColumnList();
+            if(!dataMigrationColumnList.isEmpty()) {
+                // 迁移数据
+                String columns = String.join(",", dataMigrationColumnList);
+                sqlList.add(String.format("INSERT INTO \"%s\" (%s) SELECT %s FROM \"%s\";", orgTableName, columns, columns, backupTableName));
+            }
         }
 
         // 创建索引
