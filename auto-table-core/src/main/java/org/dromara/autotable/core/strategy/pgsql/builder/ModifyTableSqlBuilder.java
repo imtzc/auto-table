@@ -1,11 +1,11 @@
 package org.dromara.autotable.core.strategy.pgsql.builder;
 
+import lombok.extern.slf4j.Slf4j;
 import org.dromara.autotable.annotation.enums.DefaultValueEnum;
 import org.dromara.autotable.core.strategy.ColumnMetadata;
 import org.dromara.autotable.core.strategy.pgsql.PgsqlStrategy;
 import org.dromara.autotable.core.strategy.pgsql.data.PgsqlCompareTableInfo;
 import org.dromara.autotable.core.utils.StringUtils;
-import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,17 +39,17 @@ public class ModifyTableSqlBuilder {
         // 删除主键
         String primaryKeyName = pgsqlCompareTableInfo.getDropPrimaryKeyName();
         if (StringUtils.hasText(primaryKeyName)) {
-            alterTableSqlList.add("  DROP CONSTRAINT " + primaryKeyName);
+            alterTableSqlList.add(String.format("  DROP CONSTRAINT %s", primaryKeyName));
         }
         // 删除列
         List<String> dropColumnList = pgsqlCompareTableInfo.getDropColumnList();
         dropColumnList.stream()
-                .map(columnName -> "  DROP COLUMN " + columnName)
+                .map(columnName -> String.format("  DROP COLUMN %s", columnName))
                 .forEach(alterTableSqlList::add);
         // 新增列
         List<ColumnMetadata> newColumnList = pgsqlCompareTableInfo.getNewColumnMetadataList();
         newColumnList.stream()
-                .map(column -> "  ADD COLUMN " + ColumnSqlBuilder.buildSql(column))
+                .map(column -> String.format("  ADD COLUMN %s", ColumnSqlBuilder.buildSql(column)))
                 .forEach(alterTableSqlList::add);
         // 修改列
         List<ColumnMetadata> modifyColumnList = pgsqlCompareTableInfo.getModifyColumnMetadataList();
@@ -57,9 +57,10 @@ public class ModifyTableSqlBuilder {
             // 修改字段
             String columnName = columnMetadata.getName();
             // 类型
-            alterTableSqlList.add("  ALTER COLUMN " + columnName + " TYPE " + columnMetadata.getType().getDefaultFullType());
+            String newFullType = columnMetadata.getType().getDefaultFullType();
+            alterTableSqlList.add(String.format("  ALTER COLUMN %s TYPE %s USING %s::%s", columnName, newFullType, columnName, newFullType));
             // 非空
-            alterTableSqlList.add("  ALTER COLUMN " + columnName + " " + (columnMetadata.isNotNull() ? "SET" : "DROP") + " NOT NULL");
+            alterTableSqlList.add(String.format("  ALTER COLUMN %s %s NOT NULL", columnName, columnMetadata.isNotNull() ? "SET" : "DROP"));
             // 默认值
             String defaultVal = null;
             DefaultValueEnum defaultValueType = columnMetadata.getDefaultValueType();
@@ -75,10 +76,10 @@ public class ModifyTableSqlBuilder {
             }
             if (StringUtils.hasText(defaultVal)) {
                 // 设置默认值
-                alterTableSqlList.add("  ALTER COLUMN " + columnName + " SET DEFAULT " + defaultVal);
+                alterTableSqlList.add(String.format("  ALTER COLUMN %s SET DEFAULT %s", columnName, defaultVal));
             } else {
                 // 删除默认值
-                alterTableSqlList.add("  ALTER COLUMN " + columnName + " DROP DEFAULT");
+                alterTableSqlList.add(String.format("  ALTER COLUMN %s DROP DEFAULT", columnName));
             }
         }
         // 添加主键
@@ -87,16 +88,16 @@ public class ModifyTableSqlBuilder {
             String primaryColumns = newPrimaries.stream().map(ColumnMetadata::getName).collect(Collectors.joining(", "));
             if (StringUtils.hasText(primaryKeyName)) {
                 // 修改主键
-                alterTableSqlList.add("  ADD CONSTRAINT " + primaryKeyName + " PRIMARY KEY (" + primaryColumns + ")");
+                alterTableSqlList.add(String.format("  ADD CONSTRAINT %s PRIMARY KEY (%s)", primaryKeyName, primaryColumns));
             } else {
                 // 新增主键
-                alterTableSqlList.add("  ADD PRIMARY KEY (" + primaryColumns + ")");
+                alterTableSqlList.add(String.format("  ADD PRIMARY KEY (%s)", primaryColumns));
             }
         }
         // 组合sql
         String alterTableSql = "";
         if (!alterTableSqlList.isEmpty()) {
-            alterTableSql = "ALTER TABLE " + PgsqlStrategy.withSchemaName(schema, tableName) + " \n" + String.join(",\n", alterTableSqlList) + ";";
+            alterTableSql = String.format("ALTER TABLE %s \n%s;", PgsqlStrategy.withSchemaName(schema, tableName), String.join(",\n", alterTableSqlList));
         }
 
         /* 为 表、字段、索引 添加注释 */
@@ -105,11 +106,11 @@ public class ModifyTableSqlBuilder {
         /* 修改 索引 */
         // 删除索引
         List<String> dropIndexList = pgsqlCompareTableInfo.getDropIndexList();
-        String dropIndexSql = dropIndexList.stream().map(indexName -> "DROP INDEX " + PgsqlStrategy.withSchemaName(schema, indexName) + ";").collect(Collectors.joining("\n"));
+        String dropIndexSql = dropIndexList.stream().map(indexName -> String.format("DROP INDEX %s;", PgsqlStrategy.withSchemaName(schema, indexName))).collect(Collectors.joining("\n"));
         // 添加索引
         String createIndexSql = CreateTableSqlBuilder.getCreateIndexSql(schema, tableName, pgsqlCompareTableInfo.getIndexMetadataList());
 
-        return Stream.of(dropIndexSql, alterTableSql, addColumnCommentSql, createIndexSql)
+        return Stream.of(dropIndexSql, alterTableSql, createIndexSql, addColumnCommentSql)
                 .filter(StringUtils::hasText)
                 .collect(Collectors.joining("\n"));
     }

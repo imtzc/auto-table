@@ -1,15 +1,15 @@
-package org.dromara.autotable.test.core;
+package org.dromara.autotable.test.core.entity.sqlite;
 
 import lombok.Data;
 import org.dromara.autotable.annotation.AutoTable;
 
 @Data
-@AutoTable("test_sqlite_entity")
-public class TestSqliteEntity_ {
+@AutoTable
+public class TestSqlite {
 
     private String name;
 
     private String age;
 
-    private String phone;
+    private String address;
 }

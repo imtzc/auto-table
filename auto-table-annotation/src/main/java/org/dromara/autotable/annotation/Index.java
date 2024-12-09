@@ -35,6 +35,11 @@ public @interface Index {
     IndexTypeEnum type() default IndexTypeEnum.NORMAL;
 
     /**
+     * @return 索引方法，如btree,hash等
+     */
+    String method() default "";
+
+    /**
      * @return 索引注释
      */
     String comment() default "";

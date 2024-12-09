@@ -105,13 +105,13 @@ public class TableBeanUtils {
 
         AutoTable autoTable = autoTableAnnotationFinder.find(clazz, AutoTable.class);
         if (autoTable != null) {
-            return autoTable.comment();
+            return replaceSingleQuote(autoTable.comment());
         }
 
         AutoTableOrmFrameAdapter autoTableOrmFrameAdapter = AutoTableGlobalConfig.getAutoTableOrmFrameAdapter();
         String adapterTableComment = autoTableOrmFrameAdapter.getTableComment(clazz);
         if(adapterTableComment != null) {
-            return adapterTableComment;
+            return replaceSingleQuote(adapterTableComment);
         }
 
         return null;
@@ -157,20 +157,33 @@ public class TableBeanUtils {
     public static String getComment(Field field, Class<?> clazz) {
         ColumnComment column = AutoTableGlobalConfig.getAutoTableAnnotationFinder().find(field, ColumnComment.class);
         if (column != null) {
-            return column.value();
+            return replaceSingleQuote(column.value());
         }
         AutoColumn autoColumn = AutoTableGlobalConfig.getAutoTableAnnotationFinder().find(field, AutoColumn.class);
         if (autoColumn != null) {
-            return autoColumn.comment();
+            return replaceSingleQuote(autoColumn.comment());
         }
 
         AutoTableOrmFrameAdapter autoTableOrmFrameAdapter = AutoTableGlobalConfig.getAutoTableOrmFrameAdapter();
         String adapterColumnComment = autoTableOrmFrameAdapter.getColumnComment(field, clazz);
         if(adapterColumnComment != null) {
-            return adapterColumnComment;
+            return replaceSingleQuote(adapterColumnComment);
         }
 
         return "";
+    }
+
+    /**
+     * 替换字符串中的单引号为双单引号
+     */
+    public static String replaceSingleQuote(String input) {
+
+        if (input == null || input.isEmpty()) {
+            return input; // 空字符串或null直接返回
+        }
+
+        // 解决单引号引发的bug: https://gitee.com/dromara/auto-table/issues/IB9RJW
+        return input.replace("'", "''");
     }
 
     public static ColumnDefault getDefaultValue(Field field) {

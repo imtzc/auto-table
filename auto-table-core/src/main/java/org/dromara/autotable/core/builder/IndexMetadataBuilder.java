@@ -1,5 +1,6 @@
 package org.dromara.autotable.core.builder;
 
+import lombok.SneakyThrows;
 import org.dromara.autotable.annotation.Index;
 import org.dromara.autotable.annotation.IndexField;
 import org.dromara.autotable.annotation.TableIndex;
@@ -8,7 +9,6 @@ import org.dromara.autotable.core.strategy.IndexMetadata;
 import org.dromara.autotable.core.utils.IndexRepeatChecker;
 import org.dromara.autotable.core.utils.StringUtils;
 import org.dromara.autotable.core.utils.TableBeanUtils;
-import lombok.SneakyThrows;
 
 import java.lang.reflect.Field;
 import java.security.MessageDigest;
@@ -70,6 +70,7 @@ public class IndexMetadataBuilder {
             String indexName = getIndexName(clazz, field, index);
             indexMetadata.setName(indexName);
             indexMetadata.setType(index.type());
+            indexMetadata.setMethod(index.method());
             indexMetadata.setComment(index.comment());
             indexMetadata.getColumns().add(IndexMetadata.IndexColumnParam.newInstance(realColumnName, null));
             return indexMetadata;
@@ -78,52 +79,71 @@ public class IndexMetadataBuilder {
     }
 
     protected String getIndexName(Class<?> clazz, TableIndex tableIndex) {
-        String indexPrefix = AutoTableGlobalConfig.getAutoTableProperties().getIndexPrefix();
 
-        // 手动指定了索引名
         String indexName = tableIndex.name();
-        if (StringUtils.hasText(indexName)) {
-            return indexPrefix + indexName;
-        }
 
-        String filedNames = Stream.concat(Arrays.stream(tableIndex.indexFields()).map(IndexField::field), Arrays.stream(tableIndex.fields()))
-                .map(fieldName -> TableBeanUtils.getRealColumnName(clazz, fieldName))
-                .collect(Collectors.joining("_"));
-        String tableName = TableBeanUtils.getTableName(clazz);
-        return encryptIndexName(indexPrefix, tableName, filedNames);
+        if (StringUtils.hasText(indexName)) {
+            // 手动指定了索引名
+            return getIndexNameWithPrefix(indexName);
+        } else {
+            // 自动生成索引名
+            String filedNames = Stream.concat(Arrays.stream(tableIndex.indexFields()).map(IndexField::field), Arrays.stream(tableIndex.fields()))
+                    .map(fieldName -> TableBeanUtils.getRealColumnName(clazz, fieldName))
+                    .collect(Collectors.joining("_"));
+            String tableName = TableBeanUtils.getTableName(clazz);
+            return getEncryptIndexName(tableName, filedNames);
+        }
     }
 
     protected String getIndexName(Class<?> clazz, Field field, Index index) {
-        String indexPrefix = AutoTableGlobalConfig.getAutoTableProperties().getIndexPrefix();
 
-        // 手动指定了索引名
         String indexName = index.name();
+
         if (StringUtils.hasText(indexName)) {
-            return indexPrefix + indexName;
+            // 手动指定了索引名
+            return getIndexNameWithPrefix(indexName);
+        } else {
+            // 自动生成索引名
+            String realColumnName = TableBeanUtils.getRealColumnName(clazz, field);
+            String tableName = TableBeanUtils.getTableName(clazz);
+            return getEncryptIndexName(tableName, realColumnName);
         }
-
-        String realColumnName = getDefaultIndexName(clazz, field);
-        String tableName = TableBeanUtils.getTableName(clazz);
-        return encryptIndexName(indexPrefix, tableName, realColumnName);
     }
 
-    protected String getDefaultIndexName(Class<?> clazz, Field field) {
-        return TableBeanUtils.getRealColumnName(clazz, field);
+    private static String getIndexNameWithPrefix(String indexName) {
+        String indexPrefix = AutoTableGlobalConfig.getAutoTableProperties().getIndexPrefix();
+        String fullIndexName = indexPrefix + indexName;
+        return replaceDoubleQuote(fullIndexName);
     }
 
-    protected String encryptIndexName(String prefix, String tableNamePart, String filedNamePart) {
-        String indexName = prefix + tableNamePart + "_" + filedNamePart;
+    protected String getEncryptIndexName(String tableNamePart, String filedNamePart) {
+        String prefix = AutoTableGlobalConfig.getAutoTableProperties().getIndexPrefix();
+        String fullIndexName = prefix + tableNamePart + "_" + filedNamePart;
         int maxLength = 63;
-        if (indexName.length() > maxLength) {
-            String md5 = generateMD5(indexName);
+        if (fullIndexName.length() > maxLength) {
+            String md5 = generateMD5(fullIndexName);
             if (prefix.length() + md5.length() > maxLength) {
                 throw new RuntimeException("索引名前缀[" + prefix + "]超长，无法生成有效索引名称，请手动指定索引名称");
             }
             // 截取前半部分长度的字符，空余足够的位置，给“_”和MD5值
-            String onePart = indexName.substring(0, maxLength - md5.length());
+            String onePart = fullIndexName.substring(0, maxLength - md5.length());
             return onePart + md5;
         }
-        return indexName;
+
+        return replaceDoubleQuote(fullIndexName);
+    }
+
+    /**
+     * 替换字符串中的双引号为两个双引号
+     */
+    public static String replaceDoubleQuote(String input) {
+
+        if (input == null || input.isEmpty()) {
+            return input; // 空字符串或null直接返回
+        }
+
+        //
+        return input.replace("\"", "\"\"");
     }
 
     @SneakyThrows

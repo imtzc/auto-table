@@ -80,7 +80,7 @@ public class H2Strategy implements IStrategy<DefaultTableMetadata, H2CompareTabl
     @Override
     public String dropTable(String schema, String tableName) {
         // 删除表，并同时删除外键
-        return String.format("DROP TABLE IF EXISTS `%s`.`%s` CASCADE", schema, tableName);
+        return String.format("DROP TABLE IF EXISTS %s CASCADE", withSchemaName(schema, tableName));
     }
 
     @Override
@@ -366,7 +366,14 @@ public class H2Strategy implements IStrategy<DefaultTableMetadata, H2CompareTabl
         return ModifyTableSqlBuilder.buildSql(compareTableInfo);
     }
 
-    public static String withSchemaName(String schema, String name) {
-        return StringUtils.hasText(schema) ? (schema + "." + name) : name;
+    public static String withSchemaName(String schema, String... names) {
+
+        String name = "\"" + String.join("\".\"", names) + "\"";
+
+        if (StringUtils.hasText(schema)) {
+            return "\"" + schema + "\"." + name;
+        }
+
+        return name;
     }
 }

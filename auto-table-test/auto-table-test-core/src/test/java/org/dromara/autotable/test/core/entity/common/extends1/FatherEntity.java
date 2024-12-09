@@ -1,7 +1,8 @@
-package org.dromara.autotable.test.core;
+package org.dromara.autotable.test.core.entity.common.extends1;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.dromara.autotable.test.core.BaseEntity;
 
 import java.io.Serializable;
 

@@ -22,7 +22,13 @@ import java.lang.annotation.Target;
 @Import(AutoTableImportRegister.class)
 public @interface EnableAutoTableTest {
 
+    /**
+     * 指定包扫描路径
+     */
     String[] basePackages() default {};
 
+    /**
+     * 单独指定扫描的类
+     */
     Class[] classes() default {};
 }

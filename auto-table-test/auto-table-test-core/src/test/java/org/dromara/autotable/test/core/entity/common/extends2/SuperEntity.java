@@ -1,10 +1,10 @@
-package org.dromara.autotable.test.core.testcase;
+package org.dromara.autotable.test.core.entity.common.extends2;
 
-import org.dromara.autotable.annotation.Ignore;
-import org.dromara.autotable.test.core.BaseEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
+import org.dromara.autotable.annotation.Ignore;
+import org.dromara.autotable.test.core.BaseEntity;
 
 import java.io.Serializable;
 import java.util.Date;

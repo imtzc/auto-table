@@ -1,5 +1,6 @@
 package org.dromara.autotable.core.strategy.h2.builder;
 
+import lombok.extern.slf4j.Slf4j;
 import org.dromara.autotable.annotation.enums.DefaultValueEnum;
 import org.dromara.autotable.annotation.enums.IndexTypeEnum;
 import org.dromara.autotable.core.strategy.ColumnMetadata;
@@ -8,7 +9,6 @@ import org.dromara.autotable.core.strategy.IndexMetadata;
 import org.dromara.autotable.core.strategy.h2.H2Strategy;
 import org.dromara.autotable.core.utils.StringConnectHelper;
 import org.dromara.autotable.core.utils.StringUtils;
-import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,6 +45,8 @@ public class CreateTableSqlBuilder {
         // 组合最终建表语句
         List<String> sqlList = new ArrayList<>();
         sqlList.add(createTableSql);
+        // 添加提交事务，优先创建表，不然后续的字段添加注释，会找不到字段
+        // sqlList.add(IStrategy.TRANSACTION_COMMIT_MARK);
         sqlList.addAll(createIndexSql);
         sqlList.addAll(addCommentSql);
         return sqlList;
@@ -58,16 +60,17 @@ public class CreateTableSqlBuilder {
     public static List<String> getCreateIndexSql(String schema, String tableName, List<IndexMetadata> indexMetadataList) {
 
         return indexMetadataList.stream()
-                .map(indexMetadataType -> StringConnectHelper.newInstance("CREATE {indexType} INDEX {indexName} ON {tableName} ({columns});")
-                        .replace("{indexType}", indexMetadataType.getType() == IndexTypeEnum.UNIQUE ? "UNIQUE" : "")
-                        .replace("{indexName}", indexMetadataType.getName())
+                .map(indexMetadata -> StringConnectHelper.newInstance("CREATE {indexType} INDEX {indexName} ON {tableName} {method} ({columns});")
+                        .replace("{indexType}", indexMetadata.getType() == IndexTypeEnum.UNIQUE ? "UNIQUE" : "")
+                        .replace("{indexName}", "\"" + indexMetadata.getName() + "\"")
                         .replace("{tableName}", H2Strategy.withSchemaName(schema, tableName))
+                        .replace("{method}", StringUtils.hasText(indexMetadata.getMethod()) ? "USING " + indexMetadata.getMethod() : "")
                         .replace("{columns}", () -> {
-                            List<IndexMetadata.IndexColumnParam> columnParams = indexMetadataType.getColumns();
+                            List<IndexMetadata.IndexColumnParam> columnParams = indexMetadata.getColumns();
                             return columnParams.stream().map(column ->
                                     // 例："name" ASC
                                     "{column} {sortMode}"
-                                            .replace("{column}", column.getColumn())
+                                            .replace("{column}", "\"" + column.getColumn() + "\"")
                                             .replace("{sortMode}", column.getSort() != null ? column.getSort().name() : "")
                             ).collect(Collectors.joining(","));
                         })
@@ -103,9 +106,9 @@ public class CreateTableSqlBuilder {
 
         // 字段备注
         columnCommentMap.entrySet().stream()
-                .map(columnComment -> StringConnectHelper.newInstance("COMMENT ON COLUMN {tableName}.{name} IS {comment};")
-                        .replace("{tableName}", H2Strategy.withSchemaName(schema, tableName))
-                        .replace("{name}", columnComment.getKey())
+                .map(columnComment -> StringConnectHelper.newInstance("COMMENT ON COLUMN {name} IS {comment};")
+                        // ⚠️列名称转大写，不然找不到
+                        .replace("{name}", H2Strategy.withSchemaName(schema, tableName, columnComment.getKey()))
                         .replace("{comment}", () -> {
                             String value = columnComment.getValue();
                             return value == null || value.isEmpty() ? "null" : "'" + value + "'";
@@ -141,7 +144,7 @@ public class CreateTableSqlBuilder {
             // 判断是主键，自动设置为NOT NULL，并记录
             if (columnData.isPrimary()) {
                 columnData.setNotNull(true);
-                primaries.add(columnData.getName());
+                primaries.add("\"" + columnData.getName() + "\"");
             }
         });
 
@@ -180,7 +183,7 @@ public class CreateTableSqlBuilder {
         // 例子："name" varchar(100) NULL DEFAULT '张三' COMMENT '名称'
         // 例子："id" int4(32) NOT NULL AUTO_INCREMENT COMMENT '主键'
         return StringConnectHelper.newInstance("{columnName} {typeAndLength} {null} {default} {autoIncrement}")
-                .replace("{columnName}", columnMetadata.getName())
+                .replace("{columnName}", "\"" + columnMetadata.getName() + "\"")
                 .replace("{typeAndLength}", columnMetadata.getType().getDefaultFullType())
                 .replace("{autoIncrement}", columnMetadata.isAutoIncrement() ? "auto_increment" : "")
                 .replace("{null}", columnMetadata.isNotNull() ? "NOT NULL" : "")

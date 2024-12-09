@@ -3,8 +3,6 @@ package org.dromara.autotable.core.strategy.pgsql;
 import lombok.NonNull;
 import org.apache.ibatis.session.Configuration;
 import org.dromara.autotable.annotation.enums.DefaultValueEnum;
-import org.dromara.autotable.annotation.enums.IndexSortTypeEnum;
-import org.dromara.autotable.annotation.enums.IndexTypeEnum;
 import org.dromara.autotable.core.AutoTableGlobalConfig;
 import org.dromara.autotable.core.constants.DatabaseDialect;
 import org.dromara.autotable.core.converter.DefaultTypeEnumInterface;
@@ -180,11 +178,9 @@ public class PgsqlStrategy implements IStrategy<DefaultTableMetadata, PgsqlCompa
             }
 
             // 获取索引定义语句，进行比较  CREATE UNIQUE INDEX mpe_idx_phone_index ON "public".my_pgsql_table USING btree (phone DESC)
-            String indexdef = dbIndex.getIndexdef().replace("\"", "");
-            boolean isUniqueIndex = indexMetadata.getType() == IndexTypeEnum.UNIQUE;
-            // 索引改变
-            String indexColumnParams = indexMetadata.getColumns().stream().map(col -> col.getColumn() + (col.getSort() == IndexSortTypeEnum.DESC ? " DESC" : "")).collect(Collectors.joining(", "));
-            if (!indexdef.matches("^CREATE " + (isUniqueIndex ? "UNIQUE INDEX" : "INDEX") + " " + indexName + " ON " + PgsqlStrategy.withSchemaName(schema, tableName) + " USING btree \\(" + indexColumnParams + "\\)$")) {
+            String dbIndexdef = dbIndex.getIndexdef().replace("\"", "") + ";";
+            String newIndexdef = CreateTableSqlBuilder.getCreateIndexSql(schema, tableName, indexMetadata).replace("\"", "");
+            if (!newIndexdef.equals(dbIndexdef)) {
                 pgsqlCompareTableInfo.addModifyIndex(indexMetadata);
             }
         }
@@ -321,7 +317,14 @@ public class PgsqlStrategy implements IStrategy<DefaultTableMetadata, PgsqlCompa
         return Collections.singletonList(sql);
     }
 
-    public static String withSchemaName(String schema, String name) {
-        return StringUtils.hasText(schema) ? (schema + "." + name) : name;
+    public static String withSchemaName(String schema, String... names) {
+
+        String name = "\"" + String.join("\".\"", names) + "\"";
+
+        if (StringUtils.hasText(schema)) {
+            return "\"" + schema + "\"." + name;
+        }
+
+        return name;
     }
 }

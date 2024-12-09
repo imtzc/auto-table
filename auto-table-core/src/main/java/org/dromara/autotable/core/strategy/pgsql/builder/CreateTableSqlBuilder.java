@@ -1,5 +1,6 @@
 package org.dromara.autotable.core.strategy.pgsql.builder;
 
+import lombok.extern.slf4j.Slf4j;
 import org.dromara.autotable.annotation.enums.IndexTypeEnum;
 import org.dromara.autotable.core.strategy.ColumnMetadata;
 import org.dromara.autotable.core.strategy.DefaultTableMetadata;
@@ -7,7 +8,6 @@ import org.dromara.autotable.core.strategy.IndexMetadata;
 import org.dromara.autotable.core.strategy.pgsql.PgsqlStrategy;
 import org.dromara.autotable.core.utils.StringConnectHelper;
 import org.dromara.autotable.core.utils.StringUtils;
-import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,21 +53,32 @@ public class CreateTableSqlBuilder {
     public static String getCreateIndexSql(String schema, String tableName, List<IndexMetadata> indexMetadataList) {
 
         return indexMetadataList.stream()
-                .map(pgsqlIndexMetadata -> StringConnectHelper.newInstance("CREATE {indexType} INDEX {indexName} ON {tableName} ({columns});")
-                        .replace("{indexType}", pgsqlIndexMetadata.getType() == IndexTypeEnum.UNIQUE ? "UNIQUE" : "")
-                        .replace("{indexName}", pgsqlIndexMetadata.getName())
-                        .replace("{tableName}", PgsqlStrategy.withSchemaName(schema, tableName))
-                        .replace("{columns}", () -> {
-                            List<IndexMetadata.IndexColumnParam> columnParams = pgsqlIndexMetadata.getColumns();
-                            return columnParams.stream().map(column ->
-                                    // 例："name" ASC
-                                    "{column} {sortMode}"
-                                            .replace("{column}", column.getColumn())
-                                            .replace("{sortMode}", column.getSort() != null ? column.getSort().name() : "")
-                            ).collect(Collectors.joining(","));
-                        })
-                        .toString()
+                .map(pgsqlIndexMetadata -> getCreateIndexSql(schema, tableName, pgsqlIndexMetadata)
                 ).collect(Collectors.joining("\n"));
+    }
+
+    public static String getCreateIndexSql(String schema, String tableName, IndexMetadata pgsqlIndexMetadata) {
+        // 此处注意，pgsql的索引对比方式，靠的是定义索引的sql字符串整体对比的
+        return StringConnectHelper.newInstance("CREATE {indexType}INDEX \"{indexName}\" ON {tableName} {method} ({columns});")
+                .replace("{indexType}", pgsqlIndexMetadata.getType() == IndexTypeEnum.UNIQUE ? "UNIQUE " : "")
+                .replace("{indexName}", pgsqlIndexMetadata.getName())
+                .replace("{tableName}", PgsqlStrategy.withSchemaName(schema, tableName))
+                .replace("{method}", getMethod(pgsqlIndexMetadata.getMethod()))
+                .replace("{columns}", () -> {
+                    List<IndexMetadata.IndexColumnParam> columnParams = pgsqlIndexMetadata.getColumns();
+                    return columnParams.stream().map(column ->
+                            // 例："name" ASC
+                            "{column}{sortMode}"
+                                    .replace("{column}", column.getColumn())
+                                    .replace("{sortMode}", column.getSort() != null ? " " + column.getSort().name() : "")
+                    ).collect(Collectors.joining(","));
+                })
+                .toString();
+    }
+
+    private static String getMethod(String method) {
+        // 这里默认设置索引方法是为了，方便索引对比那里的对比逻辑，因为不设置方法的情况下，数据库的defsql上会默认带"USING btree"
+        return "USING " + (StringUtils.hasText(method) ? method.toLowerCase() : "btree");
     }
 
     private static String getAddColumnCommentSql(DefaultTableMetadata tableMetadata) {
@@ -97,9 +108,8 @@ public class CreateTableSqlBuilder {
 
         // 字段备注
         columnCommentMap.entrySet().stream()
-                .map(columnComment -> "COMMENT ON COLUMN {tableName}.{name} IS '{comment}';"
-                        .replace("{tableName}", PgsqlStrategy.withSchemaName(schema, tableName))
-                        .replace("{name}", columnComment.getKey())
+                .map(columnComment -> "COMMENT ON COLUMN {name} IS '{comment}';"
+                        .replace("{name}", PgsqlStrategy.withSchemaName(schema, tableName, columnComment.getKey()))
                         .replace("{comment}", columnComment.getValue()))
                 .forEach(commentList::add);
 

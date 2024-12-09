@@ -14,10 +14,6 @@ public class RecordSqlService {
 
         PropertyConfig.RecordSqlProperties recordSql = AutoTableGlobalConfig.getAutoTableProperties().getRecordSql();
 
-        if (!recordSql.isEnable()) {
-            return;
-        }
-
         RecordSqlHandler recordSqlHandler;
         PropertyConfig.RecordSqlProperties.TypeEnum recordType = recordSql.getRecordType();
         switch (recordType) {

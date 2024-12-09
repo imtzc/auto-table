@@ -1,8 +1,8 @@
 package org.dromara.autotable.test.core;
 
-import org.dromara.autotable.annotation.ColumnComment;
 import lombok.Getter;
 import lombok.Setter;
+import org.dromara.autotable.annotation.ColumnComment;
 
 import java.io.Serializable;
 

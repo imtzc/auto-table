@@ -32,9 +32,18 @@ public @interface TableIndex {
     String name() default "";
 
     /**
-     * @return 索引类型
+     * @return 索引类型标识
      */
     IndexTypeEnum type() default IndexTypeEnum.NORMAL;
+
+    /**
+     * @return 索引方法
+     * Mysql中，默认为BTREE，可选的：BTREE、FULLTEXT、SPATIAL
+     * Pgsql中，默认为BTREE，可选的：BTREE、GiST、GIN
+     * H2中，默认为BTREE，可选的：BTREE、HASH、FULLTEXT、SPATIAL
+     * H2中，默认为BTREE，可选的：BTREE、HASH、FULLTEXT、SPATIAL
+     */
+    String method() default "";
 
     /**
      * <p>字段名：支持多字段

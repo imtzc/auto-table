@@ -382,7 +382,7 @@ public class MysqlStrategy implements IStrategy<MysqlTableMetadata, MysqlCompare
         /* 判断限定符是否相同 */
         boolean dbHasQualifier = dbColumnTypeArr.size() > 1;
         // 设置初始值
-        boolean isQualifierDiff = false;;
+        boolean isQualifierDiff = false;
         // 任何一方有限定符的话，则进行比较
         if (mysqlColumnMetadata.hasQualifier() || dbHasQualifier) {
             // 无符号比较

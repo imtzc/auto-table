@@ -117,7 +117,7 @@ public class CreateTableSqlBuilder {
 
     public static String getIndexSql(IndexMetadata indexMetadata) {
         // 例子： UNIQUE INDEX `unique_name_age`(`name` ASC, `age` DESC) COMMENT '姓名、年龄索引',
-        return StringConnectHelper.newInstance("{indexType} INDEX `{indexName}`({columns}) {indexComment}")
+        return StringConnectHelper.newInstance("{indexType} INDEX `{indexName}`({columns}) {method} {indexComment}")
                 .replace("{indexType}", indexMetadata.getType() == IndexTypeEnum.UNIQUE ? "UNIQUE" : "")
                 .replace("{indexName}", indexMetadata.getName())
                 .replace("{columns}", () -> {
@@ -129,6 +129,7 @@ public class CreateTableSqlBuilder {
                                     .replace("{sortMode}", column.getSort() != null ? column.getSort().name() : "")
                     ).collect(Collectors.joining(","));
                 })
+                .replace("{method}", StringUtils.hasText(indexMetadata.getMethod()) ? "USING " + indexMetadata.getMethod() : "")
                 .replace("{indexComment}", StringUtils.hasText(indexMetadata.getComment()) ? "COMMENT '" + indexMetadata.getComment() + "'" : "")
                 .toString();
     }

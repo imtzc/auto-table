@@ -1,4 +1,4 @@
-package org.dromara.autotable.test.core.testcase;
+package org.dromara.autotable.test.core.entity.common.extends2;
 
 
 import lombok.Data;

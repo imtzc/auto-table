@@ -1,5 +1,9 @@
 package org.dromara.autotable.core.strategy;
 
+import lombok.NonNull;
+import org.apache.ibatis.session.Configuration;
+import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.SqlSessionFactory;
 import org.dromara.autotable.core.AutoTableGlobalConfig;
 import org.dromara.autotable.core.RunMode;
 import org.dromara.autotable.core.converter.DefaultTypeEnumInterface;
@@ -7,10 +11,6 @@ import org.dromara.autotable.core.dynamicds.SqlSessionFactoryManager;
 import org.dromara.autotable.core.recordsql.AutoTableExecuteSqlLog;
 import org.dromara.autotable.core.recordsql.RecordSqlService;
 import org.dromara.autotable.core.utils.StringUtils;
-import lombok.NonNull;
-import org.apache.ibatis.session.Configuration;
-import org.apache.ibatis.session.SqlSession;
-import org.apache.ibatis.session.SqlSessionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Function;
 
 /**
@@ -31,6 +32,11 @@ import java.util.function.Function;
 public interface IStrategy<TABLE_META extends TableMetadata, COMPARE_TABLE_INFO extends CompareTableInfo, MAPPER> {
 
     Logger log = LoggerFactory.getLogger(IStrategy.class);
+
+    /**
+     * 事务提交标志
+     */
+    String TRANSACTION_COMMIT_MARK = "COMMIT;";
 
     /**
      * 获取mapper执行mapper的方法
@@ -229,22 +235,36 @@ public interface IStrategy<TABLE_META extends TableMetadata, COMPARE_TABLE_INFO 
             // 批量的SQL 改为手动提交模式
             connection.setAutoCommit(false);
 
+
             List<AutoTableExecuteSqlLog> autoTableExecuteSqlLogs = new ArrayList<>();
             try (Statement statement = connection.createStatement()) {
+
+                boolean recordSql = AutoTableGlobalConfig.getAutoTableProperties().getRecordSql().isEnable();
                 for (String sql : sqlList) {
                     // sql末尾添加;
                     if (!sql.endsWith(";")) {
                         sql += ";";
                     }
+
+                    if (Objects.equals(IStrategy.TRANSACTION_COMMIT_MARK, sql)) {
+                        log.debug("中途提交事务");
+                        connection.commit();
+                        continue;
+                    }
+
                     long executionTime = System.currentTimeMillis();
                     statement.execute(sql);
                     long executionEndTime = System.currentTimeMillis();
-                    AutoTableExecuteSqlLog autoTableExecuteSqlLog = AutoTableExecuteSqlLog.of(tableMetadata.getEntityClass(), tableMetadata.getSchema(), tableMetadata.getTableName(), sql, executionTime, executionEndTime);
-                    autoTableExecuteSqlLogs.add(autoTableExecuteSqlLog);
+
+                    if (recordSql) {
+                        AutoTableExecuteSqlLog autoTableExecuteSqlLog = AutoTableExecuteSqlLog.of(tableMetadata.getEntityClass(), tableMetadata.getSchema(), tableMetadata.getTableName(), sql, executionTime, executionEndTime);
+                        autoTableExecuteSqlLogs.add(autoTableExecuteSqlLog);
+                    }
+
                     log.info("执行sql({}ms)：{}", executionEndTime - executionTime, sql);
                 }
                 // 提交
-                log.debug("提交事务");
+                log.debug("最终提交事务");
                 connection.commit();
             } catch (Exception e) {
                 connection.rollback();
@@ -252,7 +272,9 @@ public interface IStrategy<TABLE_META extends TableMetadata, COMPARE_TABLE_INFO 
             }
 
             // 记录SQL
-            RecordSqlService.record(autoTableExecuteSqlLogs);
+            if (!autoTableExecuteSqlLogs.isEmpty()) {
+                RecordSqlService.record(autoTableExecuteSqlLogs);
+            }
 
         } catch (SQLException e) {
             throw new RuntimeException("获取数据库连接出错", e);

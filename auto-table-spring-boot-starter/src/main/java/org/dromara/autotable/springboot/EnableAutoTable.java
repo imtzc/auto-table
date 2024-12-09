@@ -20,7 +20,13 @@ import java.lang.annotation.Target;
 @Import({AutoTableAutoConfig.class, AutoTableImportRegister.class, AutoTableRunner.class})
 public @interface EnableAutoTable {
 
+    /**
+     * 指定包扫描路径
+     */
     String[] basePackages() default {};
 
+    /**
+     * 单独指定扫描的类
+     */
     Class[] classes() default {};
 }

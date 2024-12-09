@@ -33,6 +33,11 @@ public class IndexMetadata {
     protected IndexTypeEnum type;
 
     /**
+     * 索引方法
+     */
+    protected String method;
+
+    /**
      * 索引注释
      */
     protected String comment;
