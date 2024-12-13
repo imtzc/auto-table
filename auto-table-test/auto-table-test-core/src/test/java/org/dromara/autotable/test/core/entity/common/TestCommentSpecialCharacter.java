@@ -6,9 +6,9 @@ import org.dromara.autotable.annotation.AutoTable;
 import org.dromara.autotable.annotation.pgsql.PgsqlTypeConstant;
 
 @Data
-@AutoTable(comment = "测试备注''")
+@AutoTable(comment = "包含特殊字符','¥#(|)\"")
 public class TestCommentSpecialCharacter {
     // 测试备注中的单引号'bug
-    @AutoColumn(type = PgsqlTypeConstant.TEXT, comment = "平台域名白名单(多个用','分隔)")
+    @AutoColumn(type = PgsqlTypeConstant.TEXT, comment = "包含特殊字符','¥#(|)\"")
     private String testColumn;
 }

@@ -11,8 +11,9 @@ public class TestSqliteUpdate {
 
     private String age;
 
+    // 删除
     // private String address;
 
-    // 新增
+    // 新增列
     private String phone;
 }

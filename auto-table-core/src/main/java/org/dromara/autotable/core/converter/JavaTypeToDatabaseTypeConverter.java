@@ -52,6 +52,23 @@ public interface JavaTypeToDatabaseTypeConverter {
      */
     static void addTypeMapping(String databaseDialect, Map<Class<?>, DefaultTypeEnumInterface> typeEnumMap) {
         JAVA_TO_DB_TYPE_MAPPING.computeIfAbsent(databaseDialect, k -> new HashMap<>()).putAll(typeEnumMap);
+        addTypeMapping(DatabaseDialect.MySQL, String.class, new DefaultTypeEnumInterface() {
+
+            @Override
+            public Integer getDefaultLength() {
+                return 30;
+            }
+
+            @Override
+            public Integer getDefaultDecimalLength() {
+                return 0;
+            }
+
+            @Override
+            public String getTypeName() {
+                return "varchar";
+            }
+        });
     }
 
     /**
