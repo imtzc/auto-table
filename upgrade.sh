@@ -40,3 +40,4 @@ git push origin main --tags
 
 echo "开始发布新的版本到maven仓库：${version}"
 mvn clean deploy -Dmaven.test.skip=true -pl auto-table-annotation,auto-table-core,auto-table-spring-boot-starter -am
+
