@@ -53,8 +53,8 @@ public class H2Strategy implements IStrategy<DefaultTableMetadata, H2CompareTabl
 
             put(byte.class, H2DefaultTypeEnum.TINYINT);
             put(Byte.class, H2DefaultTypeEnum.TINYINT);
-            put(short.class, H2DefaultTypeEnum.SMARTINT);
-            put(Short.class, H2DefaultTypeEnum.SMARTINT);
+            put(short.class, H2DefaultTypeEnum.SMALLINT);
+            put(Short.class, H2DefaultTypeEnum.SMALLINT);
             put(int.class, H2DefaultTypeEnum.INTEGER);
             put(Integer.class, H2DefaultTypeEnum.INTEGER);
             put(long.class, H2DefaultTypeEnum.BIGINT);
@@ -309,6 +309,10 @@ public class H2Strategy implements IStrategy<DefaultTableMetadata, H2CompareTabl
             }
         } else {
             String defaultValue = columnMetadata.getDefaultValue();
+            // 字符串字段补单引号
+            if (defaultValue != null && !defaultValue.startsWith("'") && !defaultValue.endsWith("'") && H2TypeHelper.isCharString(columnMetadata.getType())) {
+                defaultValue = "'" + defaultValue + "'";
+            }
             // 编码中文字符
             defaultValue = encodeChinese(defaultValue);
             return !Objects.equals(defaultValue, dbDefaultValue);
@@ -343,7 +347,13 @@ public class H2Strategy implements IStrategy<DefaultTableMetadata, H2CompareTabl
 
         if (hasChinese) {
             // 打印编码后的字符串
-            return "U&'" + unicodeString + "'";
+            if(!input.startsWith("'")) {
+                unicodeString.insert(0, "'");
+            }
+            if(!input.endsWith("'")) {
+                unicodeString.append("'");
+            }
+            return "U&" + unicodeString;
         }
         return input;
     }
@@ -368,10 +378,10 @@ public class H2Strategy implements IStrategy<DefaultTableMetadata, H2CompareTabl
 
     public static String withSchemaName(String schema, String... names) {
 
-        String name = "\"" + String.join("\".\"", names) + "\"";
+        String name = String.join(".", names);
 
         if (StringUtils.hasText(schema)) {
-            return "\"" + schema + "\"." + name;
+            return schema + "." + name;
         }
 
         return name;

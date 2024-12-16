@@ -98,7 +98,8 @@ export default defineConfig({
                         {text: '字段排序', link: '/葵花宝典/字段排序'},
                         {text: '父类字段没有创建', link: '/葵花宝典/父类字段没有创建'},
                         {text: 'Invalid value type', link: '/葵花宝典/Invalid value type'},
-                        {text: '集成Flyway', link: '/葵花宝典/集成Flyway'},
+                        {text: '生成Flyway脚本', link: '/葵花宝典/生成Flyway脚本'},
+                        {text: '与Flyway集成', link: '/葵花宝典/与Flyway集成'},
                         {text: '启动顺序(时机)', link: '/葵花宝典/启动顺序(时机)'},
                         {text: '字段删除', link: '/葵花宝典/字段删除'},
                     ]

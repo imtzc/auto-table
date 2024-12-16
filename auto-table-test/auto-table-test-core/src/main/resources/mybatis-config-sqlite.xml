@@ -12,7 +12,7 @@
                 <!-- 注：-->
                 <!-- :resource: 指向项目的 resources 路径（resource前后两个 `:` 不能省略）-->
                 <!--          url: jdbc:sqlite::resource:sqlite.db-->
-                <property name="url" value="jdbc:sqlite::resource:sqlite.db"/>
+                <property name="url" value="jdbc:sqlite:file:./src/main/resources/sqlite.db"/>
             </dataSource>
         </environment>
     </environments>

@@ -53,6 +53,6 @@ public interface SqliteTablesMapper {
             @Result(column = "dflt_value", property = "dfltValue"),
             @Result(column = "pk", property = "pk"),
     })
-    @Select("pragma table_info(\"${tableName}\");")
+    @Select("pragma table_info(${tableName});")
     List<SqliteColumns> queryTableColumns(String tableName);
 }

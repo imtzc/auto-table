@@ -22,7 +22,6 @@ public interface PgsqlTypeConstant {
     String TIMESTAMPTZ = "timestamptz"; // 时间戳 (带时区)
     String BIT = "bit";             // 定长位串类型
     String VARBIT = "varbit";       // 可变长度位串类型
-    String UUID = "uuid";           // 全局唯一标识符类型
     String JSON = "json";           // JSON 数据类型
     String JSONB = "jsonb";         // 二进制 JSON 数据类型
     String XML = "xml";             // XML 数据类型

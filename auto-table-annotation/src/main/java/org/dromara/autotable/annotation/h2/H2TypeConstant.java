@@ -10,7 +10,7 @@ public interface H2TypeConstant {
      */
     String INTEGER = "INTEGER";
     String TINYINT = "TINYINT";
-    String SMARTINT = "SMARTINT";
+    String SMALLINT = "SMALLINT";
     String BIGINT = "BIGINT";
     /**
      * 小数

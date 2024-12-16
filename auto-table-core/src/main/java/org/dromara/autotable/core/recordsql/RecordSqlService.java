@@ -38,8 +38,8 @@ public class RecordSqlService {
         for (AutoTableExecuteSqlLog autoTableExecuteSqlLog : autoTableExecuteSqlLogs) {
             // 设置手动指定的版本
             autoTableExecuteSqlLog.setVersion(version);
-            // 调用不同的记录器
-            recordSqlHandler.record(autoTableExecuteSqlLog);
         }
+        // 调用不同的记录器
+        recordSqlHandler.record(autoTableExecuteSqlLogs);
     }
 }

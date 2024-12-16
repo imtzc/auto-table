@@ -24,7 +24,7 @@ public class ColumnSqlBuilder {
      */
     public static String buildSql(ColumnMetadata columnMetadata, boolean isSinglePrimaryKey, boolean addComma) {
         boolean isAutoIncrement = isSinglePrimaryKey && columnMetadata.isPrimary() && columnMetadata.isAutoIncrement();
-        return StringConnectHelper.newInstance("\"{columnName}\" {typeAndLength} {null} {default} {primaryKey}{comma}{columnComment}")
+        return StringConnectHelper.newInstance("{columnName} {typeAndLength} {null} {default} {primaryKey}{comma}{columnComment}")
                 .replace("{columnName}", columnMetadata.getName())
                 .replace("{typeAndLength}", SqliteTypeHelper.getFullType(columnMetadata.getType(), isAutoIncrement))
                 .replace("{null}", columnMetadata.isNotNull() ? "NOT NULL" : "NULL")

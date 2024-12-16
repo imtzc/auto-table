@@ -64,7 +64,6 @@ public enum PgsqlDefaultTypeEnum implements DefaultTypeEnumInterface {
      * 二进制
      */
     BIT(PgsqlTypeConstant.BIT, 1, null), //
-    UUID(PgsqlTypeConstant.UUID, 1, null), //
 
     ;
 

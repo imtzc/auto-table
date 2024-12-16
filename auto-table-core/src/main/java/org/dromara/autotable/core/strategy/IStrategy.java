@@ -6,6 +6,7 @@ import org.apache.ibatis.session.SqlSession;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.dromara.autotable.core.AutoTableGlobalConfig;
 import org.dromara.autotable.core.RunMode;
+import org.dromara.autotable.core.Utils;
 import org.dromara.autotable.core.converter.DefaultTypeEnumInterface;
 import org.dromara.autotable.core.dynamicds.SqlSessionFactoryManager;
 import org.dromara.autotable.core.recordsql.AutoTableExecuteSqlLog;
@@ -16,14 +17,12 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.ParameterizedType;
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.function.Function;
 
 /**
@@ -32,11 +31,6 @@ import java.util.function.Function;
 public interface IStrategy<TABLE_META extends TableMetadata, COMPARE_TABLE_INFO extends CompareTableInfo, MAPPER> {
 
     Logger log = LoggerFactory.getLogger(IStrategy.class);
-
-    /**
-     * 事务提交标志
-     */
-    String TRANSACTION_COMMIT_MARK = "COMMIT;";
 
     /**
      * 获取mapper执行mapper的方法
@@ -228,28 +222,20 @@ public interface IStrategy<TABLE_META extends TableMetadata, COMPARE_TABLE_INFO 
     default void executeSql(TABLE_META tableMetadata, List<String> sqlList) {
         SqlSessionFactory sqlSessionFactory = SqlSessionFactoryManager.getSqlSessionFactory();
 
+        List<AutoTableExecuteSqlLog> autoTableExecuteSqlLogs = new ArrayList<>();
         try (SqlSession sqlSession = sqlSessionFactory.openSession();
              Connection connection = sqlSession.getConnection()) {
 
-            log.debug("开启事务");
+            log.debug("开启执行sql事务");
             // 批量的SQL 改为手动提交模式
             connection.setAutoCommit(false);
 
-
-            List<AutoTableExecuteSqlLog> autoTableExecuteSqlLogs = new ArrayList<>();
             try (Statement statement = connection.createStatement()) {
-
                 boolean recordSql = AutoTableGlobalConfig.getAutoTableProperties().getRecordSql().isEnable();
                 for (String sql : sqlList) {
                     // sql末尾添加;
                     if (!sql.endsWith(";")) {
                         sql += ";";
-                    }
-
-                    if (Objects.equals(IStrategy.TRANSACTION_COMMIT_MARK, sql)) {
-                        log.debug("中途提交事务");
-                        connection.commit();
-                        continue;
                     }
 
                     long executionTime = System.currentTimeMillis();
@@ -263,21 +249,21 @@ public interface IStrategy<TABLE_META extends TableMetadata, COMPARE_TABLE_INFO 
 
                     log.info("执行sql({}ms)：{}", executionEndTime - executionTime, sql);
                 }
-                // 提交
-                log.debug("最终提交事务");
-                connection.commit();
             } catch (Exception e) {
-                connection.rollback();
-                throw new RuntimeException(String.format("执行SQL: \n%s\n期间出错", String.join("\n", sqlList)), e);
+                throw new RuntimeException(String.format("执行SQL期间出错: \n%s\n", String.join("\n", sqlList)), e);
             }
-
-            // 记录SQL
-            if (!autoTableExecuteSqlLogs.isEmpty()) {
-                RecordSqlService.record(autoTableExecuteSqlLogs);
-            }
-
+            // 提交
+            log.debug("提交执行sql事务");
+            connection.commit();
         } catch (SQLException e) {
             throw new RuntimeException("获取数据库连接出错", e);
+        } finally {
+            log.debug("关闭执行sql事务");
+        }
+
+        // 记录SQL
+        if (!autoTableExecuteSqlLogs.isEmpty()) {
+            RecordSqlService.record(autoTableExecuteSqlLogs);
         }
     }
 
@@ -292,11 +278,10 @@ public interface IStrategy<TABLE_META extends TableMetadata, COMPARE_TABLE_INFO 
         // 获取Configuration对象
         Configuration configuration = SqlSessionFactoryManager.getSqlSessionFactory().getConfiguration();
         try (Connection connection = configuration.getEnvironment().getDataSource().getConnection()) {
-            // 通过连接获取DatabaseMetaData对象
-            DatabaseMetaData metaData = connection.getMetaData();
-            String connectionCatalog = connection.getCatalog();
-            String connectionSchema = connection.getSchema();
-            boolean exist = metaData.getTables(connectionCatalog, StringUtils.hasText(schema) ? schema : connectionSchema, tableName, new String[]{"TABLE"}).next();
+            if(!StringUtils.hasText(schema)) {
+                schema = connection.getSchema();
+            }
+            boolean exist = Utils.tableIsExists(connection, schema, tableName, new String[]{"TABLE"}, true);
             return !exist;
         } catch (SQLException e) {
             throw new RuntimeException("判断数据库是否存在出错", e);

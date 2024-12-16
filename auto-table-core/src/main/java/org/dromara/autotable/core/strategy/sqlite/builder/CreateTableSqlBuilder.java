@@ -70,9 +70,8 @@ public class CreateTableSqlBuilder {
                 .filter(StringUtils::hasText)
                 .collect(Collectors.joining(","));
 
-        return ("CREATE TABLE `{tableName}`{comment} \n" +
-                "(\n{addItems}\n" +
-                ");")
+        return ("CREATE TABLE {tableName}{comment} \n" +
+                "(\n{addItems}\n);")
                 .replace("{tableName}", name)
                 .replace("{comment}", StringUtils.hasText(comment) ? " -- "  + comment : "")
                 .replace("{addItems}", addSql);
@@ -102,7 +101,7 @@ public class CreateTableSqlBuilder {
      * );
      */
     public static String getIndexSql(String tableName, IndexMetadata indexMetadata) {
-        return StringConnectHelper.newInstance("CREATE{indexType} INDEX \"{indexName}\" ON {tableName} ({columns}) {indexComment};")
+        return StringConnectHelper.newInstance("CREATE{indexType} INDEX {indexName} ON {tableName} ({columns}) {indexComment};")
                 .replace("{indexType}", indexMetadata.getType() == IndexTypeEnum.NORMAL ? "" : " " + indexMetadata.getType().name())
                 .replace("{indexName}", indexMetadata.getName())
                 .replace("{tableName}", tableName)
@@ -110,7 +109,7 @@ public class CreateTableSqlBuilder {
                     List<IndexMetadata.IndexColumnParam> columnParams = indexMetadata.getColumns();
                     return columnParams.stream().map(column ->
                             // 例："name" ASC
-                            "\"{column}\" {sortMode}"
+                            "{column} {sortMode}"
                                     .replace("{column}", column.getColumn())
                                     .replace("{sortMode}", column.getSort() != null ? column.getSort().name() : "")
                     ).collect(Collectors.joining(","));
@@ -123,9 +122,7 @@ public class CreateTableSqlBuilder {
         return "PRIMARY KEY ({primaries})"
                 .replace(
                         "{primaries}",
-                        primaries.stream()
-                                .map(fieldName -> "\"" + fieldName + "\"")
-                                .collect(Collectors.joining(","))
+                        String.join(",", primaries)
                 );
     }
 }

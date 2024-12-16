@@ -1,6 +1,10 @@
 package org.dromara.autotable.core.recordsql;
 
+import lombok.extern.slf4j.Slf4j;
+import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.SqlSessionFactory;
 import org.dromara.autotable.core.AutoTableGlobalConfig;
+import org.dromara.autotable.core.Utils;
 import org.dromara.autotable.core.config.PropertyConfig;
 import org.dromara.autotable.core.dynamicds.DatasourceNameManager;
 import org.dromara.autotable.core.dynamicds.IDataSourceHandler;
@@ -8,9 +12,6 @@ import org.dromara.autotable.core.dynamicds.SqlSessionFactoryManager;
 import org.dromara.autotable.core.strategy.IStrategy;
 import org.dromara.autotable.core.utils.StringUtils;
 import org.dromara.autotable.core.utils.TableBeanUtils;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.ibatis.session.SqlSession;
-import org.apache.ibatis.session.SqlSessionFactory;
 
 import java.lang.reflect.Field;
 import java.sql.Connection;
@@ -25,7 +26,7 @@ import java.util.stream.IntStream;
 @Slf4j
 public class RecordSqlDbHandler implements RecordSqlHandler {
     @Override
-    public void record(AutoTableExecuteSqlLog autoTableExecuteSqlLog) {
+    public void record(List<AutoTableExecuteSqlLog> autoTableExecuteSqlLogs) {
 
         PropertyConfig.RecordSqlProperties recordSqlConfig = AutoTableGlobalConfig.getAutoTableProperties().getRecordSql();
 
@@ -39,20 +40,33 @@ public class RecordSqlDbHandler implements RecordSqlHandler {
         SqlSessionFactory sqlSessionFactory = SqlSessionFactoryManager.getSqlSessionFactory();
         try (SqlSession sqlSession = sqlSessionFactory.openSession();
              Connection connection = sqlSession.getConnection()) {
-            String catalog = connection.getCatalog();
-            String schema = StringUtils.hasText(autoTableExecuteSqlLog.getTableSchema()) ? autoTableExecuteSqlLog.getTableSchema() : connection.getSchema();
-            boolean tableNotExit = !connection.getMetaData().getTables(catalog, schema, tableName, new String[]{"TABLE"}).next();
+            log.debug("开启sql记录事务");
             connection.setAutoCommit(false);
-            if (tableNotExit) {
-                // 初始化表
-                initTable(connection);
-                log.info("初始化sql记录表：{}", tableName);
+
+            try {
+                for (AutoTableExecuteSqlLog autoTableExecuteSqlLog : autoTableExecuteSqlLogs) {
+                    String schema = connection.getSchema();
+                    if(StringUtils.hasText(autoTableExecuteSqlLog.getTableSchema())) {
+                        schema = autoTableExecuteSqlLog.getTableSchema();
+                    }
+                    boolean exists = Utils.tableIsExists(connection, schema, tableName, new String[]{"TABLE"}, true);
+                    if (!exists) {
+                        // 初始化表
+                        initTable(connection);
+                        log.info("初始化sql记录表：{}", tableName);
+                    }
+                    // 插入数据
+                    insertLog(tableName, autoTableExecuteSqlLog, connection);
+                }
+            } catch (Exception e) {
+                throw new RuntimeException("记录sql到数据库出错", e);
             }
-            // 插入数据
-            insertLog(tableName, autoTableExecuteSqlLog, connection);
+            log.debug("提交sql记录事务");
             connection.commit();
         } catch (SQLException e) {
             throw new RuntimeException(e);
+        } finally {
+            log.debug("关闭sql记录事务");
         }
     }
 
@@ -78,7 +92,10 @@ public class RecordSqlDbHandler implements RecordSqlHandler {
         }).collect(Collectors.toList());
 
         // 执行数据插入
-        String insertSql = String.format("INSERT INTO %s (%s) VALUES (%s)", tableName, String.join(", ", columns), IntStream.range(0, values.size()).mapToObj(i -> "?").collect(Collectors.joining(", ")));
+        String insertSql = String.format("INSERT INTO %s (%s) VALUES (%s)",
+                tableName,
+                String.join(", ", columns),
+                IntStream.range(0, values.size()).mapToObj(i -> "?").collect(Collectors.joining(", ")));
         log.info("插入SQL记录：{}", insertSql);
         PreparedStatement preparedStatement = connection.prepareStatement(insertSql);
         for (int i = 0; i < values.size(); i++) {

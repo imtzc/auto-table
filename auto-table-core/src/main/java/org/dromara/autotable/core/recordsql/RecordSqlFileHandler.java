@@ -1,43 +1,47 @@
 package org.dromara.autotable.core.recordsql;
 
+import lombok.extern.slf4j.Slf4j;
 import org.dromara.autotable.core.AutoTableGlobalConfig;
 import org.dromara.autotable.core.config.PropertyConfig;
 import org.dromara.autotable.core.dynamicds.DatasourceNameManager;
 import org.dromara.autotable.core.utils.StringUtils;
-import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
 @Slf4j
 public class RecordSqlFileHandler implements RecordSqlHandler {
     @Override
-    public void record(AutoTableExecuteSqlLog autoTableExecuteSqlLog) {
+    public void record(List<AutoTableExecuteSqlLog> autoTableExecuteSqlLogs) {
 
-        Path path = getFilePath(autoTableExecuteSqlLog);
-        if (path != null && !Files.exists(path)) {
-            try {
-                Files.createDirectories(path.getParent());
-                Files.createFile(path);
-            } catch (IOException e) {
-                log.error("创建日志文件{}出错", path, e);
-                path = null;
-            }
-        }
+        for (AutoTableExecuteSqlLog autoTableExecuteSqlLog : autoTableExecuteSqlLogs) {
 
-        if (path != null) {
-            try {
-                String sqlStatement = autoTableExecuteSqlLog.getSqlStatement();
-                // 末尾添加换行符
-                if (!sqlStatement.endsWith(System.lineSeparator())) {
-                    sqlStatement = sqlStatement + System.lineSeparator();
+            Path path = getFilePath(autoTableExecuteSqlLog);
+            if (path != null && !Files.exists(path)) {
+                try {
+                    Files.createDirectories(path.getParent());
+                    Files.createFile(path);
+                } catch (IOException e) {
+                    log.error("创建日志文件{}出错", path, e);
+                    path = null;
                 }
-                Files.write(path, sqlStatement.getBytes(StandardCharsets.UTF_8), java.nio.file.StandardOpenOption.APPEND);
-            } catch (IOException e) {
-                log.error("向{}写入SQL日志出错", path, e);
+            }
+
+            if (path != null) {
+                try {
+                    String sqlStatement = autoTableExecuteSqlLog.getSqlStatement();
+                    // 末尾添加换行符
+                    if (!sqlStatement.endsWith(System.lineSeparator())) {
+                        sqlStatement = sqlStatement + System.lineSeparator();
+                    }
+                    Files.write(path, sqlStatement.getBytes(StandardCharsets.UTF_8), java.nio.file.StandardOpenOption.APPEND);
+                } catch (IOException e) {
+                    log.error("向{}写入SQL日志出错", path, e);
+                }
             }
         }
     }

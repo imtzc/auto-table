@@ -7,6 +7,7 @@ import org.dromara.autotable.core.strategy.ColumnMetadata;
 import org.dromara.autotable.core.strategy.DefaultTableMetadata;
 import org.dromara.autotable.core.strategy.IndexMetadata;
 import org.dromara.autotable.core.strategy.h2.H2Strategy;
+import org.dromara.autotable.core.strategy.h2.data.H2TypeHelper;
 import org.dromara.autotable.core.utils.StringConnectHelper;
 import org.dromara.autotable.core.utils.StringUtils;
 
@@ -62,7 +63,7 @@ public class CreateTableSqlBuilder {
         return indexMetadataList.stream()
                 .map(indexMetadata -> StringConnectHelper.newInstance("CREATE {indexType} INDEX {indexName} ON {tableName} {method} ({columns});")
                         .replace("{indexType}", indexMetadata.getType() == IndexTypeEnum.UNIQUE ? "UNIQUE" : "")
-                        .replace("{indexName}", "\"" + indexMetadata.getName() + "\"")
+                        .replace("{indexName}", indexMetadata.getName())
                         .replace("{tableName}", H2Strategy.withSchemaName(schema, tableName))
                         .replace("{method}", StringUtils.hasText(indexMetadata.getMethod()) ? "USING " + indexMetadata.getMethod() : "")
                         .replace("{columns}", () -> {
@@ -70,7 +71,7 @@ public class CreateTableSqlBuilder {
                             return columnParams.stream().map(column ->
                                     // 例："name" ASC
                                     "{column} {sortMode}"
-                                            .replace("{column}", "\"" + column.getColumn() + "\"")
+                                            .replace("{column}", column.getColumn())
                                             .replace("{sortMode}", column.getSort() != null ? column.getSort().name() : "")
                             ).collect(Collectors.joining(","));
                         })
@@ -144,7 +145,7 @@ public class CreateTableSqlBuilder {
             // 判断是主键，自动设置为NOT NULL，并记录
             if (columnData.isPrimary()) {
                 columnData.setNotNull(true);
-                primaries.add("\"" + columnData.getName() + "\"");
+                primaries.add(columnData.getName());
             }
         });
 
@@ -183,7 +184,7 @@ public class CreateTableSqlBuilder {
         // 例子："name" varchar(100) NULL DEFAULT '张三' COMMENT '名称'
         // 例子："id" int4(32) NOT NULL AUTO_INCREMENT COMMENT '主键'
         return StringConnectHelper.newInstance("{columnName} {typeAndLength} {null} {default} {autoIncrement}")
-                .replace("{columnName}", "\"" + columnMetadata.getName() + "\"")
+                .replace("{columnName}", columnMetadata.getName())
                 .replace("{typeAndLength}", columnMetadata.getType().getDefaultFullType())
                 .replace("{autoIncrement}", columnMetadata.isAutoIncrement() ? "auto_increment" : "")
                 .replace("{null}", columnMetadata.isNotNull() ? "NOT NULL" : "")
@@ -201,9 +202,9 @@ public class CreateTableSqlBuilder {
                     String defaultValue = columnMetadata.getDefaultValue();
                     if (DefaultValueEnum.isCustom(defaultValueType) && StringUtils.hasText(defaultValue)) {
                         // 字符串字段补单引号
-                        // if (!defaultValue.startsWith("'") && !defaultValue.endsWith("'") && H2TypeHelper.isCharString(columnMetadata.getType())) {
-                        //     defaultValue = "'" + defaultValue + "'";
-                        // }
+                        if (!defaultValue.startsWith("'") && !defaultValue.endsWith("'") && H2TypeHelper.isCharString(columnMetadata.getType())) {
+                            defaultValue = "'" + defaultValue + "'";
+                        }
                         defaultValue = H2Strategy.encodeChinese(defaultValue);
                         return "DEFAULT " + defaultValue;
                     }

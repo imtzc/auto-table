@@ -21,7 +21,7 @@ public enum H2DefaultTypeEnum implements DefaultTypeEnumInterface {
      */
     INTEGER(H2TypeConstant.INTEGER, null, null),
     TINYINT(H2TypeConstant.TINYINT, null, null),
-    SMARTINT(H2TypeConstant.SMARTINT, null, null),
+    SMALLINT(H2TypeConstant.SMALLINT, null, null),
     BIGINT(H2TypeConstant.BIGINT, null, null),
     /**
      * 小数

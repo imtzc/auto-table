@@ -59,7 +59,7 @@ public class CreateTableSqlBuilder {
 
     public static String getCreateIndexSql(String schema, String tableName, IndexMetadata pgsqlIndexMetadata) {
         // 此处注意，pgsql的索引对比方式，靠的是定义索引的sql字符串整体对比的
-        return StringConnectHelper.newInstance("CREATE {indexType}INDEX \"{indexName}\" ON {tableName} {method} ({columns});")
+        return StringConnectHelper.newInstance("CREATE {indexType}INDEX {indexName} ON {tableName} {method} ({columns});")
                 .replace("{indexType}", pgsqlIndexMetadata.getType() == IndexTypeEnum.UNIQUE ? "UNIQUE " : "")
                 .replace("{indexName}", pgsqlIndexMetadata.getName())
                 .replace("{tableName}", PgsqlStrategy.withSchemaName(schema, tableName))
@@ -96,27 +96,32 @@ public class CreateTableSqlBuilder {
 
     public static String getAddColumnCommentSql(String schema, String tableName, String tableComment, Map<String, String> columnCommentMap, Map<String, String> indexCommentMap) {
 
+        String finalSchema = StringUtils.hasText(schema) ? (schema + ".") : "";
         List<String> commentList = new ArrayList<>();
 
         // 表备注
         if (StringUtils.hasText(tableComment)) {
-            String addTableComment = "COMMENT ON TABLE {tableName} IS '{comment}';"
-                    .replace("{tableName}", PgsqlStrategy.withSchemaName(schema, tableName))
+            String addTableComment = "COMMENT ON TABLE {schema}{name} IS '{comment}';"
+                    .replace("{schema}", finalSchema)
+                    .replace("{name}", tableName)
                     .replace("{comment}", tableComment);
             commentList.add(addTableComment);
         }
 
         // 字段备注
         columnCommentMap.entrySet().stream()
-                .map(columnComment -> "COMMENT ON COLUMN {name} IS '{comment}';"
-                        .replace("{name}", PgsqlStrategy.withSchemaName(schema, tableName, columnComment.getKey()))
+                .map(columnComment -> "COMMENT ON COLUMN {schema}{tableName}.{name} IS '{comment}';"
+                        .replace("{schema}", finalSchema)
+                        .replace("{tableName}", tableName)
+                        .replace("{name}", columnComment.getKey())
                         .replace("{comment}", columnComment.getValue()))
                 .forEach(commentList::add);
 
         // 索引备注
         indexCommentMap.entrySet().stream()
-                .map(indexComment -> "COMMENT ON INDEX {name} IS '{comment}';"
-                        .replace("{name}", PgsqlStrategy.withSchemaName(schema, indexComment.getKey()))
+                .map(indexComment -> "COMMENT ON INDEX {schema}{name} IS '{comment}';"
+                        .replace("{schema}", finalSchema)
+                        .replace("{name}", indexComment.getKey())
                         .replace("{comment}", indexComment.getValue()))
                 .forEach(commentList::add);
 

@@ -4,6 +4,7 @@ import lombok.NonNull;
 import org.apache.ibatis.session.Configuration;
 import org.dromara.autotable.annotation.enums.DefaultValueEnum;
 import org.dromara.autotable.core.AutoTableGlobalConfig;
+import org.dromara.autotable.core.Utils;
 import org.dromara.autotable.core.constants.DatabaseDialect;
 import org.dromara.autotable.core.converter.DefaultTypeEnumInterface;
 import org.dromara.autotable.core.dynamicds.SqlSessionFactoryManager;
@@ -25,7 +26,6 @@ import org.dromara.autotable.core.utils.StringUtils;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -85,8 +85,6 @@ public class PgsqlStrategy implements IStrategy<DefaultTableMetadata, PgsqlCompa
             put(LocalTime.class, PgsqlDefaultTypeEnum.TIME);
             put(java.sql.Time.class, PgsqlDefaultTypeEnum.TIME);
             put(OffsetTime.class, PgsqlDefaultTypeEnum.TIMETZ);
-
-            put(java.util.UUID.class, PgsqlDefaultTypeEnum.UUID);
         }};
     }
 
@@ -132,13 +130,10 @@ public class PgsqlStrategy implements IStrategy<DefaultTableMetadata, PgsqlCompa
         // 获取Configuration对象
         Configuration configuration = SqlSessionFactoryManager.getSqlSessionFactory().getConfiguration();
         try (Connection connection = configuration.getEnvironment().getDataSource().getConnection()) {
-            // 通过连接获取DatabaseMetaData对象
-            DatabaseMetaData metaData = connection.getMetaData();
-            String connectionCatalog = connection.getCatalog();
-            String connectionSchema = connection.getSchema();
-            boolean exist = metaData.getTables(connectionCatalog, StringUtils.hasText(schema) ? schema : connectionSchema, tableName,
-                    // pgsql 兼容分区模式，增加了PARTITIONED TABLE类型
-                    new String[]{"TABLE", "PARTITIONED TABLE"}).next();
+            if (!StringUtils.hasText(schema)) {
+                schema = connection.getSchema();
+            }
+            boolean exist = Utils.tableIsExists(connection, schema, tableName, new String[]{"TABLE", "PARTITIONED TABLE"}, true);
             return !exist;
         } catch (SQLException e) {
             throw new RuntimeException("判断数据库是否存在出错", e);
@@ -319,10 +314,10 @@ public class PgsqlStrategy implements IStrategy<DefaultTableMetadata, PgsqlCompa
 
     public static String withSchemaName(String schema, String... names) {
 
-        String name = "\"" + String.join("\".\"", names) + "\"";
+        String name = String.join(".", names);
 
         if (StringUtils.hasText(schema)) {
-            return "\"" + schema + "\"." + name;
+            return schema + "." + name;
         }
 
         return name;

@@ -19,7 +19,7 @@ public class H2TypeHelper {
         String type = databaseTypeAndLength.getType();
         return H2DefaultTypeEnum.INTEGER.getTypeName().equalsIgnoreCase(type) ||
                 H2DefaultTypeEnum.BIGINT.getTypeName().equalsIgnoreCase(type) ||
-                H2DefaultTypeEnum.SMARTINT.getTypeName().equalsIgnoreCase(type) ||
+                H2DefaultTypeEnum.SMALLINT.getTypeName().equalsIgnoreCase(type) ||
                 H2DefaultTypeEnum.TINYINT.getTypeName().equalsIgnoreCase(type) ||
                 H2DefaultTypeEnum.REAL.getTypeName().equalsIgnoreCase(type) ||
                 H2DefaultTypeEnum.NUMERIC.getTypeName().equalsIgnoreCase(type);
@@ -28,7 +28,7 @@ public class H2TypeHelper {
     public static boolean isNumber(String dataType) {
         return H2TypeConstant.INTEGER.equals(dataType) ||
                 H2TypeConstant.BIGINT.equals(dataType) ||
-                H2TypeConstant.SMARTINT.equals(dataType) ||
+                H2TypeConstant.SMALLINT.equals(dataType) ||
                 H2TypeConstant.TINYINT.equals(dataType) ||
                 H2TypeConstant.REAL.equals(dataType) ||
                 H2TypeConstant.NUMERIC.equals(dataType);

@@ -6,7 +6,7 @@ import org.dromara.autotable.annotation.AutoTable;
 
 @Data
 @AutoTable
-public class TestColumnCustomName {
+public class TestColumnNameCustom {
     @AutoColumn("custom_name")
     private String testColumn;
 }

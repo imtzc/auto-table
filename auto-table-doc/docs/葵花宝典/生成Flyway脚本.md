@@ -3,7 +3,7 @@ title: 常见问题
 description:
 ---
 
-## 集成Flyway
+## 生成Flyway脚本
 
 ### 需求
 
